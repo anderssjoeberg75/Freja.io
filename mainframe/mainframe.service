@@ -1,0 +1,14 @@
+[Unit]
+Description=DAA Mainframe Backend
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/mainframe
+ExecStart=/opt/mainframe/venv/bin/python main.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

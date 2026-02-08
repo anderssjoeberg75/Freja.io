@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-mainframe-bg text-mainframe-text font-sans antialiased;
+    }
+}
+
+/* Custom Scrollbar for "Mainframe" feel */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-mainframe-bg;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-mainframe-border rounded-full hover:bg-zinc-600;
+}
