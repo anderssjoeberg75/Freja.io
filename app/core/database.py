@@ -1,6 +1,10 @@
 import sqlite3
 import os
+import logging
 from app.core.config import DB_PATH
+
+# Konfigurera logger för denna modul
+logger = logging.getLogger(__name__)
 
 DEFAULT_SETTINGS = [
     "APP_NAME", "USER_NAME",
@@ -65,6 +69,7 @@ Används när användaren ber om 'analysera koden', 'självanalys' eller 'system
 
 def get_db_connection():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    # check_same_thread=False behövs för FastAPI men var försiktig med skrivningar
     conn = sqlite3.connect(DB_PATH, timeout=10.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
@@ -78,16 +83,17 @@ def init_db():
             c.execute('''CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)''')
             c.execute('''CREATE TABLE IF NOT EXISTS prompts (key TEXT PRIMARY KEY, value TEXT)''')
             
+            # Settings: INSERT OR IGNORE (Behåll användarens ändringar)
             for key in DEFAULT_SETTINGS:
                 c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, ""))
             
+            # Prompts: INSERT OR REPLACE (Uppdatera alltid från kod vid omstart)
             for key, val in DEFAULT_PROMPTS.items():
-                c.execute("INSERT OR IGNORE INTO prompts (key, value) VALUES (?, ?)", (key, val))
+                c.execute("INSERT OR REPLACE INTO prompts (key, value) VALUES (?, ?)", (key, val))
                 
             conn.commit()
+            logger.info("Database initialized/updated successfully.")
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"[DB] Database initialization error: {e}")
 
 def get_db_settings():
@@ -97,8 +103,7 @@ def get_db_settings():
             c.execute("SELECT key, value FROM settings")
             return {row["key"]: row["value"] for row in c.fetchall()}
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"[DB] Failed to get settings: {e}")
+        logger.error(f"[DB] Failed to get settings: {e}")
         return {}
 
 def save_db_setting(key, value):
@@ -108,8 +113,7 @@ def save_db_setting(key, value):
             conn.commit()
         return True
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"[DB] Failed to save setting {key}: {e}")
+        logger.error(f"[DB] Failed to save setting {key}: {e}")
         return False
 
 def get_db_prompts():
@@ -119,8 +123,7 @@ def get_db_prompts():
             c.execute("SELECT key, value FROM prompts")
             return {row["key"]: row["value"] for row in c.fetchall()}
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"[DB] Failed to get prompts: {e}")
+        logger.error(f"[DB] Failed to get prompts: {e}")
         return {}
 
 def save_db_prompt(key, value):
@@ -130,8 +133,7 @@ def save_db_prompt(key, value):
             conn.commit()
         return True
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"[DB] Failed to save prompt {key}: {e}")
+        logger.error(f"[DB] Failed to save prompt {key}: {e}")
         return False
 
 def save_message(session_id, role, content, image=None):
@@ -140,16 +142,15 @@ def save_message(session_id, role, content, image=None):
             conn.execute("INSERT INTO history (session_id, role, content, image) VALUES (?, ?, ?, ?)", (session_id, role, content, image))
             conn.commit()
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"[DB] Failed to save message: {e}")
+        logger.error(f"[DB] Failed to save message: {e}")
 
 def get_history(session_id=None, limit=600):
     try:
         with get_db_connection() as conn:
             c = conn.cursor()
             c.execute(f"SELECT * FROM history ORDER BY id DESC LIMIT ?", (limit,))
+            # Return reversed list so it's chronological for the LLM
             return [{"role": r["role"], "content": r["content"], "image": r["image"]} for r in reversed(c.fetchall())]
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"[DB] Failed to get history: {e}")
+        logger.error(f"[DB] Failed to get history: {e}")
         return []
