@@ -4,13 +4,12 @@ from typing import List, Optional
 import google.generativeai as genai
 import asyncio
 import base64
-import json
 import logging
-from app.core import config
-from app.core.database import save_message, get_history
+from app.core.database import save_message
 from app.core.prompts import get_system_prompt
-from app.core.dependencies import get_garmin, get_strava, get_code_executor
-from app.core.config import get_credential, settings
+from app.core.context_builder import build_realtime_context
+from app.core.dependencies import get_code_executor
+from app.core.config import get_credential
 
 logger = logging.getLogger(__name__)
 
@@ -88,39 +87,15 @@ async def chat(request: ChatRequest):
     system_prompt = get_system_prompt()
     
     # --- Context Injection ---
-    context_parts = []
-    
-    # Garmin Context - fetch fresh data
-    # Garmin Context - fetch fresh data
-    print("DEBUG CHAT: Attempting to fetch Garmin data...", flush=True)
-    garmin_tool = get_garmin()
-    if garmin_tool:
-        try:
-            health_data = garmin_tool.get_health_report()
-            if health_data and not health_data.get('error'):
-                print(f"DEBUG CHAT: Garmin data fetched successfully: {json.dumps(health_data)[:100]}...", flush=True)
-                context_parts.append(f"GARMIN DATA:\n{json.dumps(health_data, indent=2, ensure_ascii=False)}")
-            else:
-                print(f"DEBUG CHAT: Garmin fetch returned error or empty: {health_data}", flush=True)
-        except Exception as e:
-            print(f"DEBUG CHAT: Garmin fetch exception: {e}", flush=True)
-    else:
-        print("DEBUG CHAT: Garmin tool not initialized (get_garmin returned None)", flush=True)
-    
-    # Strava Context
-    strava_tool = get_strava()
-    if strava_tool and hasattr(strava_tool, 'cached_data') and strava_tool.cached_data:
-        context_parts.append(f"STRAVA DATA:\n{json.dumps(strava_tool.cached_data, indent=2, ensure_ascii=False)}")
+    realtime_context = build_realtime_context()
 
-    # Add context to system prompt
-    if context_parts:
-        context = "\n\n".join(context_parts)
-        gemini_history.append({"role": "user", "parts": [f"{system_prompt}\n\nREALTIDSDATA (Kontext):\n{context}"]})
+    if realtime_context:
+        gemini_history.append({"role": "user", "parts": [f"{system_prompt}\n\nREALTIDSDATA (Kontext):\n{realtime_context}"]})
         gemini_history.append({"role": "model", "parts": ["Jag har tagit emot informationen och är redo att hjälpa dig."]})
     else:
         gemini_history.append({"role": "user", "parts": [system_prompt]})
         gemini_history.append({"role": "model", "parts": ["Okej, jag förstår. Hur kan jag hjälpa dig?"]})
-    
+
     # Add conversation history
     for msg in messages:
         role = "user" if msg.role == "user" else "model"

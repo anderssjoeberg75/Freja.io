@@ -7,6 +7,8 @@ from app.services.voice_service import init_voice_service
 from app.services.proactive_service import init_proactive_service
 from app.services.tool_registry import registry
 from contextlib import asynccontextmanager
+from app.core.context_builder import with_realtime_context
+from app.core.config import get_credential
 
 # Import tools to register them
 import app.tools.basic_tools
@@ -27,41 +29,17 @@ async def lifespan(app: FastAPI):
     from app.services.telegram_service import init_telegram_service
     from app.services.llm_handler import stream_gemini
     from app.core.prompts import get_system_prompt
-    from app.core.config import get_credential
     
     async def telegram_llm_callback(message: str) -> str:
         """Process Telegram message through LLM and return response."""
         try:
-            import json
-            from app.core.dependencies import get_garmin, get_strava
-            
             logger.info(f"Processing Telegram message: {message[:50]}...")
             
             model_id = get_credential("SELECTED_MODEL") or "gemini-2.0-flash"
-            system_prompt = get_system_prompt()
-            
-            # --- Context Injection (same as web chat) ---
-            context_parts = []
-            
-            # Garmin Context
-            garmin_tool = get_garmin()
-            if garmin_tool:
-                try:
-                    health_data = garmin_tool.get_health_report()
-                    if health_data and not health_data.get('error'):
-                        context_parts.append(f"GARMIN DATA:\n{json.dumps(health_data, indent=2, ensure_ascii=False)}")
-                except Exception as e:
-                    logger.error(f"Garmin fetch error: {e}")
-            
-            # Strava Context
-            strava_tool = get_strava()
-            if strava_tool and hasattr(strava_tool, 'cached_data') and strava_tool.cached_data:
-                context_parts.append(f"STRAVA DATA:\n{json.dumps(strava_tool.cached_data, indent=2, ensure_ascii=False)}")
-            
-            # Append context to system prompt
-            if context_parts:
-                context = "\n\n".join(context_parts)
-                system_prompt = f"{system_prompt}\n\nREALTIDSDATA (Kontext):\n{context}"
+            system_prompt = with_realtime_context(
+                get_system_prompt(),
+                label="REALTIME DATA (Context)",
+            )
             
             full_response = ""
             async for chunk in stream_gemini(model_id, [], message, system_prompt=system_prompt):
@@ -93,8 +71,8 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://192.168.107.17:3000",
-        "*"
     ],
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
