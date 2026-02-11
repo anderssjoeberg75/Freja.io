@@ -124,6 +124,7 @@ def init_db():
             c.execute('''CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT, role TEXT, content TEXT, image TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
             c.execute('''CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)''')
             c.execute('''CREATE TABLE IF NOT EXISTS prompts (key TEXT PRIMARY KEY, value TEXT)''')
+            c.execute('''CREATE TABLE IF NOT EXISTS user_state (session_id TEXT, key TEXT, value TEXT, PRIMARY KEY (session_id, key))''')
             
             # Settings: INSERT OR IGNORE (Behåll användarens ändringar)
             for key in DEFAULT_SETTINGS:
@@ -190,9 +191,51 @@ def get_history(session_id=None, limit=600):
     try:
         with get_db_connection() as conn:
             c = conn.cursor()
-            c.execute(f"SELECT * FROM history ORDER BY id DESC LIMIT ?", (limit,))
+            if session_id:
+                c.execute(
+                    "SELECT * FROM history WHERE session_id = ? ORDER BY id DESC LIMIT ?",
+                    (session_id, limit),
+                )
+            else:
+                c.execute("SELECT * FROM history ORDER BY id DESC LIMIT ?", (limit,))
             # Return reversed list so it's chronological for the LLM
             return [{"role": r["role"], "content": r["content"], "image": r["image"]} for r in reversed(c.fetchall())]
     except Exception as e:
         logger.error(f"[DB] Failed to get history: {e}")
         return []
+
+
+def get_user_state(session_id: str):
+    """Return persisted user state for a session as a plain dictionary."""
+    try:
+        with get_db_connection() as conn:
+            c = conn.cursor()
+            c.execute("SELECT key, value FROM user_state WHERE session_id = ?", (session_id,))
+            rows = c.fetchall()
+            state = {}
+            for row in rows:
+                state[row["key"]] = row["value"]
+            return state
+    except Exception as e:
+        logger.error(f"[DB] Failed to get user state for session {session_id}: {e}")
+        return {}
+
+
+def save_user_state(session_id: str, state: dict):
+    """Persist user state values for a session."""
+    if not state:
+        return True
+
+    try:
+        with get_db_connection() as conn:
+            c = conn.cursor()
+            for key, value in state.items():
+                c.execute(
+                    "INSERT OR REPLACE INTO user_state (session_id, key, value) VALUES (?, ?, ?)",
+                    (session_id, key, str(value)),
+                )
+            conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"[DB] Failed to save user state for session {session_id}: {e}")
+        return False
