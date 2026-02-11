@@ -1,0 +1,217 @@
+[2026-02-09 17:23:16] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
+[2026-02-09 17:23:16] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 17:23:16] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 17:26:00] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
+[2026-02-09 17:26:00] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 17:26:00] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 17:26:00] [ERROR] DAA: [GEMINI AIO ERROR] 429 Too Many Requests. {'message': '{\n  "error": {\n    "code": 429,\n    "message": "Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.",\n    "status": "RESOURCE_EXHAUSTED"\n  }\n}\n', 'status': 'Too Many Requests'}
+[2026-02-09 17:26:01] [ERROR] DAA: Generate Content Error: 429 Too Many Requests. {'message': '{\n  "error": {\n    "code": 429,\n    "message": "Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.",\n    "status": "RESOURCE_EXHAUSTED"\n  }\n}\n', 'status': 'Too Many Requests'}
+[2026-02-09 17:28:25] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
+[2026-02-09 17:28:25] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 17:28:25] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 17:28:36] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
+[2026-02-09 17:28:36] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 17:28:36] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 17:29:02] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
+[2026-02-09 17:29:02] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 17:29:02] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 18:04:52] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-09 18:04:52] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 18:04:52] [INFO] DAA: [GEMINI DEBUG] System Prompt start: You are DAA, a proactive assistant. Always answer in Swedish.
+[2026-02-09 18:26:42] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-09 18:26:42] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 18:26:42] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 18:37:19] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-09 18:37:19] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 18:37:19] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 18:38:09] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-09 18:38:09] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 18:38:09] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 18:38:52] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-09 18:38:52] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 18:38:52] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 18:39:38] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-09 18:39:38] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 18:39:38] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 18:39:39] [ERROR] DAA: [GEMINI AIO ERROR] 'run_code'
+[2026-02-09 18:40:11] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-09 18:40:11] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 18:40:11] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-09 18:40:44] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-09 18:40:44] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-09 18:40:44] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 05:21:51] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 05:21:51] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 05:21:51] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 05:34:06] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 05:34:06] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 05:34:06] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 06:51:53] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 06:51:53] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 06:51:54] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 07:09:38] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 07:09:38] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 07:09:38] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 08:00:04] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 08:00:04] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 08:00:04] [INFO] DAA: [GEMINI DEBUG] System Prompt start: You are DAA, a proactive assistant. Always answer in Swedish.
+[2026-02-10 08:06:08] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 08:06:08] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 08:06:08] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 08:56:18] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 08:56:18] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 08:56:18] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 08:56:41] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 08:56:41] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 08:56:41] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 14:55:46] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 14:55:46] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 14:55:46] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 17:55:53] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 17:55:53] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 17:55:53] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 17:56:55] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 17:56:55] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 17:56:55] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 17:57:16] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 17:57:16] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 17:57:16] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:01:21] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:01:21] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:01:21] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:02:19] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:02:19] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:02:19] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:07:43] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:07:43] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:07:43] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:09:36] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:09:36] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:09:36] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:22:30] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:22:30] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:22:30] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:31:47] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:31:47] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:31:47] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:32:26] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:32:26] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:32:26] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:38:48] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:38:48] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:38:48] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:51:21] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:51:21] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:51:21] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-10 18:52:08] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-10 18:52:08] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-10 18:52:08] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 08:09:41] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 08:09:41] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 08:09:41] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 08:10:04] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 08:10:04] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 08:10:04] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 10:56:03] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 10:56:03] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 10:56:03] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 10:59:19] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 10:59:19] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 10:59:19] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:00:02] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:00:02] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:00:02] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:00:51] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:00:51] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:00:51] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:09:56] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:09:56] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:09:56] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:19:12] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:19:12] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:19:12] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:20:31] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:20:31] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:20:31] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:21:07] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:21:07] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:21:07] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:21:31] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:21:31] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:21:31] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:21:50] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:21:50] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:21:50] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:22:08] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:22:08] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:22:08] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:22:21] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:22:21] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:22:21] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:22:59] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:22:59] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:22:59] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:23:11] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:23:11] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:23:11] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:23:28] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:23:28] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:23:28] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:23:45] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:23:45] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:23:45] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera
+[2026-02-11 11:23:56] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
+[2026-02-11 11:23:56] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
+[2026-02-11 11:23:56] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
+Du agera

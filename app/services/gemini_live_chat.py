@@ -127,11 +127,7 @@ if ha_available:
         )
     ))
 
-if garmin_available:
-    funcs.append(types.FunctionDeclaration(
-        name="get_health_data",
-        description="Fetches comprehensive health data from Garmin including sleep, heart rate, stress, body battery, HRV status, steps, and activity metrics for today."
-    ))
+# Garmin data is injected into system prompt, no tool needed.
 
 my_tools = [types.Tool(function_declarations=funcs)] if funcs else []
 
@@ -284,37 +280,8 @@ class LiveChatSession:
                     function_responses=[types.FunctionResponse(name="get_sensor", id=fc.id, response={"result": result})]
                 )
             
-            # GET HEALTH DATA (GARMIN)
-            elif fc.name == "get_health_data":
-                try:
-                    # Garmin is synchronous, run in executor
-                    health_data = await asyncio.get_event_loop().run_in_executor(None, garmin_tool.get_health_report)
-                    
-                    if health_data and 'error' not in health_data:
-                        # Format health data nicely for the AI
-                        result = (
-                            f"**HÄLSODATA FRÅN GARMIN ({health_data.get('date', 'N/A')})**:\n"
-                            f"- 💤 Sömn: {health_data.get('sleep_hours', 'N/A')} (poäng: {health_data.get('sleep_score', 'N/A')})\n"
-                            f"- �� REM-sömn: {health_data.get('rem_sleep', 'N/A')}, Djupsömn: {health_data.get('deep_sleep', 'N/A')}\n"
-                            f"- ❤️ Vilopuls: {health_data.get('resting_heart_rate', 'N/A')} bpm\n"
-                            f"- ⚡ Stress: {health_data.get('stress_avg', 'N/A')}/100 (max: {health_data.get('stress_max', 'N/A')})\n"
-                            f"- 🧠 HRV Status: {health_data.get('hrv_status', 'N/A')}\n"
-                            f"- 🔋 Body Battery: Nu {health_data.get('body_battery_now', 'N/A')} (högsta: {health_data.get('body_battery_high', 'N/A')}, lägsta: {health_data.get('body_battery_low', 'N/A')})\n"
-                            f"- 👟 Steg: {health_data.get('steps', 'N/A')} av {health_data.get('step_goal', 'N/A')}\n"
-                            f"- 🏃 Distans: {health_data.get('distance_km', 'N/A')} km\n"
-                            f"- 🔥 Kalorier: {health_data.get('total_calories', 'N/A')} kcal\n"
-                            f"- ⏱️ Intensiva minuter: {health_data.get('intensive_minutes', 'N/A')} min\n"
-                            f"- 🫁 SpO2: {health_data.get('spo2_avg', 'N/A')}%"
-                        )
-                    else:
-                        result = health_data.get('error', 'Could not fetch Garmin data')
-                        
-                except Exception as e:
-                    result = f"Garmin error: {e}"
-                
-                await self.session.send_tool_response(
-                    function_responses=[types.FunctionResponse(name="get_health_data", id=fc.id, response={"result": result})]
-                )
+                # Garmin tool removed (injected instead)
+                pass
     
     async def receive_responses(self):
         """Receive responses from Gemini Live - BOTH text and audio"""
@@ -362,6 +329,25 @@ class LiveChatSession:
             
             # Fetch system prompt dynamically
             current_prompt = get_system_prompt()
+            
+            # --- CONTEXT INJECTION (Live Mode) ---
+            context_parts = []
+            
+            # Garmin
+            if garmin_available and garmin_tool:
+                try:
+                    import json
+                    # Run in executor to avoid blocking
+                    health_data = await asyncio.get_event_loop().run_in_executor(None, garmin_tool.get_health_report)
+                    if health_data and not health_data.get('error'):
+                        context_parts.append(f"GARMIN DATA:\n{json.dumps(health_data, indent=2, ensure_ascii=False)}")
+                except Exception as e:
+                    print(f"[LIVE CHAT] Garmin injection error: {e}")
+
+            # Inject into prompt if data exists
+            if context_parts:
+                context = "\n\n".join(context_parts)
+                current_prompt = f"{current_prompt}\n\nREALTIDSDATA (Kontext):\n{context}"
             
             live_config = types.LiveConnectConfig(
                 response_modalities=["AUDIO"],  # Only AUDIO (Live API doesn't support TEXT+AUDIO together)

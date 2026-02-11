@@ -190,8 +190,8 @@ async def stream_response(model_id, history, new_message, image_data=None, syste
 
 async def stream_gemini(model_id, history, new_message, image_data=None, system_prompt=None):
     try:
-        from app.core.config import settings
-        api_key = settings.GOOGLE_API_KEY
+        from app.core.config import get_credential
+        api_key = get_credential("GOOGLE_API_KEY")
         
         if not api_key:
             yield "⚠️ No Google API key configured."

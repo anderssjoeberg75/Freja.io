@@ -90,10 +90,22 @@ async def chat(request: ChatRequest):
     # --- Context Injection ---
     context_parts = []
     
-    # Garmin Context
+    # Garmin Context - fetch fresh data
+    # Garmin Context - fetch fresh data
+    print("DEBUG CHAT: Attempting to fetch Garmin data...", flush=True)
     garmin_tool = get_garmin()
-    if garmin_tool and hasattr(garmin_tool, 'cached_data') and garmin_tool.cached_data:
-         context_parts.append(f"GARMIN DATA:\n{json.dumps(garmin_tool.cached_data, indent=2, ensure_ascii=False)}")
+    if garmin_tool:
+        try:
+            health_data = garmin_tool.get_health_report()
+            if health_data and not health_data.get('error'):
+                print(f"DEBUG CHAT: Garmin data fetched successfully: {json.dumps(health_data)[:100]}...", flush=True)
+                context_parts.append(f"GARMIN DATA:\n{json.dumps(health_data, indent=2, ensure_ascii=False)}")
+            else:
+                print(f"DEBUG CHAT: Garmin fetch returned error or empty: {health_data}", flush=True)
+        except Exception as e:
+            print(f"DEBUG CHAT: Garmin fetch exception: {e}", flush=True)
+    else:
+        print("DEBUG CHAT: Garmin tool not initialized (get_garmin returned None)", flush=True)
     
     # Strava Context
     strava_tool = get_strava()

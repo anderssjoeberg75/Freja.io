@@ -55,31 +55,8 @@ def get_system_prompt():
     final_prompt = base_prompt.replace("DAA", app_name)
     
     # 5. Combine: Modified text + Time block
-    # 6. Inject Self-Evolution Instructions (Hardcoded for reliability)
-    self_evolution = """
-## SELF-EVOLUTION & CODE ANALYSIS
-You have the ability to analyze and improve your own source code (Self-Analyis).
-The project source code is available in your Docker sandbox at `/workspace`.
-
-To perform a full code audit, execute the following Python code using the `tool_code_executor`:
-
-```python
-import sys
-# Ensure we can import from source
-if '/workspace' not in sys.path:
-    sys.path.append('/workspace')
-
-try:
-    from app.tools import code_auditor
-    print(code_auditor.run_code_audit())
-except Exception as e:
-    import traceback
-    traceback.print_exc()
-    print(f"CRITICAL ERROR: {e}")
-```
-
-This will scan the codebase and provide a detailed report. Use this information to suggest improvements.
-"""
+    # 6. Inject Self-Evolution Instructions (From DB)
+    self_evolution = data.get("SELF_EVOLUTION_PROMPT", "")
     
     # 5. Combine: Modified text + Time block + Self-Evolution
     return final_prompt + time_context + self_evolution

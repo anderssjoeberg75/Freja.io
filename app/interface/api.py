@@ -387,7 +387,7 @@ async def chat(request: ChatRequest):
         now = time.time()
         if (now - last_garmin_fetch > 300) or not cached_garmin_data:
             try:
-                data = garmin_tool.get_health_summary()
+                data = garmin_tool.get_health_report()
                 if data and not data.get("error"):
                     cached_garmin_data = data
                     last_garmin_fetch = now

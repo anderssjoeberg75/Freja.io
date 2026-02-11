@@ -24,6 +24,7 @@ python-kasa>=0.6.0
 garminconnect>=0.1.56
 stravalib>=1.6.0
 paho-mqtt>=1.6.1
+python-telegram-bot>=21.0
 
 # Utilities
 loguru>=0.7.2

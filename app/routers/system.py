@@ -50,25 +50,45 @@ async def get_status():
         "agents": agents
     }
 
-@router.get("/api/garmin/reconnect")
+@router.post("/api/integrations/garmin/reconnect")
 async def reconnect_garmin():
     """Forces Garmin re-authentication by clearing tokens."""
+    import os
+    import shutil
+    
     try:
-        # This Logic needs to be centralized in the Garmin Tool or Dependency Manager
-        # For now, we manually trigger a reload
-        from app.core.config import settings
-        # ... logic to clear tokens ... 
-        # In the new architecture, we should add a method to DependencyManager to reload tools
+        # Clear cached tokens
+        token_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "garmin_tokens")
+        if os.path.exists(token_dir):
+            shutil.rmtree(token_dir)
+            logger.info(f"Cleared Garmin tokens from {token_dir}")
         
+        # Reset the cached garmin tool in DependencyManager
+        from app.core.dependencies import _manager
+        _manager._garmin_tool = None
+        
+        # Re-initialize
         garmin = get_garmin()
-        if garmin:
-            # If the tool has a reconnect method, use it
-            if hasattr(garmin, 'authenticate'):
-                 await garmin.authenticate()
-            return {"success": True, "message": "Garmin reconnected"}
+        if garmin and garmin.client:
+            return {"success": True, "message": "Garmin reconnected successfully!"}
         else:
-             return {"success": False, "message": "Garmin tool not initialized"}
+            return {"success": False, "message": "Garmin login failed - check credentials or try logging in at connect.garmin.com first"}
 
     except Exception as e:
         logger.error(f"Garmin reconnect error: {e}")
+        return {"success": False, "message": str(e)}
+
+@router.post("/api/proactive/trigger-morning-briefing")
+async def trigger_morning_briefing():
+    """Manually triggers the morning briefing (for testing)."""
+    try:
+        from app.services.proactive_service import proactive_service
+        if proactive_service:
+            # Run in background or await? Await to see errors
+            await proactive_service.trigger_briefing()
+            return {"success": True, "message": "Morning briefing triggered"}
+        else:
+            return {"success": False, "message": "Proactive service not running"}
+    except Exception as e:
+        logger.error(f"Trigger error: {e}")
         return {"success": False, "message": str(e)}

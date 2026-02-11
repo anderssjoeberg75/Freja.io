@@ -32,7 +32,7 @@ const Settings = () => {
             const res = await fetch('/api/models');
             if (res.ok) {
                 const data = await res.json();
-                setModels(data.data || []);
+                setModels(data.models || []);
             }
         } catch (err) {
             console.error("Failed to fetch models:", err);
@@ -122,7 +122,9 @@ const Settings = () => {
                 },
                 { key: "STRAVA_CLIENT_ID", label: "Strava Client ID", type: "text", desc: "From https://www.strava.com/settings/api (Create App)" },
                 { key: "STRAVA_CLIENT_SECRET", label: "Strava Client Secret", type: "password", desc: "Client Secret from Strava API" },
-                { key: "STRAVA_REFRESH_TOKEN", label: "Strava Refresh Token", type: "password", desc: "OAuth refresh token (see guide)" }
+                { key: "STRAVA_REFRESH_TOKEN", label: "Strava Refresh Token", type: "password", desc: "OAuth refresh token (see guide)" },
+                { key: "TELEGRAM_BOT_TOKEN", label: "Telegram Bot Token", type: "password", desc: "From @BotFather on Telegram" },
+                { key: "TELEGRAM_CHAT_ID", label: "Telegram Chat ID", type: "text", desc: "Your chat ID (send /start to bot)" }
             ]
         }
     ];
@@ -174,8 +176,8 @@ const Settings = () => {
                                             >
                                                 <option value="" disabled>Select a model...</option>
                                                 {item.options.map((opt) => (
-                                                    <option key={opt.id} value={opt.id}>
-                                                        {opt.name}
+                                                    <option key={opt} value={opt}>
+                                                        {opt}
                                                     </option>
                                                 ))}
                                             </select>

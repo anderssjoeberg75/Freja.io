@@ -1,9 +1,7 @@
 
-import os
-import datetime
 import logging
-from garminconnect import Garmin
-from app.core.config import settings, BASE_DIR
+import datetime
+from app.tools.garmin.client import GarminClient
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -11,137 +9,115 @@ logger = logging.getLogger(__name__)
 class GarminCoach:
     def __init__(self):
         self.client = None
-        
-        # Use credential helper for consistent DB-first loading
-        from app.core.config import get_credential
-        
-        self.email = get_credential("GARMIN_EMAIL")
-        self.password = get_credential("GARMIN_PASSWORD")
-        self.token_dir = os.path.join(BASE_DIR, "config", "garmin_tokens")
-        
-        if self.email and self.password:
-            masked_email = self.email[:3] + "***" if self.email else "None"
-            logger.info(f"[GARMIN] Initializing with email: {masked_email}")
-            self._login()
-        else:
-            logger.warning("[GARMIN] No credentials found in DB or ENV.")
-
-    def _login(self):
+    def __init__(self):
+        self.client = None
         try:
-            self.client = Garmin(self.email, self.password)
-            self.client.garth.configure(domain="garmin.com")
-            
-            if os.path.exists(self.token_dir):
-                try:
-                    self.client.garth.load(self.token_dir)
-                    self.client.login()
-                    logger.info("[GARMIN] Logged in using cached tokens.")
-                    return
-                except:
-                    logger.warning("[GARMIN] Cached tokens invalid, re-logging in.")
-
-            self.client.login()
-            if not os.path.exists(self.token_dir):
-                os.makedirs(self.token_dir)
-            self.client.garth.dump(self.token_dir)
-            logger.info("[GARMIN] Logged in and tokens saved.")
+            # Initialize client and try to load tokens
+            self.client = GarminClient()
+            if self.client.auth.load_tokens():
+                logger.info("[GARMIN] Client initialized with saved tokens.")
+            else:
+                # If no tokens, try to login with credentials
+                logger.info("[GARMIN] No valid tokens found, attempting login...")
+                self.client.login()
+                logger.info("[GARMIN] Client initialized with fresh login.")
         except Exception as e:
-            logger.error(f"[GARMIN] Login Error: {e}")
-            self.client = None
+             logger.warning(f"[GARMIN] Failed to initialize client: {e}")
 
     def get_health_report(self):
-        if not self.client:
-            if self.email and self.password: self._login()
-            if not self.client: return {"error": "Not logged in to Garmin."}
+        if not self.client or not self.client.is_authenticated:
+            try:
+                if self.client:
+                    self.client.login()
+                else:
+                    self.client = GarminClient.from_credentials()
+            except Exception as e:
+                return {"error": f"Not logged in to Garmin. {e}"}
 
         try:
-            today_str = datetime.date.today().isoformat()
-            logger.info(f"[GARMIN] Fetching ALL data for: {today_str}")
+            today = datetime.date.today()
+            logger.info(f"[GARMIN] Fetching ALL data for: {today}")
             
-            # --- 1. DAILY SUMMARY (Steps, Heart Rate, Calories) ---
-            stats = self.client.get_user_summary(today_str)
+            # Fetch data using new extractors
+            # 1. Daily Summary
+            daily = self.client.get_daily_summary(today)
             
-            # --- 2. DETAILED SLEEP & SLEEP SCORE ---
+            # 2. Sleep (for last night)
+            sleep = self.client.get_sleep(today)
+            
+            # 3. Stress & Body Battery
+            stress = self.client.get_stress(today)
+            
+            # Body Battery details might need separate fetch if not fully in stress/daily
+            # The ported stress extractor's get_for_date returns StressData which has body_battery_charged/drained
+            # but specific low/high/now values are often in the daily summary or body battery specific report.
+            # Let's try to get more body battery details.
+            bb_data = self.client.get_body_battery(today)
+
+            if not daily:
+                 return {"error": "No data from Garmin today (sync your watch)."}
+
+            # --- PROCESS DATA ---
+            
+            # Sleep Formatting
             sleep_str = "0h"
             rem_str = "0h"
             deep_str = "0h"
             sleep_score = "N/A"
-            try:
-                sleep_data = self.client.get_sleep_data(today_str)
-                if sleep_data and 'dailySleepDTO' in sleep_data:
-                    dto = sleep_data['dailySleepDTO']
-                    total_sleep_sec = dto.get('sleepTimeSeconds', 0)
-                    # Fallback if detailed time is missing
-                    if total_sleep_sec == 0: total_sleep_sec = stats.get("sleepingSeconds", 0)
-
-                    sleep_str = f"{int(total_sleep_sec // 3600)}h {int((total_sleep_sec % 3600) // 60)}m"
-                    rem_str = f"{round(dto.get('remSleepSeconds', 0) / 3600, 1)}h"
-                    deep_str = f"{round(dto.get('deepSleepSeconds', 0) / 3600, 1)}h"
-                    
-                    # Fetch Sleep Score (Quality)
-                    if 'sleepScores' in dto and dto['sleepScores']:
-                        sleep_score = dto['sleepScores'].get('overall', {}).get('value', 'N/A')
-            except Exception as e:
-                logger.error(f"[GARMIN] Sleep error: {e}")
-
-            # --- 3. BODY BATTERY (Energi) ---
+            
+            if sleep:
+                sleep_str = f"{int(sleep.total_sleep_hours)}h {int((sleep.total_sleep_hours % 1) * 60)}m"
+                rem_str = f"{sleep.rem_sleep_hours:.1f}h"
+                deep_str = f"{sleep.deep_sleep_hours:.1f}h"
+                light_str = f"{sleep.light_sleep_hours:.1f}h"
+                awake_str = f"{sleep.awake_sleep_hours:.1f}h"
+                sleep_score = sleep.overall_score if sleep.overall_score is not None else "N/A"
+                
+                # Sleep Times
+                start_time = sleep.sleep_start_timestamp.strftime("%H:%M") if sleep.sleep_start_timestamp else "N/A"
+                end_time = sleep.sleep_end_timestamp.strftime("%H:%M") if sleep.sleep_end_timestamp else "N/A"
+            
+            # Body Battery Formatting
             bb_now = "N/A"
             bb_high = "N/A"
             bb_low = "N/A"
-            try:
-                bb_data = self.client.get_body_battery(today_str)
-                # Check if we got a list directly or a list inside a dict
-                if bb_data:
-                    values = []
-                    # Case A: List inside dict
-                    if isinstance(bb_data, list) and len(bb_data) > 0 and 'bodyBatteryValuesArray' in bb_data[0]:
-                         values = [pair[1] for pair in bb_data[0]['bodyBatteryValuesArray'] if pair and len(pair) > 1]
-                    # Case B: Plain list
-                    elif isinstance(bb_data, list):
-                         values = [x['value'] for x in bb_data if isinstance(x, dict) and x.get('value') is not None]
+            
+            if bb_data:
+                 # bb_data is a dict (raw response from bodyBattery/reports/daily)
+                 # It usually contains 'bodyBatteryValuesArray'
+                 values = []
+                 if 'bodyBatteryValuesArray' in bb_data and bb_data['bodyBatteryValuesArray']:
+                     # Format: [[ts, value], ...]
+                     values = [pair[1] for pair in bb_data['bodyBatteryValuesArray'] if pair and len(pair) > 1]
+                 
+                 if values:
+                     bb_now = values[-1]
+                     bb_high = max(values)
+                     bb_low = min(values)
 
-                    if values:
-                        bb_now = values[-1]  # Last value = Now
-                        bb_high = max(values)
-                        bb_low = min(values)
-                        # logger.info(f"[GARMIN] Body Battery: {bb_now}") 
-            except Exception as e:
-                logger.error(f"[GARMIN] Body Battery error: {e}")
+            # Fallback for BB from daily summary if available
+            if bb_high == "N/A" and daily.body_battery_highest_value is not None:
+                bb_high = daily.body_battery_highest_value
+            if bb_low == "N/A" and daily.body_battery_lowest_value is not None:
+                bb_low = daily.body_battery_lowest_value
+            if bb_now == "N/A" and daily.body_battery_most_recent_value is not None:
+                bb_now = daily.body_battery_most_recent_value
 
-            # --- 4. HRV STATUS ---
-            hrv_status = "N/A"
-            try:
-                hrv = self.client.get_hrv_data(today_str)
-                if hrv and 'hrvSummary' in hrv:
-                    summary = hrv['hrvSummary']
-                    status = summary.get('status') # E.g. "BALANCED"
-                    avg = summary.get('weeklyAvg')
-                    last = summary.get('lastNightAvg')
-                    
-                    if status:
-                        hrv_text = status
-                        if last: hrv_text += f" (Tonight: {last} ms"
-                        if avg: hrv_text += f", Avg: {avg} ms)"
-                        else: hrv_text += ")"
-                        hrv_status = hrv_text
-                        # logger.info(f"[GARMIN] HRV: {hrv_status}") 
-            except Exception as e:
-                logger.error(f"[GARMIN] HRV Error: {e}")
 
-            if not stats:
-                return {"error": "No data from Garmin today (sync your watch)."}
+            # HRV
+            hrv_status = daily.hrv_status if daily.hrv_status else "N/A"
 
-            # --- COMPILATION ---
+            # Compilation
             data = {
-                "date": today_str,
-                "steps": stats.get("totalSteps", 0),
-                "step_goal": stats.get("dailyStepGoal", 0),
-                "distance_km": round(stats.get("totalDistanceMeters", 0) / 1000, 2),
+                "date": str(today),
+                "steps": daily.total_steps,
+                "step_goal": daily.daily_step_goal,
+                "distance_km": round(daily.total_distance_meters / 1000, 2),
                 
                 # Heart & Stress
-                "resting_heart_rate": stats.get("restingHeartRate", "N/A"),
-                "stress_avg": stats.get("averageStressLevel", "N/A"),
-                "stress_max": stats.get("maxStressLevel", "N/A"),
+                "resting_heart_rate": daily.resting_heart_rate if daily.resting_heart_rate else "N/A",
+                "stress_avg": daily.avg_stress_level if daily.avg_stress_level else "N/A",
+                "stress_max": daily.max_stress_level if daily.max_stress_level else "N/A",
                 "hrv_status": hrv_status,
                 
                 # Energy (Body Battery)
@@ -154,17 +130,17 @@ class GarminCoach:
                 "sleep_score": sleep_score, 
                 "rem_sleep": rem_str,
                 "deep_sleep": deep_str,
+                "light_sleep": light_str,
+                "awake_time": awake_str,
+                "sleep_start": start_time,
+                "sleep_end": end_time,
                 
                 # Calories & Activity
-                "total_calories": stats.get("totalKilocalories", 0),
-                "intensive_minutes": stats.get("activeSeconds", 0) / 60,
-                "spo2_avg": stats.get("averageSpO2Value", "N/A"),
+                "total_calories": daily.total_kilocalories,
+                "intensive_minutes": daily.moderate_intensity_minutes + (daily.vigorous_intensity_minutes * 2),
+                "spo2_avg": daily.avg_spo2_value if daily.avg_spo2_value else "N/A",
             }
             
-            # Correct intensive minutes if detailed info is available
-            if "moderateIntensityMinutes" in stats and "vigorousIntensityMinutes" in stats:
-                data["intensive_minutes"] = stats["moderateIntensityMinutes"] + (stats["vigorousIntensityMinutes"] * 2)
-
             return data
 
         except Exception as e:

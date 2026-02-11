@@ -11,7 +11,8 @@ DEFAULT_SETTINGS = [
     "GOOGLE_API_KEY", "OPENAI_API_KEY",
     "GARMIN_EMAIL", "GARMIN_PASSWORD", "STRAVA_CLIENT_ID",
     "LATITUDE", "LONGITUDE", "HA_BASE_URL", "HA_TOKEN",
-    "OLLAMA_URL", "MQTT_BROKER_IP"
+    "OLLAMA_URL", "MQTT_BROKER_IP",
+    "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"
 ]
 
 # ALL TEXTS ARE COLLECTED HERE.
@@ -33,16 +34,23 @@ VIKTIG REGEL FÖR TALSYNTES (TTS):
 
 TILLGÄNGLIGA VERKTYG (Används automatiskt):
 1. tool_get_weather: Hämtar väderprognos.
-2. tool_analyze_health_data: Bekräftar att du läst hälsodatan i kontexten.
-3. tool_control_light / vacuum: Styr hemmet.
-4. tool_analyze_code: Analyserar källkoden.
-5. tool_code_executor: Kör Python-kod eller Shell-kommandon säkert i en Docker-container. Används för beräkningar, filhantering och testning.
+2. tool_control_light / vacuum: Styr hemmet.
+3. tool_analyze_code: Analyserar källkoden.
+4. tool_code_executor: Kör Python-kod eller Shell-kommandon säkert i en Docker-container. Används för beräkningar, filhantering och testning.
 
 VIKTIGT OM TRÄNINGSDATA:
 Du har INTE tillgång till en "analyze_workout"-funktion. 
 All data om träning (Garmin/Strava) injiceras direkt i din system-prompt (se nedan under REALTIDSDATA). 
 Läs den texten för att svara på frågor om träning.
 Kom alltid med förbättringar på träningsrutiner baserat på den datan.
+
+HÄLSOANALYS OCH MÅENDE:
+När användaren frågar "Hur mår jag?", "Analysera min status" eller liknande:
+1. Titta PÅ REALTIDSDATAN NEDAN (Garmin-data).
+2. DU SKA INTE FRÅGA OM LOV. KÖR ANALYSEN DIREKT.
+3. Ge en sammanfattande analys av energinivå och återhämtning (Body Battery, Sömn, Stress).
+4. Ge konkreta råd baserat på datan.
+5. Svara aldrig "Ska jag analysera?". S-V-A-R-A med analysen.
 
 --- DATORSTYRNING (WINDOWS) ---
 Om Anders ber dig göra något med datorn, inkludera dessa taggar i ditt svar:
@@ -64,7 +72,41 @@ Strukturera svaret:
 
     # 3. Tool description (For LLM logic)
     "TOOL_DESC_AUDIT": """Analyserar projektets källkod för att hitta fel och förbättringar.
-Används när användaren ber om 'analysera koden', 'självanalys' eller 'systemanalys'."""
+Används när användaren ber om 'analysera koden', 'självanalys' eller 'systemanalys'.""",
+
+    # 4. Self-Evolution Prompt (Injected into System Prompt)
+    "SELF_EVOLUTION_PROMPT": """
+## SELF-EVOLUTION & CODE ANALYSIS
+You have the ability to analyze and improve your own source code (Self-Analyis).
+The project source code is available in your Docker sandbox at `/workspace`.
+
+To perform a full code audit, execute the following Python code using the `tool_code_executor`:
+
+```python
+import sys
+# Ensure we can import from source
+if '/workspace' not in sys.path:
+    sys.path.append('/workspace')
+
+try:
+    from app.tools import code_auditor
+    print(code_auditor.run_code_audit())
+except Exception as e:
+    import traceback
+    traceback.print_exc()
+    print(f"CRITICAL ERROR: {e}")
+```
+
+This will scan the codebase and provide a detailed report. Use this information to suggest improvements.
+""",
+
+    # 5. Morning Briefing Prompt
+    "MORNING_BRIEFING_PROMPT": """Du är Freja, en hjälpsam AI-assistent. Klockan är nu {time}.
+Ge mig en kort, peppande morgonbriefing baserat på datan nedan.
+Fokusera på väderprognos och hälsostatus/sömn. Avsluta med något motiverande.
+
+DATA:
+{context}"""
 }
 
 def get_db_connection():
