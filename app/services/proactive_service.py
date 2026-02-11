@@ -26,21 +26,30 @@ class ProactiveService:
         logger.info("Proactive Service Stopped")
 
     async def _loop(self):
-        last_check_str = ""
+        last_briefing_date = None
         
         while self.running:
             try:
                 import datetime
                 
                 now = datetime.datetime.now()
-                current_time_str = now.strftime("%H:%M")
+                today = now.date()
                 
                 # --- MORNING BRIEFING (08:00) ---
-                target_time = "08:00"
+                target_hour = 8
+                run_window_minutes = 5
                 
-                # Check if it's time and we haven't run for this minute yet
-                if current_time_str == target_time and last_check_str != current_time_str:
-                    last_check_str = current_time_str
+                # Trigger once per day inside a short morning window.
+                # This avoids missing the run if the event loop is delayed
+                # and prevents duplicate sends on the same day.
+                should_send_briefing = (
+                    now.hour == target_hour
+                    and now.minute < run_window_minutes
+                    and last_briefing_date != today
+                )
+
+                if should_send_briefing:
+                    last_briefing_date = today
                     await self.send_morning_briefing()
 
                 # Sleep (check every 30s to be precise enough)
