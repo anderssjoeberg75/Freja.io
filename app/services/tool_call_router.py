@@ -17,13 +17,13 @@ class ToolCallRouter:
 
     def __init__(self) -> None:
         # The gateway host/port/token are read from server-side config only.
-        self.host = settings.OPENCLOW_HOST
-        self.port = settings.OPENCLOW_PORT
-        self.scheme = settings.OPENCLOW_SCHEME
-        self.path = settings.OPENCLOW_PATH
-        self.token = settings.OPENCLOW_TOKEN
-        self.timeout_seconds = settings.OPENCLOW_TIMEOUT_SECONDS
-        self.retries = settings.OPENCLOW_RETRIES
+        self.host = settings.TOOL_GATEWAY_HOST
+        self.port = settings.TOOL_GATEWAY_PORT
+        self.scheme = settings.TOOL_GATEWAY_SCHEME
+        self.path = settings.TOOL_GATEWAY_PATH
+        self.token = settings.TOOL_GATEWAY_TOKEN
+        self.timeout_seconds = settings.TOOL_GATEWAY_TIMEOUT_SECONDS
+        self.retries = settings.TOOL_GATEWAY_RETRIES
 
     @property
     def enabled(self) -> bool:

@@ -19,17 +19,25 @@ class Settings(BaseSettings):
     LIVE_AUDIO_CHUNK_MS: int = 30
 
     # External tool gateway settings
-    OPENCLOW_SCHEME: str = "http"
-    OPENCLOW_HOST: Optional[str] = None
-    OPENCLOW_PORT: Optional[int] = None
-    OPENCLOW_PATH: str = "/execute"
-    OPENCLOW_TOKEN: Optional[str] = None
-    OPENCLOW_TIMEOUT_SECONDS: float = 12.0
-    OPENCLOW_RETRIES: int = 1
+    TOOL_GATEWAY_SCHEME: str = "http"
+    TOOL_GATEWAY_HOST: Optional[str] = None
+    TOOL_GATEWAY_PORT: Optional[int] = None
+    TOOL_GATEWAY_PATH: str = "/execute"
+    TOOL_GATEWAY_TOKEN: Optional[str] = None
+    TOOL_GATEWAY_TIMEOUT_SECONDS: float = 12.0
+    TOOL_GATEWAY_RETRIES: int = 1
     
     # Mem0 / Vector DB
     MEM0_API_KEY: Optional[str] = None
     
+    # Speech-to-text / Telegram voice
+    STT_PROVIDER: str = ""
+    STT_LANGUAGE_DEFAULT: str = "sv"
+    MAX_VOICE_MB: int = 20
+    MAX_VOICE_SECONDS: int = 120
+    TELEGRAM_VOICE_DOWNLOAD_TIMEOUT_SECONDS: float = 20.0
+    TELEGRAM_STT_TIMEOUT_SECONDS: float = 45.0
+
     # Integrations
     GARMIN_EMAIL: Optional[str] = None
     GARMIN_PASSWORD: Optional[str] = None
