@@ -12,10 +12,12 @@ from app.core.prompts import get_system_prompt
 from app.core.dependencies import get_garmin, get_strava, get_code_executor
 from app.core.config import get_credential
 from app.self_improving.hooks import handle_user_prompt_submit
+from app.services.web_fallback_service import WebFallbackService, needs_web_fallback
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+web_fallback_service = WebFallbackService()
 
 
 async def process_code_execution_tags(text: str) -> str:
@@ -309,6 +311,14 @@ async def chat(request: ChatRequest):
                 response_text = f"The AI generated no text response. (Finish Reason: {finish_reason})"
         else:
             response_text = "The AI returned no candidates."
+
+        # Run optional web fallback only when the primary answer appears uncertain.
+        web_fallback_enabled = str(get_credential("WEB_FALLBACK_ENABLED", "true")).lower() in {"1", "true", "yes", "on"}
+        if web_fallback_enabled and needs_web_fallback(response_text):
+            response_text = await web_fallback_service.build_fallback_answer(
+                query=user_msg,
+                original_answer=response_text,
+            )
 
         save_message(session_id, "user", user_msg)
         save_message(session_id, "assistant", response_text)

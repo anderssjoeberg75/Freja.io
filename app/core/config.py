@@ -54,6 +54,16 @@ class Settings(BaseSettings):
     LATITUDE: Optional[str] = None
     LONGITUDE: Optional[str] = None
     
+    # Web fallback
+    WEB_FALLBACK_ENABLED: bool = True
+    WEB_FALLBACK_PROVIDER: str = "google_cse"
+    GOOGLE_CSE_API_KEY: Optional[str] = None
+    GOOGLE_CSE_CX: Optional[str] = None
+    SERPAPI_API_KEY: Optional[str] = None
+    WIKIPEDIA_LANG: str = "sv"
+    WEB_FALLBACK_MAX_SOURCES: int = 5
+    WEB_FALLBACK_CACHE_TTL_MINUTES: int = 20
+
     # LLM / Agents
     OLLAMA_URL: str = "http://127.0.0.1:11434"
     WEB_AGENT_MODEL: str = "gemini-2.5-computer-use-preview-10-2025"
