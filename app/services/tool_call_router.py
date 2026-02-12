@@ -9,6 +9,7 @@ import httpx
 
 from app.core.config import settings
 from app.core.logging import logger
+from app.self_improving.hooks import handle_post_tool_use
 
 
 class ToolCallRouter:
@@ -89,8 +90,12 @@ class ToolCallRouter:
                 if attempt <= self.retries:
                     await asyncio.sleep(min(1.5 * attempt, 4.0))
 
-        return {
+        failed_result = {
             "ok": False,
             "tool": tool_name,
             "text": f"Gateway call failed for {tool_name}: {last_error}",
         }
+
+        # Trigger PostToolUse hook for automatic structured error logging.
+        handle_post_tool_use(tool_name, tool_args, failed_result, project_root=".")
+        return failed_result
