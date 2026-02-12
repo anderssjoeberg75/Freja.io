@@ -1,7 +1,7 @@
 import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
+from app.core.config import settings, get_allowed_origins
 from app.core.logging import logger
 from app.services.voice_service import init_voice_service
 from app.services.proactive_service import init_proactive_service
@@ -88,13 +88,7 @@ app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://192.168.107.17:3000",
-        "*"
-    ],
+    allow_origins=get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -91,23 +91,35 @@ async def tool_get_calendar(start: str, end: str):
 
 async def tool_control_light(entity_id: str, action: str):
     """Controls lights (on/off)."""
-    try: return await control_light(entity_id, action)
-    except: return "Could not control light."
+    try:
+        return await control_light(entity_id, action)
+    except Exception:
+        logger.exception("[TOOL] Could not control light")
+        return "Could not control light."
 
 async def tool_control_vacuum(entity_id: str, action: str):
     """Controls vacuum (start/stop/dock)."""
-    try: return await control_vacuum(entity_id, action)
-    except: return "Could not control vacuum."
+    try:
+        return await control_vacuum(entity_id, action)
+    except Exception:
+        logger.exception("[TOOL] Could not control vacuum")
+        return "Could not control vacuum."
 
 async def tool_get_ha_state(entity_id: str):
     """Fetches status for a device."""
-    try: return await get_ha_state(entity_id)
-    except: return "Could not fetch status."
+    try:
+        return await get_ha_state(entity_id)
+    except Exception:
+        logger.exception("[TOOL] Could not fetch HA state")
+        return "Could not fetch status."
 
 async def tool_get_sensor(friendly_name: str):
     """Fetches sensor data."""
-    try: return await get_sensor_data(friendly_name)
-    except: return "Could not fetch sensor data."
+    try:
+        return await get_sensor_data(friendly_name)
+    except Exception:
+        logger.exception("[TOOL] Could not fetch sensor data")
+        return "Could not fetch sensor data."
 
 def tool_analyze_health_data():
     """Helper function to analyze health data."""
@@ -128,6 +140,8 @@ daa_tools = [
 
 # --- MAIN STREAMING FUNCTION ---
 async def stream_response(model_id, history, new_message, image_data=None, system_injection=None):
+    base_system_prompt = get_system_prompt()
+
     # --- MEM0 ---
     mem0_key = settings.MEM0_API_KEY
     mem0_client = None

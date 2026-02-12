@@ -14,7 +14,7 @@ class LLMService:
         else:
             logger.warning("GOOGLE_API_KEY not found. LLM capabilities limited.")
 
-    async def generate_response(self, prompt: str, image_data: str = None, history: list = []):
+    async def generate_response(self, prompt: str, image_data: str = None, history: list | None = None):
         """
         Generates a streaming response from Gemini.
         """
@@ -24,6 +24,7 @@ class LLMService:
 
         model_id = "gemini-2.0-flash" 
         
+        history = history or []
         contents = []
         # Add history
         # TODO: Format history correctly for Gemini 2.0
