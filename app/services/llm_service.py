@@ -2,7 +2,6 @@ from google import genai
 from google.genai import types
 from app.core.config import settings
 from app.core.logging import logger
-from app.services.tool_registry import registry
 import base64
 
 class LLMService:

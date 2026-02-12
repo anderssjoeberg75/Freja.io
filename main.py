@@ -5,7 +5,6 @@ from app.core.config import settings, get_allowed_origins
 from app.core.logging import logger
 from app.services.voice_service import init_voice_service
 from app.services.proactive_service import init_proactive_service
-from app.services.tool_registry import registry
 from contextlib import asynccontextmanager
 
 # Import tools to register them
@@ -95,7 +94,7 @@ app.add_middleware(
 )
 
 # Socket.IO Setup
-sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
+sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=get_allowed_origins())
 app_socketio = socketio.ASGIApp(sio, app)
 
 # Routes
