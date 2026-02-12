@@ -2,7 +2,6 @@ from google import genai
 from google.genai import types
 from app.core.config import settings
 from app.core.logging import logger
-from app.services.tool_registry import registry
 import base64
 
 class LLMService:
@@ -14,7 +13,7 @@ class LLMService:
         else:
             logger.warning("GOOGLE_API_KEY not found. LLM capabilities limited.")
 
-    async def generate_response(self, prompt: str, image_data: str = None, history: list = []):
+    async def generate_response(self, prompt: str, image_data: str = None, history: list | None = None):
         """
         Generates a streaming response from Gemini.
         """
@@ -24,6 +23,7 @@ class LLMService:
 
         model_id = "gemini-2.0-flash" 
         
+        history = history or []
         contents = []
         # Add history
         # TODO: Format history correctly for Gemini 2.0

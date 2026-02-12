@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+    ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000"
     
     # API Keys
     GOOGLE_API_KEY: Optional[str] = None
@@ -88,3 +89,12 @@ def get_credential(key: str, fallback=None) -> str:
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "db", "mainframe.db")
+
+
+
+def get_allowed_origins() -> list[str]:
+    """Return normalized CORS origins from settings."""
+    raw = (settings.ALLOWED_ORIGINS or "").strip()
+    if not raw:
+        return []
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
