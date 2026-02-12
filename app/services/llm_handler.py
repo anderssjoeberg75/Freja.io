@@ -69,45 +69,63 @@ async def tool_get_weather(**kwargs):
         kwargs: Ignored arguments (model may pass dates etc).
     """
     logger.info(f"[TOOL] Weather called with args: {kwargs}")
-    try: return await get_weather()
-    except Exception as e: return f"Could not fetch weather: {e}"
+    try:
+        return await get_weather()
+    except Exception as exc:
+        logger.exception("[TOOL] Could not fetch weather")
+        return f"Could not fetch weather: {exc}"
 
 async def tool_get_calendar(start: str, end: str):
     """
     Fetches calendar events between two ISO timestamps.
     You MUST calculate these dates based on the current time in the system prompt.
-    
+
     CRITICAL: For "next week" requests, calculate the Full range.
     Example: If today is Monday, "next week" means NEXT Monday to NEXT Sunday.
     Example: If today is 2026-02-01, "next week" is 2026-02-02T00:00:00Z to 2026-02-08T23:59:59Z.
-    
+
     Args:
       start: ISO string with 'Z' (e.g. '2026-02-02T00:00:00Z')
       end: ISO string with 'Z' (e.g. '2026-02-08T23:59:59Z')
     """
-    try: return await get_calendar_events(start=start, end=end)
-    except Exception as e: return f"Could not fetch calendar: {e}"
+    try:
+        return await get_calendar_events(start=start, end=end)
+    except Exception as exc:
+        logger.exception("[TOOL] Could not fetch calendar events")
+        return f"Could not fetch calendar: {exc}"
 
 
 async def tool_control_light(entity_id: str, action: str):
     """Controls lights (on/off)."""
-    try: return await control_light(entity_id, action)
-    except: return "Could not control light."
+    try:
+        return await control_light(entity_id, action)
+    except Exception:
+        logger.exception("[TOOL] Could not control light")
+        return "Could not control light."
 
 async def tool_control_vacuum(entity_id: str, action: str):
     """Controls vacuum (start/stop/dock)."""
-    try: return await control_vacuum(entity_id, action)
-    except: return "Could not control vacuum."
+    try:
+        return await control_vacuum(entity_id, action)
+    except Exception:
+        logger.exception("[TOOL] Could not control vacuum")
+        return "Could not control vacuum."
 
 async def tool_get_ha_state(entity_id: str):
     """Fetches status for a device."""
-    try: return await get_ha_state(entity_id)
-    except: return "Could not fetch status."
+    try:
+        return await get_ha_state(entity_id)
+    except Exception:
+        logger.exception("[TOOL] Could not fetch HA state")
+        return "Could not fetch status."
 
 async def tool_get_sensor(friendly_name: str):
     """Fetches sensor data."""
-    try: return await get_sensor_data(friendly_name)
-    except: return "Could not fetch sensor data."
+    try:
+        return await get_sensor_data(friendly_name)
+    except Exception:
+        logger.exception("[TOOL] Could not fetch sensor data")
+        return "Could not fetch sensor data."
 
 def tool_analyze_health_data():
     """Helper function to analyze health data."""
@@ -128,6 +146,8 @@ daa_tools = [
 
 # --- MAIN STREAMING FUNCTION ---
 async def stream_response(model_id, history, new_message, image_data=None, system_injection=None):
+    base_system_prompt = get_system_prompt()
+
     # --- MEM0 ---
     mem0_key = settings.MEM0_API_KEY
     mem0_client = None
@@ -138,15 +158,14 @@ async def stream_response(model_id, history, new_message, image_data=None, syste
             mem0_client = AsyncMemoryClient(api_key=mem0_key)
             try:
                 relevant_memories = await mem0_client.search(new_message, user_id=user_id)
-                mem_text = ""
-                for mem in relevant_memories:
-                    mem_text += f"- {mem['memory']}\n"
-                if mem_text:
+                mem_lines = [f"- {mem.get('memory', '')}" for mem in relevant_memories if mem.get('memory')]
+                if mem_lines:
+                    mem_text = "\n".join(mem_lines)
                     base_system_prompt += f"\n\n--- LONG TERM MEMORY ---\n{mem_text}"
             except Exception:
-                pass
+                logger.exception("[MEM0] Failed to search memories")
         except Exception:
-            pass
+            logger.exception("[MEM0] Failed to initialize client")
 
 
     # --- LIVE DATA ---
