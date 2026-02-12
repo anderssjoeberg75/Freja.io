@@ -104,11 +104,12 @@ async def health_check():
     return {"status": "ok", "app": settings.APP_NAME}
 
 # Include API Routers
-from app.routers import chat, settings as settings_router, system
+from app.routers import chat, settings as settings_router, system, live
 
 app.include_router(chat.router)
 app.include_router(settings_router.router)
 app.include_router(system.router)
+app.include_router(live.router)
 
 # --- SERVE REACT FRONTEND (Production) ---
 from fastapi.staticfiles import StaticFiles
