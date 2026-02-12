@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard';
 import ChatInterface from './components/ChatInterface';
 import Settings from './components/Settings';
 import Prompts from './components/Prompts';
+import LiveSession from './components/LiveSession';
 
 import { useSocket } from './hooks/useSocket';
 
@@ -35,7 +36,7 @@ function App() {
                 {activeView === 'dashboard' && <Dashboard />}
                 {activeView === 'chat' && <ChatInterface />}
                 {activeView === 'prompts' && <Prompts />}
-                {activeView === 'voice' && <div className="p-8 text-2xl text-zinc-500">Voice Module Loading...</div>}
+                {activeView === 'voice' && <LiveSession />}
                 {activeView === 'settings' && <Settings />}
             </main>
         </div>

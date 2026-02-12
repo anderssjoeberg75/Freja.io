@@ -12,6 +12,20 @@ class Settings(BaseSettings):
     # API Keys
     GOOGLE_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
+
+    # Live voice + vision settings
+    GEMINI_LIVE_MODEL: str = "gemini-2.5-flash-native-audio-preview-09-2025"
+    LIVE_FRAME_FPS: float = 1.0
+    LIVE_AUDIO_CHUNK_MS: int = 30
+
+    # External tool gateway settings
+    OPENCLOW_SCHEME: str = "http"
+    OPENCLOW_HOST: Optional[str] = None
+    OPENCLOW_PORT: Optional[int] = None
+    OPENCLOW_PATH: str = "/execute"
+    OPENCLOW_TOKEN: Optional[str] = None
+    OPENCLOW_TIMEOUT_SECONDS: float = 12.0
+    OPENCLOW_RETRIES: int = 1
     
     # Mem0 / Vector DB
     MEM0_API_KEY: Optional[str] = None
