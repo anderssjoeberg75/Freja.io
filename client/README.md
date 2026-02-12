@@ -16,11 +16,11 @@ Set these environment variables in backend `.env` before starting server:
 - `GOOGLE_API_KEY` (required, backend only)
 - `GEMINI_LIVE_MODEL` (optional, default in config)
 - `LIVE_FRAME_FPS` (optional, default `1.0`)
-- `OPENCLOW_SCHEME` (optional, default `http`)
-- `OPENCLOW_HOST` (optional, if missing tool calls become no-op)
-- `OPENCLOW_PORT` (optional)
-- `OPENCLOW_PATH` (optional, default `/execute`)
-- `OPENCLOW_TOKEN` (optional bearer token)
+- `TOOL_GATEWAY_SCHEME` (optional, default `http`)
+- `TOOL_GATEWAY_HOST` (optional, if missing tool calls become no-op)
+- `TOOL_GATEWAY_PORT` (optional)
+- `TOOL_GATEWAY_PATH` (optional, default `/execute`)
+- `TOOL_GATEWAY_TOKEN` (optional bearer token)
 
 ### 2) Start backend and client
 
@@ -40,14 +40,14 @@ npm run dev
 
 ### 3) Test without gateway (no-op tool calls)
 
-Leave `OPENCLOW_HOST` unset. Tool calls are acknowledged and return a no-op response so session keeps running.
+Leave `TOOL_GATEWAY_HOST` unset. Tool calls are acknowledged and return a no-op response so session keeps running.
 
 ### 4) Test with gateway
 
-Set `OPENCLOW_HOST`/`OPENCLOW_PORT`/`OPENCLOW_TOKEN`, then verify gateway health manually:
+Set `TOOL_GATEWAY_HOST`/`TOOL_GATEWAY_PORT`/`TOOL_GATEWAY_TOKEN`, then verify gateway health manually:
 
 ```bash
-curl -H "Authorization: Bearer $OPENCLOW_TOKEN" "http://$OPENCLOW_HOST:$OPENCLOW_PORT/health"
+curl -H "Authorization: Bearer $TOOL_GATEWAY_TOKEN" "http://$TOOL_GATEWAY_HOST:$TOOL_GATEWAY_PORT/health"
 ```
 
 Then open Freja client, go to Voice view, click **Start Live Session**, and verify:
