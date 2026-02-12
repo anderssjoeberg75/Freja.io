@@ -61,7 +61,7 @@ class GeminiLiveSession:
             )
         ]
 
-        # Response modalities include both text and audio for parity with VisionClaw-like behavior.
+        # Response modalities include both text and audio for multimodal interaction parity.
         live_config = {
             "response_modalities": ["AUDIO", "TEXT"],
             "tools": tools,
