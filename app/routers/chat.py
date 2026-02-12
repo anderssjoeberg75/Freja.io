@@ -11,6 +11,7 @@ from app.core.database import get_history, get_user_state, save_message, save_us
 from app.core.prompts import get_system_prompt
 from app.core.dependencies import get_garmin, get_strava, get_code_executor
 from app.core.config import get_credential
+from app.self_improving.hooks import handle_user_prompt_submit
 
 logger = logging.getLogger(__name__)
 
@@ -172,6 +173,9 @@ async def chat(request: ChatRequest):
         user_msg = messages[-1].content
     else:
         user_msg = "..."
+
+    # Trigger UserPromptSubmit hook to auto-log learnings and feature requests.
+    handle_user_prompt_submit(user_msg, project_root=".")
 
     user_state = get_user_state(session_id)
     extracted_now = extract_user_state(user_msg)
