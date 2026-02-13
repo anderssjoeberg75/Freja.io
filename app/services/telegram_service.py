@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shlex
 import time
+from pathlib import Path
 from collections import OrderedDict
 from typing import Awaitable, Callable, Optional
 
@@ -32,6 +34,11 @@ RATE_LIMIT_SECONDS = 1.0
 PROCESSED_UPDATE_TTL_SECONDS = 600
 PROCESSED_UPDATE_CACHE_SIZE = 5000
 
+
+SELF_UPDATE_TRIGGER_PHRASES = (
+    "uppdatera dig",
+    "update yourself",
+)
 
 class TelegramService:
     """Telegram bot service for receiving and sending messages."""
@@ -217,6 +224,42 @@ class TelegramService:
                 "Jag kunde inte transkribera ljudet. Försök igen eller skriv kommandot som text."
             )
 
+    @staticmethod
+    def _is_self_update_command(user_message: str) -> bool:
+        """Return True when the message asks Freja to self-update from GitHub."""
+        normalized = " ".join(user_message.casefold().split())
+        return normalized in SELF_UPDATE_TRIGGER_PHRASES
+
+    async def _run_self_update(self) -> tuple[bool, str]:
+        """Run the repository self-update script and return execution status."""
+        repo_root = Path(__file__).resolve().parents[2]
+        script_path = repo_root / "scripts" / "self_update.sh"
+
+        if not script_path.exists():
+            return False, "Update script is missing."
+
+        cmd = f"bash {shlex.quote(str(script_path))}"
+        process = await asyncio.create_subprocess_shell(
+            cmd,
+            cwd=str(repo_root),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await process.communicate()
+
+        output = (stdout or b"").decode("utf-8", errors="replace").strip()
+        error_output = (stderr or b"").decode("utf-8", errors="replace").strip()
+
+        if process.returncode == 0:
+            return True, output or "Update completed."
+
+        message_parts = ["Update failed."]
+        if output:
+            message_parts.append(output)
+        if error_output:
+            message_parts.append(error_output)
+        return False, "\n".join(message_parts)
+
     async def _process_user_message(self, update: Update, user_message: str):
         """Shared execution pipeline for all user messages, including transcribed voice."""
         global _last_message_time
@@ -245,6 +288,16 @@ class TelegramService:
         _last_message_time = current_time
 
         logger.info("Telegram message accepted for processing")
+
+        if self._is_self_update_command(user_message):
+            await update.effective_chat.send_action("typing")
+            await update.message.reply_text("Jag uppdaterar mig nu från GitHub och startar om tjänsten.")
+            success, details = await self._run_self_update()
+            if success:
+                await update.message.reply_text("✅ Uppdatering klar. start.sh körs nu.")
+            else:
+                await update.message.reply_text(f"❌ Uppdateringen misslyckades.\n{details}")
+            return
 
         # Try Strava skill parser first for natural-language triggers in Telegram text.
         strava_processor = get_strava_command_processor()
