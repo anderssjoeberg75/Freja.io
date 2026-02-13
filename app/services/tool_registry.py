@@ -19,7 +19,7 @@ class ToolRegistry:
     def register(self, name: str, description: str, args_schema: Type[BaseModel]):
         """Decorator to register a tool with a Pydantic schema."""
         def decorator(func: Callable):
-            logger.info(f"Registered tool: {name}")
+            logger.info("Registered tool: {}", name)
             self._tools[name] = ToolDefinition(
                 name=name,
                 description=description,
@@ -31,7 +31,7 @@ class ToolRegistry:
 
     async def execute(self, tool_name: str, tool_args: Dict[str, Any]) -> Any:
         if tool_name not in self._tools:
-            logger.error(f"Tool not found: {tool_name}")
+            logger.error("Tool not found: {}", tool_name)
             return f"Error: Tool {tool_name} not found."
 
         try:
@@ -41,14 +41,14 @@ class ToolRegistry:
             tool_args = tool_args or {}
             validated_args = tool.args_schema(**tool_args)
             
-            logger.info(f"Executing tool: {tool_name} with {validated_args}")
+            logger.info("Executing tool: {} with {}", tool_name, validated_args)
             
             if inspect.iscoroutinefunction(tool.func):
                 return await tool.func(**validated_args.model_dump())
             else:
                 return tool.func(**validated_args.model_dump())
         except Exception as e:
-            logger.error(f"Tool execution failed: {e}", exc_info=True)
+            logger.exception("Tool execution failed: {}", e)
             return f"Error executing {tool_name}: {str(e)}"
 
     def get_gemini_function_declarations(self) -> List[Dict[str, Any]]:
