@@ -17,10 +17,13 @@ from app.services.web_fallback_service import WebFallbackService, needs_web_fall
 from skills.homeassistant import get_homeassistant_command_processor
 # --- Native Tooling Imports ---
 from app.services.tool_registry import registry
-# Ensure tools are registered
-import app.tools.implementations
+from skills._core.skill_loader import discover_and_register_skills
 
 logger = logging.getLogger(__name__)
+
+# Section: Skill bootstrap
+# Register all auto-discovered tools once when chat service is imported.
+discover_and_register_skills(registry)
 
 class UnifiedChatService:
     """
