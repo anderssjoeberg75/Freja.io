@@ -14,6 +14,7 @@ from app.core.dependencies import get_code_executor, get_garmin, get_strava
 from app.core.prompts import get_system_prompt
 from app.self_improving.hooks import handle_user_prompt_submit
 from app.services.web_fallback_service import WebFallbackService, needs_web_fallback
+from skills.homeassistant import get_homeassistant_command_processor
 # --- Native Tooling Imports ---
 from app.services.tool_registry import registry
 # Ensure tools are registered
@@ -52,7 +53,16 @@ class UnifiedChatService:
 
         logger.info(f"Processing message for session {session_id} with model {model_id}")
 
-        # 2. Logic Hook (Self-improving)
+        # 2. Direct Home Assistant command route.
+        # This keeps deterministic HA command behavior for inputs like "ha list".
+        ha_processor = get_homeassistant_command_processor()
+        ha_result = await ha_processor.process_message(session_id, user_msg)
+        if ha_result.handled and ha_result.response:
+            save_message(session_id, "user", user_msg)
+            save_message(session_id, "assistant", ha_result.response)
+            return ha_result.response
+
+        # 3. Logic Hook (Self-improving)
         handle_user_prompt_submit(user_msg, project_root=".")
 
         # 3. User State & Profile Memory
