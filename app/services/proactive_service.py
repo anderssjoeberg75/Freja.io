@@ -71,6 +71,7 @@ class ProactiveService:
             from app.tools.weather_core import get_weather
             from app.services.llm_handler import stream_gemini
             from app.core.config import get_credential
+            from app.core.dependencies import get_strava  # Added Strava dependency
 
             if not telegram_service or not telegram_service.primary_chat_id:
                 logger.warning("Morning briefing skipped: Telegram is not configured")
@@ -102,6 +103,23 @@ class ProactiveService:
             except Exception as e:
                 logger.error(f"Garmin proactive error: {e}")
 
+            # Strava (Added)
+            try:
+                strava = get_strava()
+                if strava:
+                    # Fetch recent activities (last 5)
+                    activities = await strava.get_health_report(limit=5)
+                    if activities and "error" not in activities: # Check for error key if get_activities returns dict on error, or just list
+                         # Simple formatting for context
+                         activity_summary = json.dumps(activities, ensure_ascii=False)
+                         context_parts.append(f"RECENT TRAINING (Strava):\n{activity_summary}")
+                    else:
+                         context_parts.append("RECENT TRAINING (Strava): Could not fetch recent activities.")
+                else:
+                    context_parts.append("RECENT TRAINING (Strava): Service not initialized")
+            except Exception as e:
+                logger.error(f"Strava proactive error: {e}")
+
             # Build prompt
             context = "\n\n".join(context_parts)
             current_time_str = datetime.datetime.now().strftime("%H:%M")
@@ -114,8 +132,11 @@ class ProactiveService:
                 (
                     "You are Freja. Current time is {time}. "
                     "Create a morning briefing in Swedish based on:\n{context}\n\n"
-                    "IMPORTANT: Include detailed sleep analysis (REM, deep sleep, awake, "
-                    "sleep start/end times) and resting heart rate."
+                    "IMPORTANT: You must include a specific section titled '🚴 Dagens Träningsråd'. "
+                    "In this section, explicitly recommend a workout for today based on my recovery (Garmin Body Battery/Sleep) "
+                    "and recent training load (Strava). "
+                    "Examples: 'Idag har du fullt batteri (83), så kör ett hårt intervallpass!' or 'Du sov dåligt, ta en promenad.'. "
+                    "Do not just summarize what I did previously, tell me what to do TODAY."
                 ),
             )
 

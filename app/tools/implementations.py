@@ -101,3 +101,28 @@ async def get_garmin_health_impl(date_str: str) -> str:
         
     except Exception as e:
         return f"Failed to fetch Garmin data: {e}"
+
+from app.tools.strava_core import StravaTool
+from app.tools.definitions import GetStravaActivity
+
+# Lazy global instance
+_strava_tool = StravaTool()
+
+@registry.register(
+    name="get_strava_activities",
+    description="Fetches recent activities from Strava (runs, rides, etc).",
+    args_schema=GetStravaActivity
+)
+async def get_strava_activities_impl(limit: int = 5) -> str:
+    try:
+        # Re-use existing core logic
+        activities = await _strava_tool.get_health_report(limit=limit)
+        
+        # Check for error dict return from core tool
+        if isinstance(activities, dict) and "error" in activities:
+            return activities["error"]
+            
+        import json
+        return json.dumps(activities, indent=2, ensure_ascii=False)
+    except Exception as e:
+        return f"Failed to fetch Strava activities: {e}"

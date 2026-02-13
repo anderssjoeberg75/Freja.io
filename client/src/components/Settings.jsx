@@ -121,6 +121,14 @@ const Settings = () => {
             ]
         },
         {
+            title: "Weather & Location",
+            icon: <Bot className="w-5 h-5 mb-1 text-yellow-400" />,
+            items: [
+                { key: "LATITUDE", label: "Latitude", type: "text", desc: "e.g. 59.3293 (Decimal)" },
+                { key: "LONGITUDE", label: "Longitude", type: "text", desc: "e.g. 18.0686 (Decimal)" }
+            ]
+        },
+        {
             title: "Integrations",
             icon: <ActivityIcon />,
             items: [

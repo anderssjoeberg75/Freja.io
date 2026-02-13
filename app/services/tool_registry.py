@@ -62,7 +62,7 @@ class ToolRegistry:
                 if isinstance(s, dict):
                     cleaned = {}
                     for k, v in s.items():
-                        if k == "title":
+                        if k == "title" or k == "default":
                             continue
                         if k == "type" and isinstance(v, str):
                             # Gemini expects uppercase types (STRING, OBJECT, etc.)

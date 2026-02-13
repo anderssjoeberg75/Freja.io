@@ -136,7 +136,12 @@ class TelegramService:
                 await self.application.bot.send_message(chat_id=int(cid), text=text, parse_mode="Markdown")
                 success = True
             except Exception as e:
-                logger.error("Telegram send error for %s: %s", cid, e)
+                logger.warning(f"Telegram Markdown send failed for {cid}, retrying as plain text: {e}")
+                try:
+                    await self.application.bot.send_message(chat_id=int(cid), text=text, parse_mode=None)
+                    success = True
+                except Exception as e2:
+                    logger.error(f"Telegram send error for {cid}: {e2}")
 
         return success
 

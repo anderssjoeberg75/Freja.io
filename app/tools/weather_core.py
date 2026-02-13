@@ -1,7 +1,6 @@
-
 import httpx
 import asyncio
-from app.core.config import settings
+from app.core.config import settings, get_credential
 
 # SMHI Wsymb2 Mapping (1-27)
 SMHI_CODES = {
@@ -18,8 +17,8 @@ async def get_weather():
     """
     Hämtar väder från SMHI Open API (PMP3g).
     """
-    lat = settings.LATITUDE
-    lon = settings.LONGITUDE
+    lat = get_credential("LATITUDE")
+    lon = get_credential("LONGITUDE")
 
     if not lat or not lon:
         return "⚠️ Saknar GPS-koordinater. Fyll i LATITUDE och LONGITUDE i inställningarna."

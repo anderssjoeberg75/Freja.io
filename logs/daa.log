@@ -1,217 +1,623 @@
-[2026-02-09 17:23:16] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
-[2026-02-09 17:23:16] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 17:23:16] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 17:26:00] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
-[2026-02-09 17:26:00] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 17:26:00] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 17:26:00] [ERROR] DAA: [GEMINI AIO ERROR] 429 Too Many Requests. {'message': '{\n  "error": {\n    "code": 429,\n    "message": "Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.",\n    "status": "RESOURCE_EXHAUSTED"\n  }\n}\n', 'status': 'Too Many Requests'}
-[2026-02-09 17:26:01] [ERROR] DAA: Generate Content Error: 429 Too Many Requests. {'message': '{\n  "error": {\n    "code": 429,\n    "message": "Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.",\n    "status": "RESOURCE_EXHAUSTED"\n  }\n}\n', 'status': 'Too Many Requests'}
-[2026-02-09 17:28:25] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
-[2026-02-09 17:28:25] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 17:28:25] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 17:28:36] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
-[2026-02-09 17:28:36] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 17:28:36] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 17:29:02] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-pro to gemini-2.0-flash for stability.
-[2026-02-09 17:29:02] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 17:29:02] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 18:04:52] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-09 18:04:52] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 18:04:52] [INFO] DAA: [GEMINI DEBUG] System Prompt start: You are DAA, a proactive assistant. Always answer in Swedish.
-[2026-02-09 18:26:42] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-09 18:26:42] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 18:26:42] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 18:37:19] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-09 18:37:19] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 18:37:19] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 18:38:09] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-09 18:38:09] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 18:38:09] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 18:38:52] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-09 18:38:52] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 18:38:52] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 18:39:38] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-09 18:39:38] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 18:39:38] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 18:39:39] [ERROR] DAA: [GEMINI AIO ERROR] 'run_code'
-[2026-02-09 18:40:11] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-09 18:40:11] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 18:40:11] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-09 18:40:44] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-09 18:40:44] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-09 18:40:44] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 05:21:51] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 05:21:51] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 05:21:51] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 05:34:06] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 05:34:06] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 05:34:06] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 06:51:53] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 06:51:53] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 06:51:54] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 07:09:38] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 07:09:38] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 07:09:38] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 08:00:04] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 08:00:04] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 08:00:04] [INFO] DAA: [GEMINI DEBUG] System Prompt start: You are DAA, a proactive assistant. Always answer in Swedish.
-[2026-02-10 08:06:08] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 08:06:08] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 08:06:08] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 08:56:18] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 08:56:18] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 08:56:18] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 08:56:41] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 08:56:41] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 08:56:41] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 14:55:46] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 14:55:46] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 14:55:46] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 17:55:53] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 17:55:53] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 17:55:53] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 17:56:55] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 17:56:55] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 17:56:55] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 17:57:16] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 17:57:16] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 17:57:16] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:01:21] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:01:21] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:01:21] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:02:19] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:02:19] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:02:19] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:07:43] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:07:43] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:07:43] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:09:36] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:09:36] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:09:36] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:22:30] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:22:30] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:22:30] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:31:47] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:31:47] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:31:47] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:32:26] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:32:26] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:32:26] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:38:48] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:38:48] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:38:48] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:51:21] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:51:21] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:51:21] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-10 18:52:08] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-10 18:52:08] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-10 18:52:08] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 08:09:41] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 08:09:41] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 08:09:41] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 08:10:04] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 08:10:04] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 08:10:04] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 10:56:03] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 10:56:03] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 10:56:03] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 10:59:19] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 10:59:19] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 10:59:19] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:00:02] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:00:02] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:00:02] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:00:51] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:00:51] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:00:51] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:09:56] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:09:56] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:09:56] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:19:12] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:19:12] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:19:12] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:20:31] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:20:31] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:20:31] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:21:07] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:21:07] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:21:07] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:21:31] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:21:31] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:21:31] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:21:50] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:21:50] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:21:50] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:22:08] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:22:08] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:22:08] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:22:21] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:22:21] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:22:21] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:22:59] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:22:59] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:22:59] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:23:11] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:23:11] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:23:11] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:23:28] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:23:28] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:23:28] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:23:45] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:23:45] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:23:45] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
-[2026-02-11 11:23:56] [INFO] DAA: [GEMINI] Auto-switched from gemini-2.5-flash to gemini-2.0-flash for stability.
-[2026-02-11 11:23:56] [INFO] DAA: [GEMINI] Using model: gemini-2.0-flash
-[2026-02-11 11:23:56] [INFO] DAA: [GEMINI DEBUG] System Prompt start: Du är DAA Mainframe (Digital Advanced Assistant), en mycket kapabel och lojal AI-assistent.
-Du agera
+/home/anderss/Documents/projects/daa/app/services/chat_service.py:8: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-02-13 12:18:17 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: run_python_code
+2026-02-13 12:18:17 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: web_search
+2026-02-13 12:18:17 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_garmin_health
+2026-02-13 12:18:17 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_strava_activities
+INFO:     Started server process [15677]
+INFO:     Waiting for application startup.
+2026-02-13 12:18:17 | INFO     | main:lifespan:17 - Initializing Mainframe Services...
+2026-02-13 12:18:17 | INFO     | app.services.proactive_service:start:16 - Proactive service started
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:44186 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44196 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44200 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44210 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40080 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59656 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39442 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58938 - "POST /api/settings HTTP/1.1" 200 OK
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+INFO:     127.0.0.1:37262 - "GET /api/prompts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37272 - "GET /api/prompts HTTP/1.1" 200 OK
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+INFO:     127.0.0.1:58104 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58120 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58128 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58142 - "GET /api/models HTTP/1.1" 200 OK
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+INFO:     127.0.0.1:51448 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51456 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51462 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51474 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51482 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51488 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46954 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46958 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46966 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46974 - "POST /api/settings HTTP/1.1" 200 OK
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+Exception happened while polling for updates.
+Traceback (most recent call last):
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
+    await do_action()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
+    action_cb_task.result()
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
+    updates = await self.bot.get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
+    updates = await super().get_updates(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
+    await self._post(
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
+    return await self._do_post(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
+    return await super()._do_post(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
+    result = await request.post(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running

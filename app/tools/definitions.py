@@ -21,3 +21,10 @@ class GetGarminHealth(BaseModel):
     Use this when the user asks about their health, training status, or sleep.
     """
     date_str: str = Field(..., description="The date to fetch data for in YYYY-MM-DD format. Defaults to today if not specified.")
+
+class GetStravaActivity(BaseModel):
+    """
+    Retrieves recent activities from Strava.
+    Use this when the user asks about their recent workouts, runs, or rides recorded on Strava.
+    """
+    limit: int = Field(5, description="The maximum number of activities to retrieve. Defaults to 5.")
