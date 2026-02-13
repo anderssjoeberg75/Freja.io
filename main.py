@@ -7,9 +7,10 @@ from app.core.logging import logger
 from app.services.proactive_service import init_proactive_service
 from contextlib import asynccontextmanager
 
-# Import tools to register them
-# Import tools to register them
-# import app.tools.basic_tools  # Legacy tools, superseded by app.tools.implementations
+# Section: Tool bootstrap imports
+# Importing this module at app startup ensures all auto-discovered skill tools,
+# including Roborock, are registered in the shared ToolRegistry before first chat.
+import app.tools.implementations  # noqa: F401
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

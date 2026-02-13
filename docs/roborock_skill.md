@@ -30,3 +30,22 @@ You must set `ROBOROCK_SECRET_KEY` to a valid Fernet key.
 4. Call control tools (`status`, `start`, `pause`, `dock`).
 5. Call `roborock_rooms` and `roborock_clean_rooms`.
 6. Call `roborock_consumables`, `roborock_maps`, and `roborock_map_image`.
+
+## Chat usage examples
+
+Freja can call Roborock tools from natural language prompts such as:
+
+- "Starta dammsugaren" → maps to `roborock_start`.
+- "Pausa dammsugaren" → maps to `roborock_pause`.
+- "Skicka dammsugaren till dockan" → maps to `roborock_dock`.
+
+## Required environment variables
+
+- `ROBOROCK_SECRET_KEY`: Fernet key used to encrypt credentials in SQLite.
+- `USER_ID` (optional): Freja user partition used for credential lookup. Defaults to the configured app user.
+
+Generate a key with:
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
