@@ -20,6 +20,7 @@ from app.core.database import get_db_settings
 from app.services.speech_to_text import build_speech_to_text_provider
 from app.services.telegram_voice_handler import TelegramVoiceError, TelegramVoiceHandler
 from skills.strava import get_strava_command_processor
+from skills.homeassistant import get_homeassistant_command_processor
 
 logger = logging.getLogger(__name__)
 
@@ -87,8 +88,9 @@ class TelegramService:
 
             # Add handlers.
             self.application.add_handler(CommandHandler("start", self._handle_start))
-            # Register dedicated Strava command route without affecting generic text handling.
+            # Register dedicated skill routes without affecting generic text handling.
             self.application.add_handler(CommandHandler("strava", self._handle_strava_command))
+            self.application.add_handler(CommandHandler("ha", self._handle_homeassistant_command))
             self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_text_message))
             self.application.add_handler(MessageHandler(filters.VOICE, self._handle_voice_message))
 
@@ -181,6 +183,23 @@ class TelegramService:
             return
 
         await update.message.reply_text("Svar:\nOkänt Strava-kommando.")
+
+
+    async def _handle_homeassistant_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /ha command by routing to Home Assistant skill parser."""
+        if not update.message or not update.effective_chat:
+            return
+
+        chat_id = str(update.effective_chat.id)
+        message_text = (update.message.text or "").strip()
+        processor = get_homeassistant_command_processor()
+        result = await processor.process_message(chat_id, message_text)
+
+        if result.handled and result.response:
+            await update.message.reply_text(result.response)
+            return
+
+        await update.message.reply_text("Svar:\nOkänt HA-kommando.")
 
     async def _handle_text_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle incoming Telegram text messages using the shared pipeline."""
