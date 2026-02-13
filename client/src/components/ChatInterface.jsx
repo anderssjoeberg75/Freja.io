@@ -6,6 +6,7 @@ export default function ChatInterface() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedModel, setSelectedModel] = useState("gemini-2.0-flash");
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -15,6 +16,24 @@ export default function ChatInterface() {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    // Fetch settings to get selected model
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/settings`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.SELECTED_MODEL) {
+                        setSelectedModel(data.SELECTED_MODEL);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch settings:", err);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -36,7 +55,7 @@ export default function ChatInterface() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: "gemini-1.5-flash", // Default model
+                    model: selectedModel,
                     messages: history,
                     session_id: "default"
                 })
@@ -44,21 +63,8 @@ export default function ChatInterface() {
 
             if (!res.ok) throw new Error('Network response was not ok');
 
-            // The backend returns the raw text response string directly based on api.py inspection
-            // But let's check if it returns JSON or text. 
-            // api.py returns: return response_text (which is a string)
-            // Wait, FastAPI usually returns JSON if not specified otherwise.
-            // Let's assume it returns a string if the return type hint is str, 
-            // but FastAPI wraps singular return values in JSON usually ONLY if it's a dict or model.
-            // If it returns a bare string, requests.post().json() might fail if it's not quoted.
-            // Let's look at api.py again. 
-            // It returns response_text. 
-            // If response_text is just a string, FastAPI returns it as a JSON string literal (quoted string).
-
             const data = await res.json();
-            // If the backend returns "Hello", res.json() parses it to string "Hello".
-
-            const botMsg = { role: 'assistant', content: data };
+            const botMsg = { role: 'assistant', content: data.response || data.error || 'No response' };
             setMessages(prev => [...prev, botMsg]);
 
         } catch (error) {
@@ -72,11 +78,14 @@ export default function ChatInterface() {
     return (
         <div className="flex flex-col h-full bg-mainframe-bg text-mainframe-text">
             {/* Header */}
-            <div className="p-4 border-b border-mainframe-border bg-mainframe-card/50 backdrop-blur">
+            <div className="p-4 border-b border-mainframe-border bg-mainframe-card/50 backdrop-blur flex justify-between items-center">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                     <Bot className="w-6 h-6 text-mainframe-accent" />
                     Neural Interface
                 </h2>
+                <div className="text-xs text-zinc-500 font-mono">
+                    Model: {selectedModel}
+                </div>
             </div>
 
             {/* Messages */}

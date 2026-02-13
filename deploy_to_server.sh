@@ -12,8 +12,9 @@ echo "📁 Creating target directory..."
 ssh $USER@$SERVER_IP "mkdir -p $TARGET_DIR"
 
 # Transfer Files
+# Transfer Files
 echo "📦 Syncing Mainframe (Backend)..."
-rsync -avz --exclude 'venv' --exclude '__pycache__' ./mainframe/ $USER@$SERVER_IP:$TARGET_DIR/mainframe/
+rsync -avz --exclude 'venv' --exclude '__pycache__' --exclude 'client' --exclude '.git' --exclude 'logs' --exclude 'temp_repos' ./ $USER@$SERVER_IP:$TARGET_DIR/mainframe/
 
 echo "⚛️ Syncing Client (Frontend)..."
 rsync -avz --exclude 'node_modules' --exclude 'dist' ./client/ $USER@$SERVER_IP:$TARGET_DIR/client/

@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Terminal, Settings, Activity, Mic, MessageSquare } from 'lucide-react';
+import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import ChatInterface from './components/ChatInterface';
+import Settings from './components/Settings';
+import Prompts from './components/Prompts';
+import LiveSession from './components/LiveSession';
 
 import { useSocket } from './hooks/useSocket';
 
@@ -20,8 +23,9 @@ function App() {
                 <nav className="flex-1 flex flex-col gap-4">
                     <NavIcon icon={<Activity />} active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')} />
                     <NavIcon icon={<MessageSquare />} active={activeView === 'chat'} onClick={() => setActiveView('chat')} />
+                    <NavIcon icon={<Edit3 />} active={activeView === 'prompts'} onClick={() => setActiveView('prompts')} />
                     <NavIcon icon={<Mic />} active={activeView === 'voice'} onClick={() => setActiveView('voice')} />
-                    <NavIcon icon={<Settings />} active={activeView === 'settings'} onClick={() => setActiveView('settings')} />
+                    <NavIcon icon={<SettingsIcon />} active={activeView === 'settings'} onClick={() => setActiveView('settings')} />
                 </nav>
 
                 <div className={`w-3 h-3 rounded-full mb-4 ${socketConnected ? 'bg-green-500' : 'bg-red-500'}`} title={socketConnected ? "Connected" : "Disconnected"} />
@@ -31,8 +35,9 @@ function App() {
             <main className="flex-1 overflow-auto h-full">
                 {activeView === 'dashboard' && <Dashboard />}
                 {activeView === 'chat' && <ChatInterface />}
-                {activeView === 'voice' && <div className="p-8 text-2xl text-zinc-500">Voice Module Loading...</div>}
-                {activeView === 'settings' && <div className="p-8 text-2xl text-zinc-500">Settings Module Loading...</div>}
+                {activeView === 'prompts' && <Prompts />}
+                {activeView === 'voice' && <LiveSession />}
+                {activeView === 'settings' && <Settings />}
             </main>
         </div>
     );

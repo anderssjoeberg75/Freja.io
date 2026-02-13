@@ -1,6 +1,28 @@
 import { Activity, Cpu, Wifi } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 export default function Dashboard() {
+    const [agents, setAgents] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStatus = async () => {
+            try {
+                const res = await fetch(`${API_URL}/status`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAgents(data.agents || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch status:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStatus();
+    }, []);
+
     return (
         <div className="p-8 max-w-7xl mx-auto">
             <header className="mb-8">
@@ -27,13 +49,19 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Active Tasks */}
+                {/* Active Agents - Now Dynamic */}
                 <div className="bg-mainframe-card rounded-2xl p-6 border border-mainframe-border">
                     <h3 className="text-lg font-semibold mb-4 text-white">Active Agents</h3>
                     <div className="space-y-4">
-                        <AgentStatus name="Voice Service" status="Idle" />
-                        <AgentStatus name="Web Scraper" status="Sleeping" />
-                        <AgentStatus name="Home Assistant" status="Connected" />
+                        {loading ? (
+                            <p className="text-zinc-500 text-sm">Loading...</p>
+                        ) : agents.length > 0 ? (
+                            agents.map((agent, idx) => (
+                                <AgentStatus key={idx} name={agent.name} status={agent.status} />
+                            ))
+                        ) : (
+                            <p className="text-zinc-500 text-sm">No active agents</p>
+                        )}
                     </div>
                 </div>
             </div>
