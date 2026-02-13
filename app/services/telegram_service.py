@@ -21,6 +21,7 @@ from app.services.speech_to_text import build_speech_to_text_provider
 from app.services.telegram_voice_handler import TelegramVoiceError, TelegramVoiceHandler
 from skills.strava import get_strava_command_processor
 from skills.homeassistant import get_homeassistant_command_processor
+from skills._core.skill_loader import register_telegram_handlers
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +94,9 @@ class TelegramService:
             self.application.add_handler(CommandHandler("ha", self._handle_homeassistant_command))
             self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_text_message))
             self.application.add_handler(MessageHandler(filters.VOICE, self._handle_voice_message))
+
+            # Allow skills to register optional Telegram handlers via plugin hooks.
+            register_telegram_handlers(self.application)
 
             # Initialize and start polling.
             await self.application.initialize()

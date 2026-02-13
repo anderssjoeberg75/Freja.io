@@ -7,6 +7,7 @@ This skill provides a modular Strava integration for Freja.io with:
 - Rate-limit handling with retry logic.
 - Activity normalization + per-user cache.
 - Deterministic analytics pipeline used by Telegram command handling.
+- Tool registration for `get_strava_activities` via Freja's shared tool registry.
 
 ## Environment variables
 Configure these in `.env` or via Freja settings:
