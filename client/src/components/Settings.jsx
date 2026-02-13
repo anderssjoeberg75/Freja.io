@@ -133,6 +133,10 @@ const Settings = () => {
             title: "Integrations",
             icon: <ActivityIcon />,
             items: [
+                { key: "HA_URL", label: "Home Assistant URL", type: "text", desc: "e.g. http://homeassistant.local:8123" },
+                { key: "HA_TOKEN", label: "Home Assistant Token", type: "password", desc: "Long-lived access token from Home Assistant" },
+                { key: "ROBOROCK_SECRET_KEY", label: "Roborock Secret Key", type: "password", desc: "Fernet key for encrypted Roborock credentials" },
+                { key: "USER_ID", label: "Roborock User ID", type: "text", desc: "Credential partition key for Roborock data (optional override)" },
                 { key: "GARMIN_EMAIL", label: "Garmin Email", type: "text" },
                 { key: "GARMIN_PASSWORD", label: "Garmin Password", type: "password" },
                 {
