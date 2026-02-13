@@ -69,7 +69,9 @@ class ProactiveService:
             from app.services.telegram_service import telegram_service
             from app.core.dependencies import get_garmin
             from app.tools.weather_core import get_weather
-            from app.services.llm_handler import stream_gemini
+            from app.tools.weather_core import get_weather
+            # from app.services.llm_handler import stream_gemini # REMOVED
+            from app.core.config import get_credential
             from app.core.config import get_credential
             from app.core.dependencies import get_strava  # Added Strava dependency
 
@@ -143,10 +145,14 @@ class ProactiveService:
             prompt = prompt_template.replace("{time}", current_time_str).replace("{context}", context)
 
             # Generate response
-            model_id = get_credential("SELECTED_MODEL") or "gemini-2.0-flash"
-            full_response = ""
-            async for chunk in stream_gemini(model_id, [], prompt):
-                full_response += chunk
+            from app.services.chat_service import shared_chat_service
+            
+            # Using Unified Chat Service for generation (includes MEM0 and proper config)
+            # Use 'proactive_morning' as session_id for MEM0 context separation if needed, 
+            # or use user_id to share context. Let's use a specific session ID.
+            session_id = f"proactive_morning_{datetime.date.today()}"
+            
+            full_response = await shared_chat_service.run_proactive_task(session_id, prompt)
 
             # Send via Telegram (primary user only)
             if full_response:

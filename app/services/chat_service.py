@@ -75,6 +75,31 @@ class UnifiedChatService:
         )
 
         full_system_block = f"{system_prompt}\n\n{state_instructions}"
+
+        # --- MEM0 INTEGRATION (Long Term Memory) ---
+        mem0_client = None
+        mem0_key = get_credential("MEM0_API_KEY")
+        user_id = settings.USER_ID
+        
+        if mem0_key and len(mem0_key) > 5:
+            try:
+                from mem0 import AsyncMemoryClient
+                mem0_client = AsyncMemoryClient(api_key=mem0_key)
+                
+                # Search for relevant memories
+                relevant_memories = await mem0_client.search(user_msg, user_id=user_id)
+                mem_text = ""
+                for mem in relevant_memories:
+                    # Mem0 returns list of dicts with 'memory' key
+                    if isinstance(mem, dict) and 'memory' in mem:
+                        mem_text += f"- {mem['memory']}\n"
+                
+                if mem_text:
+                    full_system_block += f"\n\n--- LONG TERM MEMORY (Facts I know about {user_id}) ---\n{mem_text}"
+                    logger.info(f"Injected {len(relevant_memories)} memories into context.")
+            except Exception as e:
+                logger.warning(f"Mem0 search failed (continuing without memory): {e}")
+
         
         # 5. Build History for Gemini
         db_history = get_history(session_id=session_id, limit=10)
@@ -199,11 +224,91 @@ class UnifiedChatService:
             save_message(session_id, "user", user_msg)
             save_message(session_id, "assistant", final_text_response)
 
+            # --- MEM0 SAVE (Async) ---
+            if mem0_client and final_text_response:
+                try:
+                    # Add interaction to memory
+                    await mem0_client.add(
+                        [
+                            {"role": "user", "content": user_msg}, 
+                            {"role": "assistant", "content": final_text_response}
+                        ],
+                        user_id=user_id
+                    )
+                    logger.info("Saved interaction to Mem0.")
+                except Exception as e:
+                    logger.warning(f"Failed to save to Mem0: {e}")
+
             return final_text_response
 
         except Exception as exc:
             logger.error(f"Chat error: {exc}", exc_info=True)
             return f"Error: {str(exc)}"
+
+    async def run_proactive_task(self, session_id: str, prompt: str) -> str:
+        """
+        Executes a proactive task (like Morning Briefing) using the same core logic.
+        Includes MEM0 access but skips user-specific message saving.
+        """
+        logger.info(f"Running proactive task for session {session_id}")
+        
+        # 1. Setup
+        model_id = get_credential("SELECTED_MODEL") or "gemini-2.0-flash"
+        system_prompt = get_system_prompt()
+        user_state = get_user_state(session_id)
+        
+        # 2. Build Context
+        user_state_context = self._build_user_state_context(user_state)
+        state_instructions = (
+            "USER PROFILE MEMORY:\n"
+            f"{user_state_context}\n"
+        )
+        full_system_block = f"{system_prompt}\n\n{state_instructions}"
+
+        # 3. MEM0 (Context Retrieval only)
+        # We might want to find relevant memories for "Morning Briefing" or "Goals"
+        mem0_key = get_credential("MEM0_API_KEY")
+        if mem0_key:
+             try:
+                from mem0 import AsyncMemoryClient
+                mem0 = AsyncMemoryClient(api_key=mem0_key)
+                # Search for general preferences or goals
+                # "Planning day, goals, preferences"
+                relevant = await mem0.search("My daily goals and preferences", user_id=settings.USER_ID)
+                mem_text = "\n".join([f"- {m['memory']}" for m in relevant if 'memory' in m])
+                if mem_text:
+                    full_system_block += f"\n\n--- LONG TERM MEMORY ---\n{mem_text}"
+             except Exception:
+                 pass
+
+        # 4. Construct History for LLM
+        # For proactive tasks, we treat the "Prompt" as a User message to trigger the response
+        gemini_history = [
+            {"role": "user", "parts": [full_system_block]},
+            {"role": "model", "parts": ["System ready."]},
+            {"role": "user", "parts": [prompt]}
+        ]
+
+        # 5. Generate
+        try:
+            google_api_key = get_credential("GOOGLE_API_KEY")
+            genai.configure(api_key=google_api_key)
+            model = genai.GenerativeModel(model_id)
+            
+            # Simple generation without tools loop for now, as briefing is mostly text generation from context
+            response = await model.generate_content_async(gemini_history)
+            
+            if response.text:
+                # Save only the assistant output to history?
+                # Usually proactive messages are sent to Telegram, so we might want to log them.
+                save_message(session_id, "assistant", response.text)
+                return response.text
+                
+            return "Error: No response generated."
+            
+        except Exception as e:
+            logger.error(f"Proactive gen error: {e}")
+            return f"Error generating briefing: {e}"
 
     # --- Helper Methods (Internal) ---
 

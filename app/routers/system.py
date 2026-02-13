@@ -29,12 +29,13 @@ async def get_status():
 
     # Add other known services (safely check if they exist)
     # These imports should ideally also be moved to dependencies or service registry
-    try:
-        from app.services.voice_service import voice_service
-        if voice_service:
-            agents.append({"name": "Voice Service", "status": "Active", "type": "voice"})
-    except:
-        pass
+    # Voice Service removed
+    # try:
+    #     from app.services.voice_service import voice_service
+    #     if voice_service:
+    #         agents.append({"name": "Voice Service", "status": "Active", "type": "voice"})
+    # except:
+    #     pass
     
     try:
         from app.services.proactive_service import proactive_service

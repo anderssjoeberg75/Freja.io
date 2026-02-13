@@ -102,6 +102,7 @@ const Settings = () => {
                     desc: "Select the AI model to use for Chat & Voice."
                 },
                 { key: "GOOGLE_API_KEY", label: "Google Gemini API Key", type: "password", desc: "Required for Chat & Voice" },
+                { key: "MEM0_API_KEY", label: "Mem0 API Key", type: "password", desc: "Required for Long-Term Memory" },
                 { key: "OPENAI_API_KEY", label: "OpenAI API Key", type: "password", desc: "Optional fallback" },
                 { key: "OLLAMA_URL", label: "Ollama URL", type: "text", desc: "e.g. http://localhost:11434" }
             ]

@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings, get_allowed_origins
 from app.core.logging import logger
-from app.services.voice_service import init_voice_service
+# from app.services.voice_service import init_voice_service # Removed
 from app.services.proactive_service import init_proactive_service
 from contextlib import asynccontextmanager
 
@@ -19,13 +19,14 @@ async def lifespan(app: FastAPI):
     init_db()
     
     proactive = init_proactive_service(sio)
-    voice = init_voice_service(sio)
+    proactive = init_proactive_service(sio)
+    # voice = init_voice_service(sio) # Removed
     
     await proactive.start()
     
     # Initialize Telegram with LLM callback
     from app.services.telegram_service import init_telegram_service
-    from app.services.llm_handler import stream_gemini
+    # from app.services.llm_handler import stream_gemini # Removed
     from app.core.prompts import get_system_prompt
     from app.core.config import get_credential
     
@@ -145,17 +146,8 @@ async def connect(sid, environ):
     logger.info(f"Client connected: {sid}")
     await sio.emit("status", {"msg": "Mainframe Online"}, room=sid)
 
-@sio.event
-async def start_voice(sid, data):
-    from app.services.voice_service import voice_service
-    if voice_service:
-        await voice_service.start_session(sid)
+# Voice handlers removed
 
-@sio.event
-async def stop_voice(sid):
-    from app.services.voice_service import voice_service
-    if voice_service:
-        await voice_service.stop_session(sid)
 
 @sio.event
 async def disconnect(sid):
@@ -166,54 +158,9 @@ async def disconnect(sid):
         del chat_sessions[sid]
 
 # --- CHAT EVENTS ---
-chat_sessions = {}
+# --- CHAT EVENTS ---
+# socket.io chat events removed in cleanup (using REST API or live.py instead)
 
-@sio.event
-async def start_chat(sid, data):
-    logger.info(f"Starting chat session for {sid}")
-    from app.services.gemini_live_chat import LiveChatSession
-    from app.core.config import settings
-
-    async def on_text(text):
-        await sio.emit("chat_text", {"text": text}, room=sid)
-
-    async def on_audio(audio_b64):
-        await sio.emit("chat_audio", {"audio": audio_b64}, room=sid)
-
-    async def on_done():
-        await sio.emit("chat_done", {}, room=sid)
-
-    async def on_error(err):
-        await sio.emit("error", {"msg": str(err)}, room=sid)
-
-    msg = data.get("message")
-    
-    session = LiveChatSession(
-        api_key=get_credential("GOOGLE_API_KEY"),
-        on_text_chunk=on_text,
-        on_audio_chunk=on_audio,
-        on_done=on_done,
-        on_error=on_error
-    )
-    
-    chat_sessions[sid] = session
-    
-    # Start the session in a background task
-    import asyncio
-    asyncio.create_task(session.start(initial_message=msg))
-
-@sio.event
-async def chat_message(sid, data):
-    if sid in chat_sessions:
-        msg = data.get("message")
-        if msg:
-            await chat_sessions[sid].send_message(msg)
-
-@sio.event
-async def stop_chat(sid):
-    if sid in chat_sessions:
-        await chat_sessions[sid].stop()
-        del chat_sessions[sid]
 
 if __name__ == "__main__":
     import uvicorn
