@@ -43,7 +43,11 @@ class Settings(BaseSettings):
     GARMIN_PASSWORD: Optional[str] = None
     STRAVA_CLIENT_ID: Optional[str] = None
     STRAVA_CLIENT_SECRET: Optional[str] = None
+    STRAVA_REDIRECT_URI: Optional[str] = None
     STRAVA_REFRESH_TOKEN: Optional[str] = None
+    STRAVA_ACCESS_TOKEN: Optional[str] = None
+    STRAVA_MOCK: bool = False
+    STRAVA_MOCK_FIXTURE: str = "mixed_run_ride"
     
     # Home Assistant
     HA_URL: Optional[str] = None

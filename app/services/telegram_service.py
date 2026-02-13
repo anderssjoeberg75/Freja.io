@@ -17,6 +17,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 from app.core.database import get_db_settings
 from app.services.speech_to_text import build_speech_to_text_provider
 from app.services.telegram_voice_handler import TelegramVoiceError, TelegramVoiceHandler
+from skills.strava import get_strava_command_processor
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,8 @@ class TelegramService:
 
             # Add handlers.
             self.application.add_handler(CommandHandler("start", self._handle_start))
+            # Register dedicated Strava command route without affecting generic text handling.
+            self.application.add_handler(CommandHandler("strava", self._handle_strava_command))
             self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_text_message))
             self.application.add_handler(MessageHandler(filters.VOICE, self._handle_voice_message))
 
@@ -151,6 +154,22 @@ class TelegramService:
 
         await update.message.reply_text(welcome_msg, parse_mode="Markdown")
 
+    async def _handle_strava_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /strava command by routing to Strava skill parser with chat-scoped user ID."""
+        if not update.message or not update.effective_chat:
+            return
+
+        chat_id = str(update.effective_chat.id)
+        message_text = (update.message.text or "").strip()
+        processor = get_strava_command_processor()
+        result = await processor.process_message(chat_id, message_text)
+
+        if result.handled and result.response:
+            await update.message.reply_text(result.response)
+            return
+
+        await update.message.reply_text("Svar:\nOkänt Strava-kommando.")
+
     async def _handle_text_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle incoming Telegram text messages using the shared pipeline."""
         user_message = (update.message.text or "").strip()
@@ -221,6 +240,13 @@ class TelegramService:
         _last_message_time = current_time
 
         logger.info("Telegram message accepted for processing")
+
+        # Try Strava skill parser first for natural-language triggers in Telegram text.
+        strava_processor = get_strava_command_processor()
+        strava_result = await strava_processor.process_message(chat_id, user_message)
+        if strava_result.handled and strava_result.response:
+            await update.message.reply_text(strava_result.response)
+            return
 
         # Send typing indicator while the command/intent pipeline executes.
         await update.effective_chat.send_action("typing")
