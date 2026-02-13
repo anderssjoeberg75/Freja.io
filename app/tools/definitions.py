@@ -28,3 +28,11 @@ class GetStravaActivity(BaseModel):
     Use this when the user asks about their recent workouts, runs, or rides recorded on Strava.
     """
     limit: int = Field(5, description="The maximum number of activities to retrieve. Defaults to 5.")
+
+
+class GetWeather(BaseModel):
+    """
+    Retrieves weather data for the configured home coordinates.
+    Requires LATITUDE and LONGITUDE settings.
+    """
+    pass

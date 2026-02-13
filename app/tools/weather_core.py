@@ -1,34 +1,34 @@
 import httpx
 import asyncio
-from app.core.config import settings, get_credential
+from app.core.config import get_credential
 
 # SMHI Wsymb2 Mapping (1-27)
 SMHI_CODES = {
-    1: "Klart", 2: "Lätt molnighet", 3: "Halvklart", 4: "Molnigt", 5: "Mycket molnigt", 
-    6: "Mulet", 7: "Dimma", 8: "Lätt regnskur", 9: "Regnskur", 10: "Kraftig regnskur",
-    11: "Åskskur", 12: "Lätt by av snöblandat regn", 13: "By av snöblandat regn", 
-    14: "Kraftig by av snöblandat regn", 15: "Lätt snöby", 16: "Snöby", 17: "Kraftig snöby",
-    18: "Lätt regn", 19: "Regn", 20: "Kraftigt regn", 21: "Åska", 22: "Lätt snöblandat regn",
-    23: "Snöblandat regn", 24: "Kraftigt snöblandat regn", 25: "Lätt snöfall", 
-    26: "Snöfall", 27: "Kraftigt snöfall"
+    1: "Clear sky", 2: "Light clouds", 3: "Partly cloudy", 4: "Cloudy", 5: "Mostly cloudy", 
+    6: "Overcast", 7: "Fog", 8: "Light rain shower", 9: "Rain shower", 10: "Heavy rain shower",
+    11: "Thunder shower", 12: "Light sleet shower", 13: "Sleet shower", 
+    14: "Heavy sleet shower", 15: "Light snow shower", 16: "Snow shower", 17: "Heavy snow shower",
+    18: "Light rain", 19: "Rain", 20: "Heavy rain", 21: "Thunder", 22: "Light sleet",
+    23: "Sleet", 24: "Heavy sleet", 25: "Light snowfall", 
+    26: "Snowfall", 27: "Heavy snowfall"
 }
 
 async def get_weather():
     """
-    Hämtar väder från SMHI Open API (PMP3g).
+    Fetch weather from the SMHI Open API (PMP3g).
     """
     lat = get_credential("LATITUDE")
     lon = get_credential("LONGITUDE")
 
     if not lat or not lon:
-        return "⚠️ Saknar GPS-koordinater. Fyll i LATITUDE och LONGITUDE i inställningarna."
+        return "⚠️ Missing GPS coordinates. Set LATITUDE and LONGITUDE in settings."
 
     # SMHI requires 6 decimal precision
     try:
         lat_formatted = f"{float(lat):.6f}"
         lon_formatted = f"{float(lon):.6f}"
     except ValueError:
-        return "⚠️ Ogiltiga GPS-koordinater."
+        return "⚠️ Invalid GPS coordinates."
 
     url = f"https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/{lon_formatted}/lat/{lat_formatted}/data.json"
 
@@ -40,13 +40,13 @@ async def get_weather():
             
             if response.status_code != 200:
                 print(f"[SMHI] Error {response.status_code}: {response.text}")
-                return f"Kunde inte hämta väder från SMHI (Felkod: {response.status_code})"
+                return f"Could not fetch weather from SMHI (HTTP {response.status_code})."
 
             data = response.json()
             time_series = data.get("timeSeries", [])
             
             if not time_series:
-                return "Ingen väderdata tillgänglig från SMHI."
+                return "No weather data available from SMHI."
 
             # --- Current Weather (First data point) ---
             current = time_series[0]
@@ -54,7 +54,7 @@ async def get_weather():
             
             # Wsymb2 = Weather Symbol
             wsymb = int(params.get("Wsymb2", 0))
-            desc = SMHI_CODES.get(wsymb, f"Okänt väder ({wsymb})")
+            desc = SMHI_CODES.get(wsymb, f"Unknown weather ({wsymb})")
             
             # t = Temp C
             temp = params.get("t", "N/A")
@@ -64,7 +64,7 @@ async def get_weather():
 
             # --- Forecast (Next 3 Days) ---
             forecast_msg = ""
-            days = ["Idag", "Imorgon", "Iövermorgon"]
+            days = ["Today", "Tomorrow", "Day after tomorrow"]
             
             # Simple assumption: 24h per day blocks roughly (since data is hourly for first days)
             # Better: Group by date string (validTime)
@@ -89,15 +89,15 @@ async def get_weather():
                         forecast_msg += f"{days[i]}: Max {d_max}°C, Min {d_min}°C. "
 
             report = (
-                f"Just nu rapporterar SMHI {desc} och {temp}°C, vind {wind} m/s. "
-                f"Prognos: {forecast_msg}"
+                f"SMHI currently reports {desc} and {temp}°C, wind {wind} m/s. "
+                f"Forecast: {forecast_msg}"
             )
                 
             return report
 
     except Exception as e:
         print(f"[WEATHER] Error: {e}")
-        return "Systemfel vid hämtning av väderdata från SMHI."
+        return "System error while fetching weather data from SMHI."
 
 if __name__ == "__main__":
     import sys

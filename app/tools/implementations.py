@@ -2,9 +2,8 @@ import asyncio
 from typing import Any, Dict
 
 from app.services.tool_registry import registry
-from app.tools.definitions import RunPythonCode, WebSearch, GetGarminHealth
-from app.core.dependencies import get_code_executor, get_garmin
-from app.core.config import get_credential
+from app.tools.definitions import RunPythonCode, WebSearch, GetGarminHealth, GetStravaActivity, GetWeather
+from app.core.dependencies import get_code_executor, get_garmin, get_strava
 from app.services.web_fallback_service import WebFallbackService
 
 # Initialize helper services (lazy loaded where possible)
@@ -102,11 +101,18 @@ async def get_garmin_health_impl(date_str: str) -> str:
     except Exception as e:
         return f"Failed to fetch Garmin data: {e}"
 
-from app.tools.strava_core import StravaTool
-from app.tools.definitions import GetStravaActivity
 
-# Lazy global instance
-_strava_tool = StravaTool()
+@registry.register(
+    name="get_weather",
+    description="Fetches weather forecast for configured coordinates using SMHI.",
+    args_schema=GetWeather
+)
+async def get_weather_impl() -> str:
+    try:
+        from app.tools.weather_core import get_weather
+        return await get_weather()
+    except Exception as e:
+        return f"Failed to fetch weather data: {e}"
 
 @registry.register(
     name="get_strava_activities",
@@ -115,8 +121,12 @@ _strava_tool = StravaTool()
 )
 async def get_strava_activities_impl(limit: int = 5) -> str:
     try:
+        strava_tool = get_strava()
+        if not strava_tool:
+            return "Strava service is not configured. Add STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, and STRAVA_REFRESH_TOKEN."
+
         # Re-use existing core logic
-        activities = await _strava_tool.get_health_report(limit=limit)
+        activities = await strava_tool.get_health_report(limit=limit)
         
         # Check for error dict return from core tool
         if isinstance(activities, dict) and "error" in activities:
