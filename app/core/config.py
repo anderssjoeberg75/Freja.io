@@ -93,8 +93,18 @@ DB_PATH = os.path.join(BASE_DIR, "db", "mainframe.db")
 
 
 def get_allowed_origins() -> list[str]:
-    """Return normalized CORS origins from settings."""
+    """Return normalized and de-duplicated CORS origins from settings."""
     raw = (settings.ALLOWED_ORIGINS or "").strip()
     if not raw:
         return []
-    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+    origins: list[str] = []
+    seen: set[str] = set()
+    for origin in raw.split(","):
+        normalized = origin.strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        origins.append(normalized)
+
+    return origins

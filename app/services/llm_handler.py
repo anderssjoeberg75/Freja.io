@@ -2,7 +2,6 @@ from google import genai
 import httpx
 import json
 import asyncio
-import traceback
 from openai import AsyncOpenAI
 # from anthropic import AsyncAnthropic # Unused
 from app.core.config import settings
@@ -245,7 +244,8 @@ async def stream_gemini(model_id, history, new_message, image_data=None, system_
                             "data": img_data
                         }
                     })
-                except: pass
+                except Exception:
+                    logger.exception("[GEMINI] Failed to attach history image")
             
             contents.append({"role": role, "parts": parts})
         
@@ -355,8 +355,7 @@ async def stream_gemini(model_id, history, new_message, image_data=None, system_
                     yield chunk.text
 
     except Exception as e: 
-        logger.error(f"Generate Content Error: {e}")
-        traceback.print_exc() # Keep traceback for debugging deep issues
+        logger.exception(f"Generate Content Error: {e}")
         yield f"⚠️ Gemini Engine Error: {str(e)}"
 
 # Keep helper functions for OpenAI/Ollama here (they were correct in previous version)
@@ -378,4 +377,5 @@ async def stream_ollama(model_id, history, new_message, system_prompt=None):
                     try: 
                         data = json.loads(line)
                         if "message" in data: yield data["message"].get("content", "")
-                    except: pass
+                    except json.JSONDecodeError:
+                        logger.debug("[OLLAMA] Ignored non-JSON stream line")

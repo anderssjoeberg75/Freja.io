@@ -95,3 +95,10 @@ The codebase is promising and functional, but a few concentrated fixes deliver h
 
 4. **Add route-level latency instrumentation**
    - Introduce timing metrics for chat streaming, tool invocations, and outbound integrations to identify performance bottlenecks early.
+
+
+5. **De-duplicate configured CORS origins at parse time**
+   - Keep only unique origins while preserving order to avoid redundant policy checks and noisy config values.
+
+6. **Handle streamed JSON parsing failures explicitly**
+   - In streaming providers (e.g., Ollama), catch `json.JSONDecodeError` instead of broad `except` to keep logs clean and actionable.
