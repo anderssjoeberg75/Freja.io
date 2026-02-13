@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from app.core import config
 import logging
 from app.core.dependencies import get_garmin, get_strava, get_code_executor
+from app.services.tool_registry import registry
+from skills._core.skill_loader import discover_and_register_skills
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -11,21 +13,28 @@ async def get_status():
     """Returns system status including active agents"""
     
     agents = []
+    known_agent_names = set()
+
+    def add_agent(name: str, status: str, agent_type: str) -> None:
+        if name in known_agent_names:
+            return
+        agents.append({"name": name, "status": status, "type": agent_type})
+        known_agent_names.add(name)
     
     # Check Garmin (via Dependency)
     garmin_tool = get_garmin()
     if garmin_tool:
-        agents.append({"name": "Garmin Coach", "status": "Connected", "type": "health"})
+        add_agent("Garmin Coach", "Connected", "health")
     
     # Check Strava (via Dependency)
     strava_tool = get_strava()
     if strava_tool:
-        agents.append({"name": "Strava Tracker", "status": "Connected", "type": "health"})
+        add_agent("Strava Tracker", "Connected", "health")
     
     # Check Code Executor
     code_executor = get_code_executor()
     if code_executor:
-        agents.append({"name": "Code Executor", "status": "Active", "type": "system"})
+        add_agent("Code Executor", "Active", "system")
 
     # Add other known services (safely check if they exist)
     # These imports should ideally also be moved to dependencies or service registry
@@ -40,11 +49,15 @@ async def get_status():
     try:
         from app.services.proactive_service import proactive_service
         if proactive_service and hasattr(proactive_service, 'running') and proactive_service.running:
-            agents.append({"name": "Proactive Service", "status": "Active", "type": "automation"})
+            add_agent("Proactive Service", "Active", "automation")
         elif proactive_service:
-            agents.append({"name": "Proactive Service", "status": "Idle", "type": "automation"})
+            add_agent("Proactive Service", "Idle", "automation")
     except:
         pass
+
+    for manifest in discover_and_register_skills(registry):
+        skill_name = manifest.name.replace("_", " ").title()
+        add_agent(skill_name, "Loaded", "skill")
     
     return {
         "system": "operational",
