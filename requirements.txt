@@ -30,3 +30,5 @@ python-telegram-bot>=21.0
 # Utilities
 loguru>=0.7.2
 colorama>=0.4.6
+
+cryptography>=42.0.0
