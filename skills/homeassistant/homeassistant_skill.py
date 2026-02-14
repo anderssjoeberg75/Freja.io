@@ -35,7 +35,7 @@ class HomeAssistantCommandProcessor:
 
         if not ha_url or not ha_token:
             raise HomeAssistantClientError(
-                "Home Assistant is not configured. Set HA_URL and HA_TOKEN in Settings or environment variables."
+                "Home Assistant is not configured. Set HAURL and HATOKEN in environment variables."
             )
 
         return HomeAssistantClient(ha_url=ha_url, ha_token=ha_token)
