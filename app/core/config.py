@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
@@ -93,34 +94,37 @@ settings = Settings()
 
 # Helper function for DB-first credential loading
 def get_credential(key: str, fallback=None) -> str:
-    """
-    Get credential from database first, then environment variables, then fallback.
-    
-    Args:
-        key: Setting key to retrieve (e.g., "GARMIN_EMAIL")
-        fallback: Default value if not found anywhere
-    
-    Returns:
-        The credential value or fallback
-    """
+    """Get credential from DB/settings/env with legacy alias support."""
+
+    aliases = {
+        "HA_URL": ("HA_BASE_URL", "HAURL"),
+        "HA_BASE_URL": ("HA_URL", "HAURL"),
+        "HA_TOKEN": ("HATOKEN",),
+    }
+    candidate_keys = (key, *aliases.get(key, ()))
+
     try:
         from app.core.database import get_db_settings
         db_settings = get_db_settings()
-        db_value = db_settings.get(key)
-        if db_value:
-            return db_value
+        for candidate in candidate_keys:
+            db_value = db_settings.get(candidate)
+            if db_value:
+                return str(db_value).strip()
     except Exception:
-        pass  # DB not available or error, fall through to env
-    
-    # Try environment variable via settings object
-    env_value = getattr(settings, key, None)
-    if env_value:
-        return env_value
-    
-    return fallback or ""
+        pass  # DB not available or error, fall through to settings/env
+
+    for candidate in candidate_keys:
+        settings_value = getattr(settings, candidate, None)
+        if settings_value:
+            return str(settings_value).strip()
+
+        env_value = os.getenv(candidate)
+        if env_value:
+            return env_value.strip()
+
+    return str(fallback or "").strip()
 
 
-import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "db", "mainframe.db")
 

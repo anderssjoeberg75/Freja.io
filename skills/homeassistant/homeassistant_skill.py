@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import dataclass
 from typing import Optional
 
-from app.core.config import settings
+from app.core.config import get_credential
 from skills.homeassistant.homeassistant_client import HomeAssistantClient, HomeAssistantClientError
 
 
@@ -24,12 +23,12 @@ class HomeAssistantCommandProcessor:
 
     def _build_client(self) -> HomeAssistantClient:
         """Validate configuration and return a ready API client."""
-        ha_url = (settings.HA_URL or os.getenv("HAURL") or "").strip()
-        ha_token = (settings.HA_TOKEN or os.getenv("HATOKEN") or "").strip()
+        ha_url = get_credential("HA_URL")
+        ha_token = get_credential("HA_TOKEN")
 
         if not ha_url or not ha_token:
             raise HomeAssistantClientError(
-                "Home Assistant is not configured. Set HAURL and HATOKEN in environment variables."
+                "Home Assistant is not configured. Set HA_URL and HA_TOKEN in Settings or environment variables."
             )
 
         return HomeAssistantClient(ha_url=ha_url, ha_token=ha_token)

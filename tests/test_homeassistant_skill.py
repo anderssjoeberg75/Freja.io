@@ -161,8 +161,40 @@ def test_command_parser_missing_config_message(monkeypatch):
 
     assert result.handled is True
     assert result.response == (
-        "Svar:\nHome Assistant is not configured. Set HAURL and HATOKEN in environment variables."
+        "Svar:\nHome Assistant is not configured. Set HA_URL and HA_TOKEN in Settings or environment variables."
     )
+
+
+def test_command_parser_reads_db_backed_ha_base_url(monkeypatch):
+    """Command parser should read HA_BASE_URL/HA_TOKEN from DB-backed credentials."""
+
+    import app.core.database as database_module
+
+    monkeypatch.delenv("HA_URL", raising=False)
+    monkeypatch.delenv("HA_TOKEN", raising=False)
+    monkeypatch.delenv("HAURL", raising=False)
+    monkeypatch.delenv("HATOKEN", raising=False)
+
+    monkeypatch.setattr(
+        database_module,
+        "get_db_settings",
+        lambda: {"HA_BASE_URL": "http://ha.local:8123", "HA_TOKEN": "token"},
+    )
+
+    def handler(method, url, headers, body):
+        assert method == "GET"
+        assert url.endswith("/api/states")
+        return DummyResponse(200, [])
+
+    patch_httpx_client(monkeypatch, handler)
+
+    processor = HomeAssistantCommandProcessor()
+    import asyncio
+
+    result = asyncio.run(processor.process_message("user-1", "ha list"))
+
+    assert result.handled is True
+    assert result.response == "Svar:\nInga entiteter hittades."
 
 
 def test_command_parser_reads_legacy_haurl_hatoken_aliases(monkeypatch):
