@@ -161,7 +161,7 @@ def test_command_parser_missing_config_message(monkeypatch):
 
     assert result.handled is True
     assert result.response == (
-        "Svar:\nHome Assistant is not configured. Set HA_URL and HA_TOKEN in Settings or environment variables."
+        "Svar:\nHome Assistant är inte konfigurerat. Sätt HAURL och HATOKEN i miljövariabler."
     )
 
 
