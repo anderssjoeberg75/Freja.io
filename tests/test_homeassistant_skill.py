@@ -142,3 +142,88 @@ def test_command_parser_service_json_error(monkeypatch):
 
     assert result.handled is True
     assert "Ogiltig JSON payload" in (result.response or "")
+
+
+def test_command_parser_missing_config_message(monkeypatch):
+    """Missing HA config should use the documented variable names in response."""
+
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "HA_URL", None)
+    monkeypatch.setattr(settings, "HA_TOKEN", None)
+    monkeypatch.delenv("HAURL", raising=False)
+    monkeypatch.delenv("HATOKEN", raising=False)
+
+    processor = HomeAssistantCommandProcessor()
+    import asyncio
+
+    result = asyncio.run(processor.process_message("user-1", "ha list"))
+
+    assert result.handled is True
+    assert result.response == (
+        "Svar:\nHome Assistant is not configured. Set HAURL and HATOKEN in environment variables."
+    )
+
+
+def test_command_parser_reads_legacy_haurl_hatoken_aliases(monkeypatch):
+    """Command parser should accept HAURL/HATOKEN aliases when canonical keys are empty."""
+
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "HA_URL", None)
+    monkeypatch.setattr(settings, "HA_TOKEN", None)
+    monkeypatch.setenv("HAURL", "http://ha.local:8123")
+    monkeypatch.setenv("HATOKEN", "token")
+
+    def handler(method, url, headers, body):
+        assert method == "GET"
+        assert url.endswith("/api/states")
+        return DummyResponse(200, [])
+
+    patch_httpx_client(monkeypatch, handler)
+
+    processor = HomeAssistantCommandProcessor()
+    import asyncio
+
+    result = asyncio.run(processor.process_message("user-1", "ha list"))
+
+    assert result.handled is True
+    assert result.response == "Svar:\nInga entiteter hittades."
+
+
+def test_command_parser_reads_db_values_via_get_credential(monkeypatch):
+    """Command parser should read Home Assistant settings via DB-first credential loader."""
+
+    from app.core.config import settings
+    import skills.homeassistant.homeassistant_skill as ha_skill
+
+    monkeypatch.setattr(settings, "HA_URL", None)
+    monkeypatch.setattr(settings, "HA_TOKEN", None)
+    monkeypatch.delenv("HAURL", raising=False)
+    monkeypatch.delenv("HATOKEN", raising=False)
+
+    def fake_get_credential(key, fallback=None):
+        values = {
+            "HA_URL": "",
+            "HA_BASE_URL": "http://ha-db.local:8123",
+            "HA_TOKEN": "db-token",
+        }
+        return values.get(key, fallback)
+
+    monkeypatch.setattr(ha_skill, "get_credential", fake_get_credential)
+
+    def handler(method, url, headers, body):
+        assert method == "GET"
+        assert url.endswith("/api/states")
+        assert headers["Authorization"] == "Bearer db-token"
+        return DummyResponse(200, [])
+
+    patch_httpx_client(monkeypatch, handler)
+
+    processor = HomeAssistantCommandProcessor()
+    import asyncio
+
+    result = asyncio.run(processor.process_message("user-1", "ha list"))
+
+    assert result.handled is True
+    assert result.response == "Svar:\nInga entiteter hittades."
