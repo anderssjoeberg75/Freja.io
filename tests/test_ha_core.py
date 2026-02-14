@@ -54,3 +54,25 @@ def test_get_ha_state_returns_clear_message_when_not_configured(monkeypatch):
     result = asyncio.run(ha_core.get_ha_state("light.kitchen"))
 
     assert result == "Home Assistant is not configured. Set HAURL and HATOKEN in environment variables."
+
+
+def test_resolve_ha_config_supports_db_alias_keys(monkeypatch):
+    """Resolver should read HAURL/HATOKEN when DB stores alias keys."""
+
+    import app.tools.ha_core as ha_core
+
+    def fake_get_credential(key, fallback=None):
+        values = {
+            "HA_URL": "",
+            "HA_BASE_URL": "",
+            "HAURL": "http://ha-db-alias.local:8123",
+            "HA_TOKEN": "",
+            "HATOKEN": "db-alias-token",
+        }
+        return values.get(key, fallback)
+
+    monkeypatch.setattr(ha_core, "get_credential", fake_get_credential)
+    monkeypatch.delenv("HAURL", raising=False)
+    monkeypatch.delenv("HATOKEN", raising=False)
+
+    assert ha_core._resolve_ha_config() == ("http://ha-db-alias.local:8123", "db-alias-token")

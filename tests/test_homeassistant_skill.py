@@ -227,3 +227,39 @@ def test_command_parser_reads_db_values_via_get_credential(monkeypatch):
 
     assert result.handled is True
     assert result.response == "Svar:\nInga entiteter hittades."
+
+
+def test_command_parser_reads_db_alias_keys_haurl_hatoken(monkeypatch):
+    """Command parser should read HAURL/HATOKEN keys when those are stored in DB settings."""
+
+    import skills.homeassistant.homeassistant_skill as ha_skill
+
+    def fake_get_credential(key, fallback=None):
+        values = {
+            "HA_URL": "",
+            "HA_BASE_URL": "",
+            "HAURL": "http://ha-db-alias.local:8123",
+            "HA_TOKEN": "",
+            "HATOKEN": "db-alias-token",
+        }
+        return values.get(key, fallback)
+
+    monkeypatch.setattr(ha_skill, "get_credential", fake_get_credential)
+    monkeypatch.delenv("HAURL", raising=False)
+    monkeypatch.delenv("HATOKEN", raising=False)
+
+    def handler(method, url, headers, body):
+        assert method == "GET"
+        assert url.endswith("/api/states")
+        assert headers["Authorization"] == "Bearer db-alias-token"
+        return DummyResponse(200, [])
+
+    patch_httpx_client(monkeypatch, handler)
+
+    processor = HomeAssistantCommandProcessor()
+    import asyncio
+
+    result = asyncio.run(processor.process_message("user-1", "ha list"))
+
+    assert result.handled is True
+    assert result.response == "Svar:\nInga entiteter hittades."

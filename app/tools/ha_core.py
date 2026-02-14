@@ -16,9 +16,13 @@ def _resolve_ha_config() -> tuple[str, str]:
     if not ha_url:
         ha_url = str(get_credential("HA_BASE_URL", "") or "").strip()
     if not ha_url:
+        ha_url = str(get_credential("HAURL", "") or "").strip()
+    if not ha_url:
         ha_url = (os.getenv("HAURL") or "").strip()
 
     ha_token = str(get_credential("HA_TOKEN", "") or "").strip()
+    if not ha_token:
+        ha_token = str(get_credential("HATOKEN", "") or "").strip()
     if not ha_token:
         ha_token = (os.getenv("HATOKEN") or "").strip()
 
