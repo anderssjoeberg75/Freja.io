@@ -1,10 +1,19 @@
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
 import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3 } from 'lucide-react';
+=======
+import { useState } from 'react';
+import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3, Hash } from 'lucide-react';
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 import Dashboard from './components/Dashboard';
 import ChatInterface from './components/ChatInterface';
 import Settings from './components/Settings';
 import Prompts from './components/Prompts';
 import LiveSession from './components/LiveSession';
+<<<<<<< HEAD
+=======
+import AliasView from './components/AliasView';
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 import { useSocket } from './hooks/useSocket';
 
@@ -25,6 +34,10 @@ function App() {
                     <NavIcon icon={<MessageSquare />} active={activeView === 'chat'} onClick={() => setActiveView('chat')} />
                     <NavIcon icon={<Edit3 />} active={activeView === 'prompts'} onClick={() => setActiveView('prompts')} />
                     <NavIcon icon={<Mic />} active={activeView === 'voice'} onClick={() => setActiveView('voice')} />
+<<<<<<< HEAD
+=======
+                    <NavIcon icon={<Hash />} active={activeView === 'aliases'} onClick={() => setActiveView('aliases')} />
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                     <NavIcon icon={<SettingsIcon />} active={activeView === 'settings'} onClick={() => setActiveView('settings')} />
                 </nav>
 
@@ -37,6 +50,10 @@ function App() {
                 {activeView === 'chat' && <ChatInterface />}
                 {activeView === 'prompts' && <Prompts />}
                 {activeView === 'voice' && <LiveSession />}
+<<<<<<< HEAD
+=======
+                {activeView === 'aliases' && <AliasView />}
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 {activeView === 'settings' && <Settings />}
             </main>
         </div>

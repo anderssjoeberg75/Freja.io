@@ -106,7 +106,11 @@ def run_vision_loop():
                             # > 4 fingers = Open hand
                             if total_fingers >= 4:
                                 print(f"[OPENCV] 🖐️ Open hand ({total_fingers}) -> Home")
+<<<<<<< HEAD
                                 control_vacuum("vacuum.roborock_s5_f528_robot_cleaner", "dock")
+=======
+                                # control_vacuum("vacuum.roborock_s5_f528_robot_cleaner", "dock")
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                                 last_action_time = current_time
                                 
                             # 1-2 fingers = Point / V-sign

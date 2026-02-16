@@ -1,5 +1,11 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
+<<<<<<< HEAD
+=======
+from dotenv import load_dotenv
+
+load_dotenv()
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 class Settings(BaseSettings):
     # Application Config
@@ -57,6 +63,10 @@ class Settings(BaseSettings):
     USER_ID: str = "Anders"
     LATITUDE: Optional[str] = None
     LONGITUDE: Optional[str] = None
+<<<<<<< HEAD
+=======
+    TIMEZONE: str = "Europe/Stockholm"
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     
     # Web fallback
     WEB_FALLBACK_ENABLED: bool = True
@@ -81,13 +91,28 @@ class Settings(BaseSettings):
     WITHINGS_CLIENT_ID: Optional[str] = None
     WITHINGS_CLIENT_SECRET: Optional[str] = None
     WITHINGS_REFRESH_TOKEN: Optional[str] = None
+<<<<<<< HEAD
+=======
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     
     # MQTT
     MQTT_BROKER_IP: str = "127.0.0.1"
     MQTT_PORT: int = 1883
     MQTT_TOPIC_BASE: str = "zigbee2mqtt"
 
+<<<<<<< HEAD
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+=======
+    # Missing fields from DB
+    SELECTED_MODEL: Optional[str] = None
+    TELEGRAM_BOT_TOKEN: Optional[str] = None
+    TELEGRAM_CHAT_ID: Optional[str] = None
+    HA_ALIASES: str = "{}"
+    WITHINGS_REDIRECT_URI: Optional[str] = None
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 settings = Settings()
 

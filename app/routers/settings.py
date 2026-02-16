@@ -5,6 +5,10 @@ import logging
 import google.generativeai as genai
 import time
 from app.core.config import get_credential
+<<<<<<< HEAD
+=======
+from app.core.settings_schema import SETTINGS_SCHEMA
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -23,6 +27,14 @@ async def get_settings():
         logger.error(f"Error fetching settings: {e}")
         return {"error": str(e)}
 
+<<<<<<< HEAD
+=======
+@router.get("/api/settings/schema")
+async def get_settings_schema():
+    """Returns the metadata schema for all available settings."""
+    return [item.model_dump() for item in SETTINGS_SCHEMA]
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 @router.post("/api/settings")
 async def update_setting(payload: dict):
     """Updates a single setting in the database."""

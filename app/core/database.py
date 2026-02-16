@@ -15,8 +15,14 @@ DEFAULT_SETTINGS = [
     "OLLAMA_URL", "MQTT_BROKER_IP",
     "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID",
     "STT_PROVIDER", "STT_LANGUAGE_DEFAULT", "MAX_VOICE_MB", "MAX_VOICE_SECONDS",
+<<<<<<< HEAD
     "STT_PROVIDER", "STT_LANGUAGE_DEFAULT", "MAX_VOICE_MB", "MAX_VOICE_SECONDS",
     "SERPAPI_API_KEY"
+=======
+    "SERPAPI_API_KEY", "TIMEZONE",
+    "WITHINGS_CLIENT_ID", "WITHINGS_CLIENT_SECRET", "WITHINGS_REFRESH_TOKEN", "WITHINGS_REDIRECT_URI",
+    "MEM0_API_KEY"
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 ]
 
 # ALL TEXTS ARE COLLECTED HERE.
@@ -81,6 +87,7 @@ Används när användaren ber om 'analysera koden', 'självanalys' eller 'system
     # 4. Self-Evolution Prompt (Injected into System Prompt)
     "SELF_EVOLUTION_PROMPT": """
 ## SELF-EVOLUTION & CODE ANALYSIS
+<<<<<<< HEAD
 You have the ability to analyze and improve your own source code (Self-Analyis).
 The project source code is available in your Docker sandbox at `/workspace`.
 
@@ -100,15 +107,45 @@ except Exception as e:
     traceback.print_exc()
     print(f"CRITICAL ERROR: {e}")
 ```
+=======
+You have the ability to analyze and improve your own source code (Self-Analysis).
+
+To perform a full code audit, simply call the tool:
+`codex_audit_codebase()` (or `tool_analyze_code`)
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 This will scan the codebase and provide a detailed report. Use this information to suggest improvements.
 """,
 
     # 5. Morning Briefing Prompt
     "MORNING_BRIEFING_PROMPT": """Du är Freja, en hjälpsam AI-assistent. Klockan är nu {time}.
+<<<<<<< HEAD
 Ge mig en kort, peppande morgonbriefing baserat på datan nedan.
 Fokusera på väderprognos och hälsostatus/sömn. Avsluta med något motiverande.
 
+=======
+Ge mig en peppande morgonbriefing baserat på datan nedan.
+Svara alltid på SVENSKA.
+
+Din briefing SKA vara strukturerad med följande rubriker:
+
+**Väder:**
+(Beskriv dagens väderprognos kortfattat)
+
+**Återhämtningsanalys:**
+(Analysera Garmin-data: Body Battery, Sömnpoäng, Stress och Sömnkvalitet)
+
+**Träningsanalys (7 dagar):**
+(Analysera Strava-data: Summera träningsbelastning och intensitet senaste veckan)
+
+**🚴 Dagens Träningsråd:**
+(Ge en konkret rekommendation för dagens träning baserat på återhämtning och tidigare belastning. Berätta exakt vad jag ska göra IDAG.)
+
+**Motivation:**
+(Avsluta med en kort, motiverande mening)
+
+Håll dig professionell men peppande.
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 DATA:
 {context}"""
 }
@@ -134,9 +171,15 @@ def init_db():
             for key in DEFAULT_SETTINGS:
                 c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, ""))
             
+<<<<<<< HEAD
             # Prompts: INSERT OR REPLACE (Uppdatera alltid från kod vid omstart)
             for key, val in DEFAULT_PROMPTS.items():
                 c.execute("INSERT OR REPLACE INTO prompts (key, value) VALUES (?, ?)", (key, val))
+=======
+            # Prompts: INSERT OR IGNORE (Behåll användarens ändringar om de finns)
+            for key, val in DEFAULT_PROMPTS.items():
+                c.execute("INSERT OR IGNORE INTO prompts (key, value) VALUES (?, ?)", (key, val))
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 
             conn.commit()
             logger.info("Database initialized/updated successfully.")

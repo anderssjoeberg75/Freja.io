@@ -10,7 +10,11 @@ from google.generativeai.types import HarmBlockThreshold, HarmCategory
 
 from app.core.config import get_credential, settings
 from app.core.database import get_history, get_user_state, save_message, save_user_state
+<<<<<<< HEAD
 from app.core.dependencies import get_code_executor, get_garmin, get_strava
+=======
+from app.core.dependencies import get_code_executor, get_garmin, get_strava, get_withings
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 from app.core.prompts import get_system_prompt
 from app.self_improving.hooks import handle_user_prompt_submit
 from app.services.web_fallback_service import WebFallbackService, needs_web_fallback
@@ -201,6 +205,22 @@ class UnifiedChatService:
                         # Execute Tool
                         result_text = await registry.execute(fname, fargs)
                         
+<<<<<<< HEAD
+=======
+                        # --- POINT 3: ENHANCED TOOL REFLECTION ---
+                        # If the result looks like an error, give the AI a hint to reflect/retry
+                        if isinstance(result_text, str) and ("Error" in result_text or "Fel" in result_text or "not found" in result_text.lower()):
+                            result_text = (
+                                f"{result_text}\n\n"
+                                "[SYSTEM HINT]: The tool returned an error. Please analyze if you used the correct "
+                                "arguments or if an alternative tool should be used. You can try a different approach "
+                                "or explain the specific obstacle to the user."
+                            )
+                            # Ensure we don't count an error turn as a final turn if we want it to reflect
+                            if _ == max_turns - 1:
+                                max_turns += 1
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                         # Append Result to history
                         gemini_history.append({
                             "role": "function",

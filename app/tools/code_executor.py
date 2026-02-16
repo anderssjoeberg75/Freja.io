@@ -12,13 +12,21 @@ class CodeExecutor:
     Allows running Python code and shell commands in an isolated container.
     """
     
+<<<<<<< HEAD
     def __init__(self, image_tag: str = "python:3.10-slim", container_name: str = "mainframe_sandbox"):
+=======
+    def __init__(self, image_tag: str = "freja-codex-sandbox", container_name: str = "mainframe_sandbox"):
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
         self.image_tag = image_tag
         self.container_name = container_name
         self.client = None
         self.container = None
         # attempt connection immediately
         self._connect()
+<<<<<<< HEAD
+=======
+        self._ensure_image()
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
     def _connect(self):
         """Connect to Docker daemon."""
@@ -29,17 +37,74 @@ class CodeExecutor:
             logger.error(f"Failed to connect to Docker: {e}")
             self.client = None
 
+<<<<<<< HEAD
     def ensure_container_running(self):
         """Ensures the sandbox container is running."""
+=======
+    def _ensure_image(self):
+        """Builds the sandbox image if it doesn't exist."""
+        if not self.client: return
+        
+        try:
+            self.client.images.get(self.image_tag)
+        except docker.errors.ImageNotFound:
+            logger.info(f"Image {self.image_tag} not found. Building from Dockerfile.sandbox...")
+            try:
+                # Build from Dockerfile.sandbox in skills/codex/
+                self.client.images.build(
+                    path=".",
+                    dockerfile="skills/codex/Dockerfile.sandbox",
+                    tag=self.image_tag,
+                    rm=True
+                )
+                logger.info(f"Successfully built {self.image_tag}")
+            except Exception as e:
+                logger.error(f"Failed to build sandbox image: {e}")
+
+    def ensure_container_running(self):
+        """Ensures the sandbox container is running and synced."""
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
         if not self.client:
             self._connect()
             if not self.client:
                 return False
 
+<<<<<<< HEAD
+=======
+        # Force reload of keys from .env directly to handle hot-updates
+        try:
+            from dotenv import dotenv_values
+            config = dotenv_values(".env")
+            google_key = config.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
+            openai_key = config.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
+        except ImportError:
+            google_key = os.environ.get("GOOGLE_API_KEY") or ""
+            openai_key = os.environ.get("OPENAI_API_KEY") or ""
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
         try:
             # Check if container exists
             try:
                 self.container = self.client.containers.get(self.container_name)
+<<<<<<< HEAD
+=======
+                
+                # Check if container has the keys (recreation needed if missing)
+                self.container.reload()
+                env_list = self.container.attrs['Config']['Env']
+                image_name = self.container.attrs['Config']['Image']
+                
+                has_google = any(e.startswith("GOOGLE_API_KEY=") and len(e) > 16 for e in env_list)
+                has_openai = any(e.startswith("OPENAI_API_KEY=") and len(e) > 16 for e in env_list)
+                
+                # If we have keys but container doesn't, OR image mismatch, recreate
+                if (google_key and not has_google) or (openai_key and not has_openai) or (image_name != self.image_tag):
+                    logger.info(f"Container configuration mismatch (Image: {image_name} vs {self.image_tag}). Recreating...")
+                    self.container.stop()
+                    self.container.remove()
+                    raise docker.errors.NotFound("Forced recreation")
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 if self.container.status != "running":
                     logger.info(f"Starting existing container {self.container_name}...")
                     self.container.start()
@@ -47,6 +112,7 @@ class CodeExecutor:
                 # Create and start new container
                 logger.info(f"Creating new container {self.container_name}...")
                 
+<<<<<<< HEAD
                 # Load environment variables to pass to container
                 from app.core.config import settings
                 env_vars = {
@@ -55,11 +121,26 @@ class CodeExecutor:
                     "PYTHONUNBUFFERED": "1"
                 }
                 
+=======
+                env_vars = {
+                    "GOOGLE_API_KEY": google_key,
+                    "OPENAI_API_KEY": openai_key,
+                    "PYTHONUNBUFFERED": "1"
+                }
+                
+                # Mount current working directory to /workspace
+                cwd = os.getcwd()
+                volumes = {
+                    cwd: {'bind': '/workspace', 'mode': 'rw'}
+                }
+                
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 self.container = self.client.containers.run(
                     self.image_tag,
                     detach=True,
                     name=self.container_name,
                     command="tail -f /dev/null",
+<<<<<<< HEAD
                     # volumes={'/opt/mainframe': {'bind': '/workspace', 'mode': 'rw'}}, # Removed due to SMB issues
                     working_dir="/workspace",
                     network_mode="bridge",
@@ -100,11 +181,24 @@ class CodeExecutor:
                 except Exception as e:
                     logger.error(f"Failed to sync project files: {e}")
 
+=======
+                    volumes=volumes, # Bind mount!
+                    network_mode="bridge",
+                    environment=env_vars,
+                    restart_policy={"Name": "on-failure"},
+                    # mem_limit="1g", # Increased for analysis
+                )
+                logger.info(f"Started new container: {self.container.id}")
+            
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
             return True
         except Exception as e:
             logger.error(f"Error managing container: {e}")
             return False
+<<<<<<< HEAD
 
+=======
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     def run_code(self, code: str, language: str = "python") -> Dict[str, Any]:
         """
         Executes code in the container.
@@ -113,6 +207,7 @@ class CodeExecutor:
             return {"error": "Docker container not available. Is Docker installed and running?"}
 
         try:
+<<<<<<< HEAD
             # Write code to file
             filename = f"script_{int(time.time())}.py"
             with open(filename, "w") as f:
@@ -131,6 +226,42 @@ class CodeExecutor:
             return {
                 "exit_code": exec_result.exit_code,
                 "output": exec_result.output.decode("utf-8"),
+=======
+            import tarfile
+            import io
+            
+            # Create script filename
+            script_name = f"script_{int(time.time())}.py"
+            
+            # Create tar stream in memory
+            stream = io.BytesIO()
+            with tarfile.open(fileobj=stream, mode='w') as tar:
+                encoded_code = code.encode('utf-8')
+                tarinfo = tarfile.TarInfo(name=script_name)
+                tarinfo.size = len(encoded_code)
+                tarinfo.mtime = time.time()
+                tar.addfile(tarinfo, io.BytesIO(encoded_code))
+                
+            stream.seek(0)
+            
+            # Upload to container
+            self.container.put_archive('/workspace', stream)
+            
+            # Execute in container
+            # Using python directly on the file inside the container (mounted volume)
+            cmd = f"python {script_name}"
+            exec_result = self.container.exec_run(cmd)
+            
+            output_text = exec_result.output.decode("utf-8")
+            
+            if exec_result.exit_code != 0:
+                # With bind mount, file sync issues are unlikely unless permissions are wrong.
+                pass
+            
+            return {
+                "exit_code": exec_result.exit_code,
+                "output": output_text,
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 "command": cmd
             }
         except Exception as e:

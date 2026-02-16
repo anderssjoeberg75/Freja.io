@@ -1,17 +1,58 @@
 import requests
 import time
 import datetime
+<<<<<<< HEAD
 from app.core.config import settings
+=======
+from app.core.config import settings, get_credential
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 from app.core.database import save_db_setting
 
 class WithingsTool:
     def __init__(self):
+<<<<<<< HEAD
         self.client_id = settings.WITHINGS_CLIENT_ID
         self.client_secret = settings.WITHINGS_CLIENT_SECRET
         self.refresh_token = settings.WITHINGS_REFRESH_TOKEN
         self.access_token = None
         self.expires_at = 0
 
+=======
+        self.client_id = get_credential("WITHINGS_CLIENT_ID")
+        self.client_secret = get_credential("WITHINGS_CLIENT_SECRET")
+        self.refresh_token = get_credential("WITHINGS_REFRESH_TOKEN")
+        self.access_token = None
+        self.expires_at = 0
+
+    def exchange_code(self, code, redirect_uri):
+        url = "https://wbsapi.withings.net/v2/oauth2"
+        payload = {
+            'action': 'requesttoken',
+            'grant_type': 'authorization_code',
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'code': code,
+            'redirect_uri': redirect_uri
+        }
+        
+        try:
+            response = requests.post(url, data=payload)
+            data = response.json()
+            
+            if data.get('status') == 0:
+                body = data['body']
+                self.access_token = body['access_token']
+                # Withings uses seconds for expires_in
+                self.expires_at = time.time() + body['expires_in'] - 60 
+                self.refresh_token = body['refresh_token']
+                save_db_setting("WITHINGS_REFRESH_TOKEN", self.refresh_token)
+                return True, "Withings ansluten!"
+            else:
+                return False, f"Token Exchange Error: {data}"
+        except Exception as e:
+            return False, f"Connection Error: {e}"
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     def _refresh_access_token(self):
         if time.time() < self.expires_at and self.access_token:
             return
@@ -64,7 +105,11 @@ class WithingsTool:
             r_act = requests.post(act_url, headers=headers, data=act_params)
             act_data = r_act.json()
             
+<<<<<<< HEAD
             if act_data.get('status') == 0 and 'activities' in act_data['body']:
+=======
+            if act_data.get('status') == 0 and 'activities' in act_data['body'] and act_data['body']['activities']:
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 latest = act_data['body']['activities'][-1]
                 report['steg_withings'] = latest.get('steps', 0)
                 report['kalorier_total'] = latest.get('totalcalories', 0)
@@ -83,7 +128,11 @@ class WithingsTool:
             r_meas = requests.post(meas_url, headers=headers, data=meas_params)
             meas_data = r_meas.json()
             
+<<<<<<< HEAD
             if meas_data.get('status') == 0 and 'measuregrps' in meas_data['body']:
+=======
+            if meas_data.get('status') == 0 and 'measuregrps' in meas_data['body'] and meas_data['body']['measuregrps']:
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 grp = meas_data['body']['measuregrps'][0]
                 report['mätning_datum'] = datetime.datetime.fromtimestamp(grp['date']).strftime("%Y-%m-%d %H:%M")
                 

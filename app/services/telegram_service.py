@@ -158,6 +158,45 @@ class TelegramService:
 
         return success
 
+<<<<<<< HEAD
+=======
+    async def send_document(self, document_path: str, caption: str = None, chat_id: Optional[str] = None) -> bool:
+        """
+        Send a document/file to the chat.
+
+        Args:
+            document_path: Absolute path to the file.
+            caption: Optional caption for the file.
+            chat_id: Specific chat ID. Defaults to all configured IDs.
+        """
+        if not self.application or not self.chat_ids:
+            logger.warning("Telegram: Cannot send document, not configured")
+            return False
+
+        target_ids = [chat_id] if chat_id else self.chat_ids
+        success = False
+        
+        path = Path(document_path)
+        if not path.exists():
+            logger.error(f"Telegram: Document not found at {document_path}")
+            return False
+
+        for cid in target_ids:
+            try:
+                with open(path, 'rb') as f:
+                    await self.application.bot.send_document(
+                        chat_id=int(cid), 
+                        document=f, 
+                        caption=caption,
+                        parse_mode="Markdown"
+                    )
+                success = True
+            except Exception as e:
+                logger.error(f"Telegram document send failed for {cid}: {e}")
+
+        return success
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     async def _handle_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /start command."""
         chat_id = str(update.effective_chat.id)

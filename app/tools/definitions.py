@@ -37,6 +37,7 @@ class GetWeather(BaseModel):
     """
     pass
 
+<<<<<<< HEAD
 
 class RoborockConfigure(BaseModel):
     """Configure Roborock credentials and optional default device."""
@@ -82,3 +83,14 @@ class RoborockMapImageInput(BaseModel):
         "png",
         description="Requested map image format. Currently only 'png' is supported.",
     )
+=======
+class GetWithingsHealth(BaseModel):
+    """
+    Retrieves Withings health data (weight, fat percentage, muscle mass, heart rate) for the user.
+    EXTREMELY IMPORTANT: Use this tool whenever the user asks "vad väger jag?", "vad är min vikt?", 
+    "hur mycket väger jag?" or questions about their current weight, body composition, or vitals.
+    """
+    pass
+
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)

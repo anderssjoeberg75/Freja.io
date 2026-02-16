@@ -14,6 +14,10 @@ class DependencyManager:
     def __init__(self):
         self._garmin_tool = None
         self._strava_tool = None
+<<<<<<< HEAD
+=======
+        self._withings_tool = None
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
         self._code_executor = None
         self._has_docker = False
         
@@ -62,6 +66,25 @@ class DependencyManager:
         
         return self._strava_tool
 
+<<<<<<< HEAD
+=======
+    def get_withings_tool(self):
+        if self._withings_tool:
+            return self._withings_tool
+
+        WITHINGS_CLIENT_ID = get_credential("WITHINGS_CLIENT_ID")
+        
+        if WITHINGS_CLIENT_ID:
+            try:
+                from app.tools.withings_core import WithingsTool
+                self._withings_tool = WithingsTool()
+                logger.info("Withings tool initialized (Dependency)")
+            except Exception as e:
+                logger.error(f"Withings init failed: {e}")
+        
+        return self._withings_tool
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     def get_code_executor(self):
         if self._code_executor:
             return self._code_executor
@@ -86,5 +109,11 @@ def get_garmin():
 def get_strava():
     return _manager.get_strava_tool()
 
+<<<<<<< HEAD
+=======
+def get_withings():
+    return _manager.get_withings_tool()
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 def get_code_executor():
     return _manager.get_code_executor()

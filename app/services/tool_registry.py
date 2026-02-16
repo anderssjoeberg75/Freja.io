@@ -57,6 +57,7 @@ class ToolRegistry:
         for name, tool in self._tools.items():
             schema = tool.args_schema.model_json_schema()
             
+<<<<<<< HEAD
             # Clean schema (remove 'title' and uppercase 'type')
             def clean_schema(s):
                 if isinstance(s, dict):
@@ -74,6 +75,41 @@ class ToolRegistry:
                     return [clean_schema(v) for v in s]
                 return s
             
+=======
+            # Clean schema (remove 'title', 'default', and handle 'anyOf' / uppercase 'type')
+            def clean_schema(s):
+                if not isinstance(s, dict):
+                    if isinstance(s, list):
+                        return [clean_schema(v) for v in s]
+                    return s
+
+                # 1. Resolve anyOf (Gemini doesn't support it)
+                if "anyOf" in s:
+                    options = s["anyOf"]
+                    # Priority: Non-null type
+                    non_null_options = [o for o in options if o.get("type") != "null"]
+                    if non_null_options:
+                        # Use the first non-null option and merge with current dict (for description, etc.)
+                        target = {k: v for k, v in s.items() if k != "anyOf"}
+                        target.update(non_null_options[0])
+                        return clean_schema(target)
+                    elif options:
+                        return clean_schema(options[0])
+
+                # 2. Filter and Map
+                cleaned = {}
+                for k, v in s.items():
+                    # Forbidden fields in Gemini Schema
+                    if k in ("title", "default", "$defs", "additionalProperties", "anyOf"):
+                        continue
+                    
+                    if k == "type" and isinstance(v, str):
+                        cleaned[k] = v.upper()
+                    else:
+                        cleaned[k] = clean_schema(v)
+                return cleaned
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
             cleaned_schema = clean_schema(schema)
             
             # Extract properties and cleanup for Gemini

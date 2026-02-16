@@ -13,6 +13,17 @@ class StravaTool:
 
     async def _refresh_access_token(self):
         """Fetches new access token and saves the new refresh token."""
+<<<<<<< HEAD
+=======
+        # Always read latest refresh token from DB to stay in sync with OAuth flows
+        new_refresh = get_credential("STRAVA_REFRESH_TOKEN")
+        if new_refresh != self.refresh_token:
+            print(f">> [STRAVA] Refresh token changed in DB. Invalidating cached access token.")
+            self.refresh_token = new_refresh
+            self.access_token = None
+            self.expires_at = 0
+            
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
         if time.time() < self.expires_at and self.access_token:
             return True
 

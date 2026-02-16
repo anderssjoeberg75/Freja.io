@@ -2,10 +2,19 @@
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+=======
+import json
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 from typing import Any, Optional
 
 import httpx
 
+<<<<<<< HEAD
+=======
+from app.core.config import get_credential
+
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 class HomeAssistantClientError(Exception):
     """Raised when a Home Assistant request fails with a user-facing message."""
@@ -88,6 +97,7 @@ class HomeAssistantClient:
             return None
         return {"result": result}
 
+<<<<<<< HEAD
     def turn_on(self, entity_id: str, **kwargs: Any) -> dict[str, Any] | None:
         """Convenience wrapper for switch/light turn_on."""
         domain = entity_id.split(".", 1)[0]
@@ -98,6 +108,81 @@ class HomeAssistantClient:
         """Convenience wrapper for switch/light turn_off."""
         domain = entity_id.split(".", 1)[0]
         return self.call_service(domain, "turn_off", {"entity_id": entity_id})
+=======
+    @property
+    def _custom_aliases(self) -> dict[str, str]:
+        """Load aliases dynamically from database/environment."""
+        raw_aliases = get_credential("HA_ALIASES", "{}")
+        try:
+            return json.loads(raw_aliases)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+
+    def _resolve_entity_id(self, identifier: str) -> str:
+        """
+        Attempt to map a user-provided identifier (e.g. 'kontor') to a full HA entity ID.
+        If identifier already contains a dot, it is returned as-is.
+        Otherwise, we search all entities for a match in ID or friendly name.
+        """
+        if "." in identifier:
+            return identifier
+
+        lowered = identifier.lower().strip()
+        
+        # Phase 0: Check custom aliases
+        aliases = self._custom_aliases
+        if lowered in aliases:
+            return aliases[lowered]
+
+        states = self.list_states()
+
+        # Phase 1: Try exact match on Friendly Name or partial ID in likely domains
+        likely_domains = ["light", "switch", "automation", "scene", "media_player"]
+        
+        candidates = []
+        for state in states:
+            eid = state.get("entity_id", "")
+            friendly = state.get("attributes", {}).get("friendly_name", "").lower()
+            
+            # Check if identifier matches end of entity_id (e.g. 'kontor' match 'light.kontor')
+            # or if it exactly matches the friendly name
+            if eid.endswith(f".{lowered}") or friendly == lowered:
+                domain = eid.split(".", 1)[0]
+                priority = likely_domains.index(domain) if domain in likely_domains else 99
+                candidates.append((priority, eid))
+
+        if candidates:
+            # Pick the one from the most likely domain (lowest priority number)
+            candidates.sort()
+            return candidates[0][1]
+
+        # Phase 2: Fallback to simple light prefixing or returning as-is
+        return f"light.{lowered}"
+
+    def turn_on(self, entity_id: str, **kwargs: Any) -> dict[str, Any] | None:
+        """Convenience wrapper for turn_on. Supports single or multiple (comma-separated) IDs."""
+        full_id = self._resolve_entity_id(entity_id)
+        
+        # If multiple entities are targeted (comma-separated), use the generic 'homeassistant' domain.
+        if "," in full_id:
+            domain = "homeassistant"
+        else:
+            domain = full_id.split(".", 1)[0]
+            
+        payload: dict[str, Any] = {"entity_id": full_id, **kwargs}
+        return self.call_service(domain, "turn_on", payload)
+
+    def turn_off(self, entity_id: str) -> dict[str, Any] | None:
+        """Convenience wrapper for turn_off. Supports single or multiple (comma-separated) IDs."""
+        full_id = self._resolve_entity_id(entity_id)
+        
+        if "," in full_id:
+            domain = "homeassistant"
+        else:
+            domain = full_id.split(".", 1)[0]
+            
+        return self.call_service(domain, "turn_off", {"entity_id": full_id})
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
     def set_light(
         self,

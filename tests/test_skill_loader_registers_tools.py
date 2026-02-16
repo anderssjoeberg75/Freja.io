@@ -14,4 +14,7 @@ def test_skill_loader_registers_expected_tools() -> None:
     assert "get_weather" in registry._tools
     assert "get_garmin_health" in registry._tools
     assert "get_strava_activities" in registry._tools
+<<<<<<< HEAD
     assert "roborock_start" in registry._tools
+=======
+>>>>>>> 331190c (Update: 2026-02-16 17:26:31)
