@@ -9,8 +9,6 @@ logger = logging.getLogger(__name__)
 class GarminCoach:
     def __init__(self):
         self.client = None
-    def __init__(self):
-        self.client = None
         try:
             # Initialize client and try to load tokens
             self.client = GarminClient()
@@ -63,7 +61,11 @@ class GarminCoach:
             sleep_str = "0h"
             rem_str = "0h"
             deep_str = "0h"
+            light_str = "0h"
+            awake_str = "0h"
             sleep_score = "N/A"
+            start_time = "N/A"
+            end_time = "N/A"
             
             if sleep:
                 sleep_str = f"{int(sleep.total_sleep_hours)}h {int((sleep.total_sleep_hours % 1) * 60)}m"
@@ -112,7 +114,7 @@ class GarminCoach:
                 "date": str(today),
                 "steps": daily.total_steps,
                 "step_goal": daily.daily_step_goal,
-                "distance_km": round(daily.total_distance_meters / 1000, 2),
+                "distance_km": round((daily.total_distance_meters or 0) / 1000, 2),
                 
                 # Heart & Stress
                 "resting_heart_rate": daily.resting_heart_rate if daily.resting_heart_rate else "N/A",
@@ -137,7 +139,7 @@ class GarminCoach:
                 
                 # Calories & Activity
                 "total_calories": daily.total_kilocalories,
-                "intensive_minutes": daily.moderate_intensity_minutes + (daily.vigorous_intensity_minutes * 2),
+                "intensive_minutes": (daily.moderate_intensity_minutes or 0) + ((daily.vigorous_intensity_minutes or 0) * 2),
                 "spo2_avg": daily.avg_spo2_value if daily.avg_spo2_value else "N/A",
             }
             
@@ -145,4 +147,4 @@ class GarminCoach:
 
         except Exception as e:
             logger.error(f"[GARMIN] Fetch Error: {e}")
-            return {"error": f" System error: {e}"}
+            return {"error": f"System error: {e}"}
