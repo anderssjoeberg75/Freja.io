@@ -9,11 +9,7 @@ from contextlib import asynccontextmanager
 
 # Section: Tool bootstrap imports
 # Importing this module at app startup ensures all auto-discovered skill tools,
-<<<<<<< HEAD
-# including Roborock, are registered in the shared ToolRegistry before first chat.
-=======
 # including integrations, are registered in the shared ToolRegistry before first chat.
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 import app.tools.implementations  # noqa: F401
 
 @asynccontextmanager
@@ -23,7 +19,6 @@ async def lifespan(app: FastAPI):
     from app.core.database import init_db
     init_db()
     
-    proactive = init_proactive_service(sio)
     proactive = init_proactive_service(sio)
     # voice = init_voice_service(sio) # Removed
     
@@ -93,27 +88,23 @@ app.add_middleware(
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=get_allowed_origins())
 app_socketio = socketio.ASGIApp(sio, app)
 
+# Legacy socket session store (kept for safe disconnect cleanup).
+chat_sessions = {}
+
 # Routes
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "app": settings.APP_NAME}
 
 # Include API Routers
-<<<<<<< HEAD
-from app.routers import chat, settings as settings_router, system, live, strava
-=======
 from app.routers import chat, settings as settings_router, system, live, strava, withings
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 app.include_router(chat.router)
 app.include_router(settings_router.router)
 app.include_router(system.router)
 app.include_router(live.router)
 app.include_router(strava.router)
-<<<<<<< HEAD
-=======
 app.include_router(withings.router)
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 # --- SERVE REACT FRONTEND (Production) ---
 from fastapi.staticfiles import StaticFiles

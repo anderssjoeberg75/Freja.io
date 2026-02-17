@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-from app.services.tool_registry import registry
-from app.core.logging import logger
-
-@registry.register
-=======
 from pydantic import BaseModel, Field
 from app.services.tool_registry import registry
 from app.core.logging import logger
@@ -22,7 +16,6 @@ class SystemStatusSchema(BaseModel):
     description="Get current weather for a specific location.",
     args_schema=WeatherSchema
 )
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 async def get_weather(location: str):
     """
     Get current weather for a specific location.
@@ -34,40 +27,29 @@ async def get_weather(location: str):
     logger.info(f"Getting weather for {location}")
     return f"Weather in {location} is currently Sunny, 22°C. Wind: 12km/h SE."
 
-<<<<<<< HEAD
-@registry.register
-=======
 @registry.register(
     name="web_search",
     description='Perform a web search. NOTE: Do NOT use this for "self-analysis", "självanalys", or "code analysis". Use the dedicated analysis tool instead.',
     args_schema=WebSearchSchema
 )
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 async def web_search(query: str):
     """
     Perform a web search using the Web Agent.
     
     Args:
         query: The search query.
-<<<<<<< HEAD
-=======
 
     NOTE: Do NOT use this for "self-analysis", "självanalys", or "code analysis". Use the dedicated analysis tool instead.
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     """
     # Placeholder for Playwright agent
     logger.info(f"Searching web for: {query}")
     return f"Search Results for '{query}': [Mock Result 1] [Mock Result 2]"
 
-<<<<<<< HEAD
-@registry.register
-=======
 @registry.register(
     name="get_system_status",
     description="Returns the current health and status of the Mainframe.",
     args_schema=SystemStatusSchema
 )
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 async def get_system_status():
     """Returns the current health and status of the Mainframe."""
     return {
@@ -76,37 +58,6 @@ async def get_system_status():
         "active_services": ["voice", "llm", "proactive"]
     }
 
-<<<<<<< HEAD
-@registry.register
-async def tool_code_executor(code: str = None, command: str = None, language: str = "python"):
-    """
-    Executes Python code or Shell commands securely in a Docker container.
-    
-    Args:
-        code: Python code to execute (optional).
-        command: Shell command to execute (optional).
-        language: Language for code execution (default: python).
-    """
-    try:
-        from app.tools.code_executor import CodeExecutor
-        executor = CodeExecutor()
-        
-        if command:
-            logger.info(f"Executing shell command: {command}")
-            return executor.run_command(command)
-        
-        if code:
-            logger.info(f"Executing python code: {code[:50]}...")
-            return executor.run_code(code, language)
-            
-        return {"error": "No code or command provided."}
-        
-    except ImportError:
-        return {"error": "Docker module not found. Is python3-docker installed?"}
-    except Exception as e:
-        logger.error(f"Code execution failed: {e}")
-        return {"error": str(e)}
-=======
 # @registry.register
 # async def tool_code_executor(code: str = None, command: str = None, language: str = "python"):
 #     """
@@ -136,4 +87,3 @@ async def tool_code_executor(code: str = None, command: str = None, language: st
 #     except Exception as e:
 #         logger.error(f"Code execution failed: {e}")
 #         return {"error": str(e)}
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)

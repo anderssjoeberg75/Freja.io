@@ -9,50 +9,6 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 # Default prompt if DB/Config is unreachable
 CODE_AUDIT_PROMPT = """
-<<<<<<< HEAD
-You are an Expert Senior Software Architect.
-Analyze the provided codebase for:
-1. Architectural patterns and violations
-2. Code quality, security, and performance issues
-3. Improvements and refactoring suggestions
-4. Potential bugs or edge cases
-
-Provide a detailed report in Markdown format.
-"""
-
-# Lazy imports to verify availability
-genai = None
-OpenAI = None
-anthropic = None
-
-def install_dependencies():
-    """Auto-install dependencies if missing (for Docker environment)."""
-    print("[AUDIT] Installing missing dependencies in Docker...")
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "google-generativeai", "openai", "anthropic"])
-        print("[AUDIT] Dependencies installed.")
-        global genai, OpenAI, anthropic
-        import google.generativeai as genai
-        from openai import OpenAI
-        try:
-            import anthropic
-        except ImportError:
-            pass
-    except Exception as e:
-        print(f"[AUDIT] dependency installation failed: {e}")
-
-# Initial import attempt
-try:
-    import google.generativeai as genai
-    from openai import OpenAI
-    try:
-        import anthropic
-    except ImportError:
-        pass
-except ImportError:
-    # Logic to handle missing deps will run in run_code_audit
-    pass
-=======
 Du är en expert och senior mjukvaruarkitekt.
 Analysera den bifogade källkoden med avseende på:
 1. Arkitektoniska mönster och eventuella överträdelser
@@ -70,7 +26,6 @@ try:
     import anthropic
 except ImportError:
     anthropic = None
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 # Configuration
 OUTPUT_FILE = "../../DAA_CODE_REVIEW.md"
@@ -78,23 +33,15 @@ IGNORED_DIRS = {
     'venv', 'node_modules', '.git', '__pycache__', 'logs', 'dist', 'build', 
     'garmin_tokens', '.vscode', 'assets', 'site-packages', '__init__', 'frontend'
 }
-<<<<<<< HEAD
-ALLOWED_EXTENSIONS = {'.py', '.js', '.jsx', '.html', '.css', '.bat', '.json'}
-=======
 ALLOWED_EXTENSIONS = {'.py', '.js', '.jsx', '.html', '.css', '.bat', '.json', '.md'}
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 IGNORED_FILES = {'package-lock.json', 'service_account.json', 'daa_memory.db', 'DAA_CODE_REVIEW.md'}
 
 def get_project_code(root_dir):
     """Reads all code recursively."""
     code_content = ""
     file_count = 0
-<<<<<<< HEAD
-    actual_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-=======
     # Use provided root_dir (usually ".") which maps to /workspace in Docker
     actual_root = os.path.abspath(root_dir) 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     
     print(f"[AUDIT] Reading files from: {actual_root}")
     
@@ -118,12 +65,6 @@ def get_project_code(root_dir):
 def process_and_save_response(full_response_text, model_name):
     SEPARATOR = "---RAPPORT_START---"
     try:
-<<<<<<< HEAD
-        abs_output = os.path.abspath(os.path.join(os.path.dirname(__file__), OUTPUT_FILE))
-        with open(abs_output, "w", encoding="utf-8") as f:
-            f.write(full_response_text)
-        file_saved_msg = f"\n\n📂 *Full report saved to: {OUTPUT_FILE}*"
-=======
         # Save to docs folder if possible, else root
         output_dir = os.path.join(os.getcwd(), "docs")
         if not os.path.exists(output_dir):
@@ -136,7 +77,6 @@ def process_and_save_response(full_response_text, model_name):
         with open(abs_output, "w", encoding="utf-8") as f:
             f.write(full_response_text)
         file_saved_msg = f"\n\n📂 *Full report saved to: {abs_output}*"
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     except Exception as e:
         file_saved_msg = f"\n\n⚠️ Could not save report file: {e}"
 
@@ -148,13 +88,6 @@ def process_and_save_response(full_response_text, model_name):
     return f"✅ **Analysis complete with {model_name}!**\n\n{summary_for_chat}{file_saved_msg}"
 
 def run_code_audit(preferred_model=None):
-<<<<<<< HEAD
-    # Ensure dependencies are available (Docker support)
-    if not genai or not OpenAI:
-        install_dependencies()
-
-=======
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     print("[AUDIT] Starting code collection...")
     full_code, count = get_project_code(".")
     
@@ -166,26 +99,15 @@ def run_code_audit(preferred_model=None):
     
     final_prompt = f"{CODE_AUDIT_PROMPT}\n\nSOURCE CODE ({count} files):\n{full_code}"
 
-<<<<<<< HEAD
-    # Lista modeller att testa
-    test_models = ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gpt-4o']
-=======
     # Lista modeller att testa (Prioritize updated/cheaper models)
     test_models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gpt-4o', 'gpt-3.5-turbo']
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
     for model_name in test_models:
         try:
             # --- GOOGLE ---
-<<<<<<< HEAD
-            if "gemini" in model_name.lower() and settings.GOOGLE_API_KEY:
-                print(f"   - Testar Google: {model_name}")
-                genai.configure(api_key=settings.GOOGLE_API_KEY)
-=======
             if "gemini" in model_name.lower() and GOOGLE_API_KEY:
                 print(f"   - Testar Google: {model_name}")
                 genai.configure(api_key=GOOGLE_API_KEY)
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 # IMPORTANT: Disable filters here too
                 safety = [
                     {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -196,15 +118,9 @@ def run_code_audit(preferred_model=None):
                 return process_and_save_response(response.text, f"Google {model_name}")
 
             # --- OPENAI ---
-<<<<<<< HEAD
-            elif "gpt" in model_name.lower() and settings.OPENAI_API_KEY:
-                print(f"   - Testar OpenAI: {model_name}")
-                client = OpenAI(api_key=settings.OPENAI_API_KEY)
-=======
             elif "gpt" in model_name.lower() and OPENAI_API_KEY:
                 print(f"   - Testar OpenAI: {model_name}")
                 client = OpenAI(api_key=OPENAI_API_KEY)
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 res = client.chat.completions.create(
                     model=model_name,
                     messages=[{"role": "system", "content": CODE_AUDIT_PROMPT},
