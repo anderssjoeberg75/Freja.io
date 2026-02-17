@@ -10,11 +10,6 @@ from google.generativeai.types import HarmBlockThreshold, HarmCategory
 
 from app.core.config import get_credential, settings
 from app.core.database import get_history, get_user_state, save_message, save_user_state
-<<<<<<< HEAD
-from app.core.dependencies import get_code_executor, get_garmin, get_strava
-=======
-from app.core.dependencies import get_code_executor, get_garmin, get_strava, get_withings
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 from app.core.prompts import get_system_prompt
 from app.self_improving.hooks import handle_user_prompt_submit
 from app.services.web_fallback_service import WebFallbackService, needs_web_fallback
@@ -124,7 +119,7 @@ class UnifiedChatService:
         gemini_history = []
         # System Prompt
         gemini_history.append({"role": "user", "parts": [full_system_block]})
-        gemini_history.append({"role": "model", "parts": ["Jag har tagit emot kontexten och är redo att hjälpa till."]})
+        gemini_history.append({"role": "model", "parts": ["Context received. Ready to help."]})
 
         # DB History
         for msg in db_history:
@@ -171,14 +166,16 @@ class UnifiedChatService:
                     }
                 )
 
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             
             # --- TOOL EXECUTION LOOP ---
             max_turns = 5
             final_text_response = ""
-            
-            for _ in range(max_turns):
+            turn = 0
+
+            while turn < max_turns:
                 response = await loop.run_in_executor(None, lambda: generate(gemini_history))
+                turn += 1
                 
                 if not response.candidates:
                     return "Error: AI returned no candidates."
@@ -205,8 +202,6 @@ class UnifiedChatService:
                         # Execute Tool
                         result_text = await registry.execute(fname, fargs)
                         
-<<<<<<< HEAD
-=======
                         # --- POINT 3: ENHANCED TOOL REFLECTION ---
                         # If the result looks like an error, give the AI a hint to reflect/retry
                         if isinstance(result_text, str) and ("Error" in result_text or "Fel" in result_text or "not found" in result_text.lower()):
@@ -216,11 +211,7 @@ class UnifiedChatService:
                                 "arguments or if an alternative tool should be used. You can try a different approach "
                                 "or explain the specific obstacle to the user."
                             )
-                            # Ensure we don't count an error turn as a final turn if we want it to reflect
-                            if _ == max_turns - 1:
-                                max_turns += 1
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                         # Append Result to history
                         gemini_history.append({
                             "role": "function",

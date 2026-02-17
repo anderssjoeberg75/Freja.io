@@ -2,19 +2,13 @@
 
 from __future__ import annotations
 
-<<<<<<< HEAD
-=======
 import json
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 from typing import Any, Optional
 
 import httpx
 
-<<<<<<< HEAD
-=======
 from app.core.config import get_credential
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 class HomeAssistantClientError(Exception):
     """Raised when a Home Assistant request fails with a user-facing message."""
@@ -97,18 +91,6 @@ class HomeAssistantClient:
             return None
         return {"result": result}
 
-<<<<<<< HEAD
-    def turn_on(self, entity_id: str, **kwargs: Any) -> dict[str, Any] | None:
-        """Convenience wrapper for switch/light turn_on."""
-        domain = entity_id.split(".", 1)[0]
-        payload: dict[str, Any] = {"entity_id": entity_id, **kwargs}
-        return self.call_service(domain, "turn_on", payload)
-
-    def turn_off(self, entity_id: str) -> dict[str, Any] | None:
-        """Convenience wrapper for switch/light turn_off."""
-        domain = entity_id.split(".", 1)[0]
-        return self.call_service(domain, "turn_off", {"entity_id": entity_id})
-=======
     @property
     def _custom_aliases(self) -> dict[str, str]:
         """Load aliases dynamically from database/environment."""
@@ -182,7 +164,6 @@ class HomeAssistantClient:
             domain = full_id.split(".", 1)[0]
             
         return self.call_service(domain, "turn_off", {"entity_id": full_id})
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
     def set_light(
         self,
