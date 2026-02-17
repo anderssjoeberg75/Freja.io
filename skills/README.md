@@ -83,6 +83,17 @@ Styr ditt smarta hem via Home Assistant.
     *   `ha on light.vardagsrum`
     *   `ha list switch`
 
+
+### 🔐 pfSense
+Analyserar pfSense-loggar via pfrest API och flaggar avvikelser.
+
+*   **Verktyg:**
+    *   `analyze_pfsense_logs(limit, lookback_minutes)`: Hämtar loggar, bygger rapport och varnar vid avvikande mönster.
+
+*   **Användning:**
+    *   "Analysera pfSense-loggar senaste timmen."
+    *   "Finns det något onormalt i brandväggsloggarna?"
+
 ### ☀️ Väder
 Hämtar väderprognoser.
 
