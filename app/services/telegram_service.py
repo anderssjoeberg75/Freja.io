@@ -158,8 +158,6 @@ class TelegramService:
 
         return success
 
-<<<<<<< HEAD
-=======
     async def send_document(self, document_path: str, caption: str = None, chat_id: Optional[str] = None) -> bool:
         """
         Send a document/file to the chat.
@@ -196,7 +194,6 @@ class TelegramService:
 
         return success
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     async def _handle_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /start command."""
         chat_id = str(update.effective_chat.id)

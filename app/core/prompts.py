@@ -1,9 +1,6 @@
 from datetime import datetime
-<<<<<<< HEAD
-=======
 import pytz
 from app.core.config import settings
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 from app.core.database import get_db_prompts
 
 """
@@ -29,9 +26,6 @@ def get_system_prompt():
     base_prompt = data.get("SYSTEM_PROMPT", "Du är Freja.Io. Fyll i din prompt i inställningarna.")
 
     # 2. Create time data (Real-time data injection)
-<<<<<<< HEAD
-    now = datetime.now()
-=======
     tz_name = settings.TIMEZONE
     try:
         tz = pytz.timezone(tz_name)
@@ -39,7 +33,6 @@ def get_system_prompt():
         tz = pytz.UTC
         
     now = datetime.now(tz)
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     current_time = now.strftime("%H:%M:%S")
     current_date = now.strftime("%Y-%m-%d")
     week_number = now.strftime("%V")
@@ -63,10 +56,6 @@ def get_system_prompt():
     )
     
     # 4. Inject APP_NAME into prompt (replace "DAA" with configured name)
-<<<<<<< HEAD
-    from app.core.config import settings
-=======
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     app_name = settings.APP_NAME
     
     # Replace all instances of "DAA" with the configured app name

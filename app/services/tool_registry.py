@@ -57,25 +57,6 @@ class ToolRegistry:
         for name, tool in self._tools.items():
             schema = tool.args_schema.model_json_schema()
             
-<<<<<<< HEAD
-            # Clean schema (remove 'title' and uppercase 'type')
-            def clean_schema(s):
-                if isinstance(s, dict):
-                    cleaned = {}
-                    for k, v in s.items():
-                        if k == "title" or k == "default":
-                            continue
-                        if k == "type" and isinstance(v, str):
-                            # Gemini expects uppercase types (STRING, OBJECT, etc.)
-                            cleaned[k] = v.upper()
-                        else:
-                            cleaned[k] = clean_schema(v)
-                    return cleaned
-                elif isinstance(s, list):
-                    return [clean_schema(v) for v in s]
-                return s
-            
-=======
             # Clean schema (remove 'title', 'default', and handle 'anyOf' / uppercase 'type')
             def clean_schema(s):
                 if not isinstance(s, dict):
@@ -109,7 +90,6 @@ class ToolRegistry:
                         cleaned[k] = clean_schema(v)
                 return cleaned
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
             cleaned_schema = clean_schema(schema)
             
             # Extract properties and cleanup for Gemini
