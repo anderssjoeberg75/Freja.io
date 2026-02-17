@@ -77,3 +77,9 @@ class AnalyzePfSenseLogs(BaseModel):
 
     limit: int = Field(200, description="Number of log lines to sample from pfSense.")
     lookback_minutes: int = Field(60, description="Time window in minutes used to identify recent spikes.")
+
+
+class GetTibberEnergyAnalysis(BaseModel):
+    """Analyze Tibber hourly energy consumption and electricity prices."""
+
+    days: int = Field(7, description="Number of days to analyze (1-30).")
