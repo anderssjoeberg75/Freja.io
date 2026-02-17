@@ -1,119 +1,44 @@
-# Freja Skills Guide
+# Freja Skills
 
-Detta är en översikt över alla tillgängliga färdigheter (skills) och verktyg i Freja-systemet.
+This directory contains Freja's pluggable skills. A skill adds one or more tools (function calls) and, in some cases, direct command handlers.
 
-## 🛠️ Core Skills (Kärnfunktioner)
+## How skills are loaded
 
-### 💻 Codex (Programmering & Analys)
-Ger Freja förmågan att skriva kod, exekvera den i en säker sandbox och analysera sig själv.
+- Skills are discovered from `skills/*` packages and registered through the shared tool registry during startup.
+- Most skills expose tools through a `register_tools(registry)` function.
+- Some skills also provide chat command handlers (for example Home Assistant and Strava command flows).
 
-*   **Verktyg:**
-    *   `tool_code_executor` / `execute_python`: Kör Python-kod i en Docker-container (`freja-codex-sandbox`). Har tillgång till filsystemet via bind-mount.
-    *   `tool_analyze_code` / `codex_audit_codebase`: Utför en fullständig självanalys av källkoden och genererar en rapport i `docs/`.
-    *   `git_clone`, `git_checkout`, `git_status`: Hanterar Git-operationer för versionshantering.
+## How to invoke skills via Freja
 
-*   **Användning:**
-    *   "Skriv ett script som listar alla filer i katalogen."
-    *   "Kör en självanalys av projektet."
-    *   "Klona repot https://github.com/..."
+You can trigger skills in two ways:
 
-### 📅 Google Calendar (Kalender)
-Hanterar din Google-kalender.
+1. **Natural language in chat (recommended)**
+   - Example: `Analyze my Strava activities from the last 7 days.`
+   - Example: `Turn on the office lamp in Home Assistant.`
 
-*   **Verktyg:**
-    *   `calendar_list_events(count)`: Listar kommande händelser.
-    *   `calendar_create_event(summary, start, end...)`: Skapar nya möten.
-    *   `calendar_update_event(...)`: Uppdaterar befintliga händelser.
-    *   `calendar_delete_event(event_id)`: Tar bort händelser.
+2. **Explicit command syntax (skills that support commands)**
+   - Home Assistant: `ha list light`, `ha on light.office`
+   - Strava: `/strava status`, `/strava connect`
 
-*   **Användning:**
-    *   "Vad har jag inbokat idag?"
-    *   "Boka ett möte med teamet imorgon kl 14."
+Freja decides when to call the underlying tool automatically.
 
----
+## Skill index
 
-## 🏃 Fitness & Hälsa
+- `codex` – code execution, Git operations, and codebase auditing.
+- `garmin` – health snapshot from Garmin Connect.
+- `google_calendar` – list/create/update/delete calendar events.
+- `homeassistant` – smart-home control via Home Assistant API.
+- `pfsense` – firewall/system log analysis via pfrest.
+- `roborock` – Roborock vacuum control and map access.
+- `strava` – Strava activity retrieval and analytics flow.
+- `tibber` – electricity usage and cost analysis.
+- `weather` – weather forecasts.
+- `withings` – body composition and health metrics.
 
-### ⌚ Garmin
-Hämtar hälsodata från Garmin Connect.
+## Adding a new skill
 
-*   **Verktyg:**
-    *   `get_garmin_health(date)`: Hämtar steg, sömn, body battery och vilopuls.
-
-*   **Användning:**
-    *   "Hur sov jag inatt?"
-    *   "Vad är min Body Battery nivå?"
-
-### 🚲 Strava
-Hämtar träningsaktiviteter från Strava.
-
-*   **Verktyg:**
-    *   `get_strava_activities(limit)`: Hämtar dina senaste träningspass (löpning, cykling, etc.).
-
-*   **Användning:**
-    *   "Visa mina senaste löprundor."
-    *   "Hur långt cyklade jag i helgen?"
-
-### ⚖️ Withings
-Hämtar kroppsdata från Withings (vågar etc.).
-
-*   **Verktyg:**
-    *   `get_withings_health`: Hämtar vikt, fettprocent och muskelmassa.
-
-*   **Användning:**
-    *   "Vad väger jag?"
-    *   "Visa min kroppssammansättning."
-
----
-
-## 🏠 Smarta Hem & Vardag
-
-### 🏠 Home Assistant
-Styr ditt smarta hem via Home Assistant.
-
-*   **Kommandon (Chatt):**
-    Denna skill lyssnar på direktkommandon i chatten (börjar med `/ha` eller `ha`).
-    *   `ha list [domain]`: Listar enheter (t.ex. `ha list light`).
-    *   `ha get <entity_id>`: Hämtar status för en enhet.
-    *   `ha on <entity_id>`: Slår på en enhet.
-    *   `ha off <entity_id>`: Slår av en enhet.
-    *   `ha scene <scene_id>`: Aktiverar en scen.
-
-*   **Användning:**
-    *   `ha on light.vardagsrum`
-    *   `ha list switch`
-
-
-### 🔐 pfSense
-Analyserar pfSense-loggar via pfrest API och flaggar avvikelser.
-
-*   **Verktyg:**
-    *   `analyze_pfsense_logs(limit, lookback_minutes)`: Hämtar loggar, bygger rapport och varnar vid avvikande mönster.
-
-*   **Användning:**
-    *   "Analysera pfSense-loggar senaste timmen."
-    *   "Finns det något onormalt i brandväggsloggarna?"
-
-### ☀️ Väder
-Hämtar väderprognoser.
-
-*   **Verktyg:**
-    *   `get_weather`: Hämtar aktuell prognos för konfigurerad plats (via SMHI/API).
-
-*   **Användning:**
-    *   "Hur blir vädret imorgon?"
-    *   "Behöver jag paraply?"
-
----
-
-## 🌐 Övrigt
-
-### I/O & System
-*   `web_search`: Söker på nätet (använd ej för kodanalys).
-*   `get_system_status`: Visar systemets hälsa (CPU/Minne).
-
----
-
-## ⚙️ Installation & Konfiguration
-För att aktivera nya skills, se till att nödvändiga API-nycklar finns i `.env` eller `credentials.json`.
-Se respektive skill-katalog för specifik README (t.ex. `skills/codex/README.md`).
+1. Create a new folder under `skills/<name>/`.
+2. Add `__init__.py` and `tools.py` (or command handlers if needed).
+3. Register tools via `register_tools(registry)`.
+4. Document configuration and invocation in `skills/<name>/README.md`.
+5. Restart Freja and test through chat.
