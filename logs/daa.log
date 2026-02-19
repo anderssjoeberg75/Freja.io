@@ -183,3 +183,9 @@ INFO:     127.0.0.1:47980 - "POST /api/chat HTTP/1.1" 200 OK
 Mem0 search failed (continuing without memory): Client error '400 Bad Request' for url 'https://api.mem0.ai/v2/memories/search/'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
 INFO:     127.0.0.1:47596 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33470 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33472 - "GET /api/settings/schema HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33490 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33498 - "GET /api/settings/schema HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33476 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33504 - "GET /api/models HTTP/1.1" 200 OK
