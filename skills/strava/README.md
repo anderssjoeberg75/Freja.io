@@ -1,42 +1,61 @@
-# Freja.io Strava Skill
+# Strava Skill
 
-## What this module does
-This skill provides a modular Strava integration for Freja.io with:
-- OAuth connect and refresh-token based authentication.
-- Athlete profile/stats fetch + activity pagination.
-- Rate-limit handling with retry logic.
-- Activity normalization + per-user cache.
-- Deterministic analytics pipeline used by Telegram command handling.
-- Tool registration for `get_strava_activities` via Freja's shared tool registry.
+## What this skill does
 
-## Environment variables
-Configure these in `.env` or via Freja settings:
+The Strava skill integrates account authorization, activity retrieval, and analytics workflows so Freja can summarize your training data and trends.
+
+## Main capabilities
+
+- OAuth connect/disconnect flow
+- Token refresh handling
+- Recent activity retrieval through tools
+- Deterministic fixture-based mock mode for testing
+- Command flow for Telegram and chat interactions
+
+## Registered Freja tool
+
+- `get_strava_activities(limit: int = 5)`
+
+## Required configuration
+
+Set these values in `.env` or Freja settings:
+
 - `STRAVA_CLIENT_ID`
 - `STRAVA_CLIENT_SECRET`
-- `STRAVA_REDIRECT_URI` (for callback endpoint)
-- `STRAVA_REFRESH_TOKEN` (optional bootstrap fallback)
-- `STRAVA_ACCESS_TOKEN` (optional local dev fallback)
-- `STRAVA_MOCK=1` (optional fixture mode)
-- `STRAVA_MOCK_FIXTURE=mixed_run_ride` (or `run_only_hr`)
+- `STRAVA_REDIRECT_URI`
+- `STRAVA_REFRESH_TOKEN` (optional bootstrap)
+- `STRAVA_ACCESS_TOKEN` (optional local fallback)
+- `STRAVA_MOCK=1` (optional test mode)
+- `STRAVA_MOCK_FIXTURE` (for example `mixed_run_ride`)
 
-## Telegram usage
+## How to use it via Freja
+
+### Natural language examples
+
+- `Analyze my Strava training from the last 14 days.`
+- `Show my latest rides.`
+- `How far did I run this week?`
+
+### Command-style examples
+
 - `/strava status`
 - `/strava connect`
-- `/strava connect <code>` for manual exchange fallback
+- `/strava connect <authorization_code>`
 - `/strava disconnect`
-- `analysera min strava senaste 30 dagar`
-- `analysera min strava 7 dagar run`
+
+### Direct tool call (internal)
+
+```json
+{
+  "tool": "get_strava_activities",
+  "args": { "limit": 10 }
+}
+```
 
 ## OAuth callback
+
 Set `STRAVA_REDIRECT_URI` to:
+
 `https://<your-host>/api/integrations/strava/callback`
 
-Strava will call this endpoint with `code` and `state`.
-The `state` value stores Telegram user/chat ID so token storage stays per user.
-
-## Test in mock mode
-Run deterministic self-test with fixture data:
-```bash
-STRAVA_MOCK=1 STRAVA_MOCK_FIXTURE=mixed_run_ride python scripts/strava_self_test.py
-STRAVA_MOCK=1 STRAVA_MOCK_FIXTURE=run_only_hr python scripts/strava_self_test.py
-```
+Strava sends `code` and `state` to this endpoint during authorization.

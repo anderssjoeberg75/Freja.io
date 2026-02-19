@@ -1,19 +1,11 @@
-<<<<<<< HEAD
-import { useState, useEffect } from 'react';
-import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3 } from 'lucide-react';
-=======
 import { useState } from 'react';
 import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3, Hash } from 'lucide-react';
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 import Dashboard from './components/Dashboard';
 import ChatInterface from './components/ChatInterface';
 import Settings from './components/Settings';
 import Prompts from './components/Prompts';
 import LiveSession from './components/LiveSession';
-<<<<<<< HEAD
-=======
 import AliasView from './components/AliasView';
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 import { useSocket } from './hooks/useSocket';
 
@@ -24,24 +16,26 @@ function App() {
     return (
         <div className="flex h-screen bg-mainframe-bg text-mainframe-text overflow-hidden">
             {/* Sidebar */}
-            <div className="w-16 flex flex-col items-center py-4 border-r border-mainframe-border bg-mainframe-card">
+            <div className="w-16 flex flex-col items-center py-4 border-r border-mainframe-border bg-mainframe-card overflow-y-auto scrollbar-hide">
                 <div className="mb-8 p-2 rounded-lg bg-mainframe-accent/10">
                     <Terminal className="w-6 h-6 text-mainframe-accent" />
                 </div>
 
-                <nav className="flex-1 flex flex-col gap-4">
-                    <NavIcon icon={<Activity />} active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')} />
-                    <NavIcon icon={<MessageSquare />} active={activeView === 'chat'} onClick={() => setActiveView('chat')} />
-                    <NavIcon icon={<Edit3 />} active={activeView === 'prompts'} onClick={() => setActiveView('prompts')} />
-                    <NavIcon icon={<Mic />} active={activeView === 'voice'} onClick={() => setActiveView('voice')} />
-<<<<<<< HEAD
-=======
-                    <NavIcon icon={<Hash />} active={activeView === 'aliases'} onClick={() => setActiveView('aliases')} />
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
-                    <NavIcon icon={<SettingsIcon />} active={activeView === 'settings'} onClick={() => setActiveView('settings')} />
+                <nav className="flex-1 flex flex-col gap-4 w-full items-center">
+                    <NavIcon icon={<Activity />} active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')} title="Dashboard" />
+                    <NavIcon icon={<MessageSquare />} active={activeView === 'chat'} onClick={() => setActiveView('chat')} title="Chat" />
+                    <NavIcon icon={<Edit3 />} active={activeView === 'prompts'} onClick={() => setActiveView('prompts')} title="Prompts" />
+                    <NavIcon icon={<Mic />} active={activeView === 'voice'} onClick={() => setActiveView('voice')} title="Voice Mode" />
+                    <NavIcon icon={<Hash />} active={activeView === 'aliases'} onClick={() => setActiveView('aliases')} title="Aliases" />
+
+                    <div className="w-8 h-px bg-mainframe-border/50 my-2" />
+
+                    <div className="flex-1" /> {/* Spacer */}
+
+                    <NavIcon icon={<SettingsIcon />} active={activeView === 'settings'} onClick={() => setActiveView('settings')} title="System Settings" />
                 </nav>
 
-                <div className={`w-3 h-3 rounded-full mb-4 ${socketConnected ? 'bg-green-500' : 'bg-red-500'}`} title={socketConnected ? "Connected" : "Disconnected"} />
+                <div className={`w-3 h-3 rounded-full mt-4 ${socketConnected ? 'bg-green-500' : 'bg-red-500'}`} title={socketConnected ? "Connected" : "Disconnected"} />
             </div>
 
             {/* Main Content */}
@@ -50,19 +44,17 @@ function App() {
                 {activeView === 'chat' && <ChatInterface />}
                 {activeView === 'prompts' && <Prompts />}
                 {activeView === 'voice' && <LiveSession />}
-<<<<<<< HEAD
-=======
                 {activeView === 'aliases' && <AliasView />}
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 {activeView === 'settings' && <Settings />}
             </main>
         </div>
     );
 }
 
-const NavIcon = ({ icon, active, onClick }) => (
+const NavIcon = ({ icon, active, onClick, title }) => (
     <button
         onClick={onClick}
+        title={title}
         className={`p-3 rounded-xl transition-all ${active ? 'bg-mainframe-accent text-black shadow-lg shadow-mainframe-accent/20' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'}`}
     >
         {icon}

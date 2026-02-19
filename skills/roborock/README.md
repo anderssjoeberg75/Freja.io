@@ -1,65 +1,73 @@
-# Roborock skill
+# Roborock Skill
 
-This skill adds Roborock vacuum controls to Freja.io.
+## What this skill does
 
-## Features
+The Roborock skill connects Freja to your Roborock account so you can manage vacuum devices, trigger cleaning actions, and request map-related data.
 
-- Configure Roborock account credentials securely (encrypted password in DB).
-- List available devices and auto-save default device on configure.
-- Vacuum controls: status, start, stop, pause, dock.
-- Room cleaning controls: list rooms and clean selected rooms.
-- Consumables and map endpoints.
-- Map image endpoint (`png`) using Freja tool response payload.
+## Main capabilities
 
-## Security
+- Store Roborock account credentials securely
+- List account devices and set a default device
+- Read status and control cleaning lifecycle
+- Retrieve room IDs and clean selected rooms
+- View consumables and map metadata
+- Generate map image output (`png`)
 
-Set an encryption key in environment before using the skill:
+## Required configuration
+
+Set an encryption key before using credential storage:
 
 ```bash
 export ROBOROCK_SECRET_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
 ```
 
-The password is encrypted with this key before being stored in SQLite.
+## Registered Freja tools
 
-## Tool usage examples
+- `roborock_configure`
+- `roborock_list_devices`
+- `roborock_status`
+- `roborock_start`
+- `roborock_stop`
+- `roborock_pause`
+- `roborock_dock`
+- `roborock_rooms`
+- `roborock_clean_rooms`
+- `roborock_consumables`
+- `roborock_maps`
+- `roborock_map_image`
 
-1. Configure:
+## How to use it via Freja
+
+### Natural language examples
+
+- `Start the robot vacuum.`
+- `Send Roborock back to dock.`
+- `Clean the kitchen and hallway rooms.`
+- `Show my Roborock consumables status.`
+
+### Direct tool call examples
 
 ```json
-{"tool": "roborock_configure", "args": {"email": "name@example.com", "password": "secret"}}
+{
+  "tool": "roborock_configure",
+  "args": {
+    "email": "name@example.com",
+    "password": "your_password"
+  }
+}
 ```
 
-2. List devices:
-
 ```json
-{"tool": "roborock_list_devices", "args": {}}
-```
-
-3. Start cleaning:
-
-```json
-{"tool": "roborock_start", "args": {}}
-```
-
-4. Clean rooms 16 and 17:
-
-```json
-{"tool": "roborock_clean_rooms", "args": {"rooms": [16, 17]}}
+{
+  "tool": "roborock_clean_rooms",
+  "args": {
+    "rooms": [16, 17]
+  }
+}
 ```
 
 ## Troubleshooting
 
-- `Not logged in`: run `roborock_configure` first.
-- `Authentication failed`: verify email/password.
-- `Device not found`: set a valid `device_id` or re-run configure.
-- `Roborock dependency not installed`: install python-roborock in runtime.
-
-## Manual smoke test
-
-1. Export `ROBOROCK_SECRET_KEY`.
-2. Restart Freja service.
-3. Run `roborock_configure` with valid account.
-4. Run `roborock_list_devices`.
-5. Run `roborock_status` for default or explicit `device_id`.
-6. Run `roborock_start` then `roborock_pause` then `roborock_dock`.
-7. Run `roborock_rooms` and `roborock_clean_rooms` with one room ID.
+- `Not logged in` → run `roborock_configure` first.
+- `Authentication failed` → verify credentials.
+- `Device not found` → re-run configure or pass explicit `device_id`.

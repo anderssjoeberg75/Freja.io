@@ -1,6 +1,13 @@
 import sys
 import os
 
+# Auto-activate venv if running with system python
+if sys.prefix == sys.base_prefix:
+    venv_python = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "venv", "bin", "python")
+    if os.path.exists(venv_python):
+        print(f"🔄 Re-executing with venv: {venv_python}")
+        os.execv(venv_python, [venv_python] + sys.argv)
+
 # Add project root to path
 sys.path.append(os.getcwd())
 

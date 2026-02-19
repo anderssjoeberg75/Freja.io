@@ -10,11 +10,7 @@ from google.generativeai.types import HarmBlockThreshold, HarmCategory
 
 from app.core.config import get_credential, settings
 from app.core.database import get_history, get_user_state, save_message, save_user_state
-<<<<<<< HEAD
-from app.core.dependencies import get_code_executor, get_garmin, get_strava
-=======
 from app.core.dependencies import get_code_executor, get_garmin, get_strava, get_withings
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 from app.core.prompts import get_system_prompt
 from app.self_improving.hooks import handle_user_prompt_submit
 from app.services.web_fallback_service import WebFallbackService, needs_web_fallback
@@ -22,6 +18,7 @@ from skills.homeassistant import get_homeassistant_command_processor
 # --- Native Tooling Imports ---
 from app.services.tool_registry import registry
 from skills._core.skill_loader import discover_and_register_skills
+from app.services.llm_providers.ollama import generate_ollama_response
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +146,32 @@ class UnifiedChatService:
 
         gemini_history.append({"role": "user", "parts": current_parts})
 
-        # 7. Call Gemini with Tool Loop
+        gemini_history.append({"role": "user", "parts": current_parts})
+
+        # 7. Route to appropriate backend
+        if not model_id.startswith("gemini"):
+            # Assume Ollama for non-gemini models
+            try:
+                # We pass the constructed history (mapped for Gemini) to the helper, 
+                # which will re-map it for Ollama.
+                # Ideally we should have a generic history format, but for now we convert.
+                final_text_response = await generate_ollama_response(
+                    model_id=model_id,
+                    system_prompt=full_system_block,
+                    history=gemini_history[:-1], # Exclude current message which is handled separately
+                    user_msg=user_msg,
+                    image_data=image_data
+                )
+                
+                save_message(session_id, "user", user_msg)
+                save_message(session_id, "assistant", final_text_response)
+                return final_text_response
+                
+            except Exception as e:
+                logger.error(f"Ollama routing error: {e}")
+                return f"Error: {str(e)}"
+
+        # 8. Call Gemini with Tool Loop
         try:
             google_api_key = get_credential("GOOGLE_API_KEY")
             if not google_api_key:
@@ -205,8 +227,6 @@ class UnifiedChatService:
                         # Execute Tool
                         result_text = await registry.execute(fname, fargs)
                         
-<<<<<<< HEAD
-=======
                         # --- POINT 3: ENHANCED TOOL REFLECTION ---
                         # If the result looks like an error, give the AI a hint to reflect/retry
                         if isinstance(result_text, str) and ("Error" in result_text or "Fel" in result_text or "not found" in result_text.lower()):
@@ -220,7 +240,6 @@ class UnifiedChatService:
                             if _ == max_turns - 1:
                                 max_turns += 1
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                         # Append Result to history
                         gemini_history.append({
                             "role": "function",
@@ -414,6 +433,7 @@ class UnifiedChatService:
             lines.append(f"- weight_kg: {user_state['weight']}")
 
         return "\n".join(lines) if lines else "No known user profile values in memory yet."
+
 
 # Singleton instance
 shared_chat_service = UnifiedChatService()

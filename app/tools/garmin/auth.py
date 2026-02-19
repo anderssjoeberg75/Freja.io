@@ -46,7 +46,7 @@ class GarminAuth:
         if token_dir:
             self.token_dir = Path(token_dir)
         else:
-            self.token_dir = Path(BASE_DIR) / "config" / "garmin_tokens"
+            self.token_dir = Path(BASE_DIR) / "db" / "tokens" / "garmin_tokens"
             
         self._is_authenticated = False
 

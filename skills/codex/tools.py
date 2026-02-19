@@ -134,6 +134,138 @@ async def audit_code_impl() -> str:
     except Exception as e:
         return f"Error preparing audit script: {e}"
 
+class RunAndFixSchema(BaseModel):
+    command: str = Field(..., description="The command to run (e.g., 'pytest tests/test_login.py' or 'python script.py').")
+    file_path: str = Field(..., description="The path to the file that should be fixed if the command fails.")
+    max_retries: int = Field(3, description="Maximum number of auto-fix attempts.")
+
+async def run_and_fix_impl(command: str, file_path: str, max_retries: int = 3) -> str:
+    """Runs a command and attempts to fix the file if it fails."""
+    import google.generativeai as genai
+    from app.core.config import get_credential, settings
+    import os
+    import httpx
+
+    executor = dependencies.get_code_executor()
+    if not executor:
+        return "Error: Code Execution environment not available."
+
+    # Validate file existence
+    if not os.path.exists(file_path):
+        return f"Error: Target file {file_path} not found."
+
+    api_key = get_credential("GOOGLE_API_KEY") or settings.GOOGLE_API_KEY
+    
+    use_ollama = False
+    model_name = "gemini-2.0-flash" # Default "Best"
+
+    if api_key:
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(model_name)
+        except Exception:
+            # Fallback to Ollama if Gemini fails configuration
+            use_ollama = True
+    else:
+        use_ollama = True
+
+    if use_ollama:
+        print("Using Ollama for self-correction (Gemini not available).")
+        ollama_url = get_credential("OLLAMA_URL") or settings.OLLAMA_URL
+        if not ollama_url:
+             return "Error: No Google API Key and no OLLAMA_URL found."
+        base_url = ollama_url.rstrip("/")
+        
+        # Use the configured default model or a sensible fallback
+        # In a real scenario, we might want to list models and pick the 'coder' one.
+        # for now, use the setting or 'llama3'
+        model_name = get_credential("GEMINI_LIVE_MODEL") or "llama3"
+        # If the setting is a gemini model but we are in ollama mode (missing key), 
+        # we must force a local model name.
+        if model_name.startswith("gemini"):
+            model_name = "llama3"
+
+    history = []
+    
+    for attempt in range(max_retries + 1):
+        # Run the command
+        loop = asyncio.get_event_loop()
+        # Use run_command wrapper
+        if command.endswith(".py"):
+             # If it's a python script, use the python execution for stateful context if desired, 
+             # but usually 'command' implies shell. Let's strictly use shell command execution for generality.
+             result = await loop.run_in_executor(None, executor.run_code, command)
+        else:
+             result = await loop.run_in_executor(None, executor.run_command, command)
+
+        exit_code = result.get("exit_code", 1)
+        output = result.get("output", "")
+
+        if exit_code == 0:
+            return f"✅ Success on attempt {attempt+1}!\nOutput:\n{output}"
+
+        if attempt == max_retries:
+            return f"❌ Failed after {max_retries} attempts.\nLast Output:\n{output}"
+
+        # If failed, try to fix
+        print(f"Attempt {attempt+1} failed. Generating fix...")
+        
+        # Read current code
+        with open(file_path, "r") as f:
+            current_code = f.read()
+
+        prompt = f"""
+        The command `{command}` failed using this code in `{file_path}`.
+        
+        Output:
+        {output}
+        
+        Current Code:
+        {current_code}
+        
+        Fix the code to resolve the error. 
+        IMPORTANT: Return ONLY the full fixed code. No markdown formatting, no explanations. 
+        Just the raw code ready to be written to the file.
+        """
+        
+        try:
+            fixed_code = ""
+            if use_ollama:
+                 async with httpx.AsyncClient(timeout=60.0) as client:
+                    payload = {
+                        "model": model_name,
+                        "messages": [{"role": "user", "content": prompt}],
+                        "stream": False
+                    }
+                    resp = await client.post(f"{base_url}/api/chat", json=payload)
+                    if resp.status_code == 200:
+                        fixed_code = resp.json().get("message", {}).get("content", "")
+                    else:
+                        return f"Ollama Error: {resp.text}"
+            else:
+                # We use a simple generate_content
+                response = await loop.run_in_executor(None, model.generate_content, prompt)
+                if not response.text:
+                    return f"Error: Empty response from LLM during fix attempt {attempt+1}."
+                fixed_code = response.text
+            
+            # Strip markdown code blocks if present (common LLM behavior)
+            if fixed_code.startswith("```"):
+                fixed_code = fixed_code.split("\n", 1)[1]
+            if fixed_code.endswith("```"):
+                fixed_code = fixed_code.rsplit("\n", 1)[0]
+            
+            # Apply fix
+            with open(file_path, "w") as f:
+                f.write(fixed_code)
+                
+            history.append(f"Attempt {attempt+1}: Fixed code based on error.")
+            
+        except Exception as e:
+            return f"Error during auto-fix generation: {e}"
+
+    return "Unexpected loop exit."
+
 # --- Registration ---
 
 def register_tools(registry: ToolRegistry) -> None:
@@ -176,3 +308,9 @@ def register_tools(registry: ToolRegistry) -> None:
         description="Alias for codex_audit_codebase. Performs self-analysis of the code.",
         args_schema=AuditCodeSchema,
     )(audit_code_impl)
+
+    registry.register(
+        name="codex_run_and_fix",
+        description="Runs a command (test or script) and automatically attempts to fix the code if it fails. Use this for 'run and fix', 'auto-correct', or when you want Freja to autonomously debug.",
+        args_schema=RunAndFixSchema,
+    )(run_and_fix_impl)

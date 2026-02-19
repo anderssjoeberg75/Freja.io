@@ -9,7 +9,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Kill any existing processes on our ports (prevents "address already in use")
 echo "🧹 Cleaning up old processes..."
 pkill -f "python3 main.py" 2>/dev/null
-lsof -ti:8000 | xargs -r kill -9 2>/dev/null
+fuser -k 8000/tcp 2>/dev/null
+sleep 2
 lsof -ti:5173 | xargs -r kill -9 2>/dev/null
 sleep 1
 

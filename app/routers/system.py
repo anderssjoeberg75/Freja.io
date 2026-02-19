@@ -106,3 +106,27 @@ async def trigger_morning_briefing():
     except Exception as e:
         logger.error(f"Trigger error: {e}")
         return {"success": False, "message": str(e)}
+
+@router.get("/api/system/backup_db")
+async def backup_database():
+    """Returns the current database file as a download."""
+    from fastapi.responses import FileResponse
+    from app.core.config import DB_PATH
+    import os
+    import datetime
+
+    try:
+        if not os.path.exists(DB_PATH):
+            return {"error": "Database file not found"}
+
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"mainframe_backup_{timestamp}.db"
+
+        return FileResponse(
+            path=DB_PATH,
+            filename=filename,
+            media_type='application/x-sqlite3'
+        )
+    except Exception as e:
+        logger.error(f"Backup error: {e}")
+        return {"error": str(e)}

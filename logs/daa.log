@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-/home/anderss/Documents/projects/daa/app/services/chat_service.py:8: FutureWarning: 
-=======
 /home/netadmin/freja.io/app/tools/code_auditor.py:23: FutureWarning: 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 All support for the `google.generativeai` package has ended. It will no longer be receiving 
 updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
@@ -11,697 +7,179 @@ See README for more details:
 https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
 
   import google.generativeai as genai
-<<<<<<< HEAD
-2026-02-13 12:18:17 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: run_python_code
-2026-02-13 12:18:17 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: web_search
-2026-02-13 12:18:17 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_garmin_health
-2026-02-13 12:18:17 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_strava_activities
-INFO:     Started server process [15677]
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: execute_codex_code
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_code_executor
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: run_code
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_git_ops
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_audit_codebase
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_analyze_code
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'codex' tools: ['execute_codex_code', 'codex_git_ops', 'codex_audit_codebase']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_garmin_health
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'garmin' tools: ['get_garmin_health']
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:64 - Skill 'google_calendar' has no tool registry hook.
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:64 - Skill 'homeassistant' has no tool registry hook.
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: analyze_pfsense_logs
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'pfsense' tools: ['analyze_pfsense_logs']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_configure
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_list_devices
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_status
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_start
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_stop
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_pause
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_dock
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_rooms
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_clean_rooms
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_consumables
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_maps
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_map_image
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'roborock' tools: ['roborock_configure', 'roborock_list_devices', 'roborock_status', 'roborock_start', 'roborock_stop', 'roborock_pause', 'roborock_dock', 'roborock_rooms', 'roborock_clean_rooms', 'roborock_consumables', 'roborock_maps', 'roborock_map_image']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_strava_activities
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'strava' tools: ['get_strava_activities']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_tibber_energy_analysis
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'tibber' tools: ['get_tibber_energy_analysis']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_weather
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'weather' tools: ['get_weather']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_withings_health
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'withings' tools: ['get_withings_health']
+INFO:     Started server process [3156668]
 INFO:     Waiting for application startup.
-2026-02-13 12:18:17 | INFO     | main:lifespan:17 - Initializing Mainframe Services...
-2026-02-13 12:18:17 | INFO     | app.services.proactive_service:start:16 - Proactive service started
+2026-02-19 08:31:55 | INFO     | main:lifespan:18 - Initializing Mainframe Services...
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: execute_codex_code
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_code_executor
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: run_code
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_git_ops
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_audit_codebase
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_analyze_code
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: calendar_list
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: calendar_create
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: calendar_update
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: calendar_delete
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_weather
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: web_search
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_system_status
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: execute_codex_code
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_code_executor
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: run_code
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_git_ops
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_audit_codebase
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_analyze_code
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'codex' tools: ['execute_codex_code', 'codex_git_ops', 'codex_audit_codebase']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_garmin_health
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'garmin' tools: ['get_garmin_health']
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:64 - Skill 'google_calendar' has no tool registry hook.
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:64 - Skill 'homeassistant' has no tool registry hook.
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: analyze_pfsense_logs
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'pfsense' tools: ['analyze_pfsense_logs']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_configure
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_list_devices
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_status
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_start
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_stop
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_pause
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_dock
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_rooms
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_clean_rooms
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_consumables
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_maps
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: roborock_map_image
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'roborock' tools: ['roborock_configure', 'roborock_list_devices', 'roborock_status', 'roborock_start', 'roborock_stop', 'roborock_pause', 'roborock_dock', 'roborock_rooms', 'roborock_clean_rooms', 'roborock_consumables', 'roborock_maps', 'roborock_map_image']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_strava_activities
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'strava' tools: ['get_strava_activities']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_tibber_energy_analysis
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'tibber' tools: ['get_tibber_energy_analysis']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_weather
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'weather' tools: ['get_weather']
+2026-02-19 08:31:55 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_withings_health
+2026-02-19 08:31:55 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'withings' tools: ['get_withings_health']
+2026-02-19 08:31:55 | INFO     | app.services.proactive_service:start:20 - Proactive service started
+2026-02-19 08:31:55 | INFO     | app.services.proactive_service:send_morning_briefing:92 - Generating morning briefing
+Login failed: Unexpected title: GARMIN Authentication Application (status=None)
+Traceback (most recent call last):
+  File "/home/netadmin/freja.io/venv/lib/python3.13/site-packages/garminconnect/__init__.py", line 452, in login
+    token1, token2 = self.garth.login(
+                     ~~~~~~~~~~~~~~~~^
+        self.username,
+        ^^^^^^^^^^^^^^
+        self.password,
+        ^^^^^^^^^^^^^^
+        prompt_mfa=self.prompt_mfa,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/netadmin/freja.io/venv/lib/python3.13/site-packages/garth/http.py", line 167, in login
+    self.oauth1_token, self.oauth2_token = sso.login(
+                                           ~~~~~~~~~^
+        *args, **kwargs, client=self
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/netadmin/freja.io/venv/lib/python3.13/site-packages/garth/sso.py", line 134, in login
+    raise GarthException(f"Unexpected title: {title}")
+garth.exc.GarthException: Unexpected title: GARMIN Authentication Application
+[GARMIN] Login failed: Login failed: Unexpected title: GARMIN Authentication Application
+[GARMIN] Failed to initialize client: Failed to authenticate: Login failed: Unexpected title: GARMIN Authentication Application
+2026-02-19 08:31:57 | INFO     | app.core.dependencies:get_garmin_tool:36 - Garmin tool initialized (Dependency)
+Login failed: Unexpected title: GARMIN Authentication Application (status=None)
+Traceback (most recent call last):
+  File "/home/netadmin/freja.io/venv/lib/python3.13/site-packages/garminconnect/__init__.py", line 452, in login
+    token1, token2 = self.garth.login(
+                     ~~~~~~~~~~~~~~~~^
+        self.username,
+        ^^^^^^^^^^^^^^
+        self.password,
+        ^^^^^^^^^^^^^^
+        prompt_mfa=self.prompt_mfa,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/netadmin/freja.io/venv/lib/python3.13/site-packages/garth/http.py", line 167, in login
+    self.oauth1_token, self.oauth2_token = sso.login(
+                                           ~~~~~~~~~^
+        *args, **kwargs, client=self
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/netadmin/freja.io/venv/lib/python3.13/site-packages/garth/sso.py", line 134, in login
+    raise GarthException(f"Unexpected title: {title}")
+garth.exc.GarthException: Unexpected title: GARMIN Authentication Application
+[GARMIN] Login failed: Login failed: Unexpected title: GARMIN Authentication Application
+2026-02-19 08:31:58 | INFO     | app.core.dependencies:get_strava_tool:54 - Strava tool initialized (Dependency)
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:44186 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44196 - "GET /api/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44200 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44210 - "GET /api/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40080 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59656 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39442 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58938 - "POST /api/settings HTTP/1.1" 200 OK
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-INFO:     127.0.0.1:37262 - "GET /api/prompts HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37272 - "GET /api/prompts HTTP/1.1" 200 OK
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-INFO:     127.0.0.1:58104 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58120 - "GET /api/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58128 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58142 - "GET /api/models HTTP/1.1" 200 OK
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-INFO:     127.0.0.1:51448 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51456 - "GET /api/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51462 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51474 - "GET /api/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51482 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51488 - "GET /api/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46954 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46958 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46966 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46974 - "POST /api/settings HTTP/1.1" 200 OK
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-Exception happened while polling for updates.
-Traceback (most recent call last):
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 161, in network_retry_loop
-    await do_action()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_utils/networkloop.py", line 154, in do_action
-    action_cb_task.result()
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_updater.py", line 340, in polling_action_cb
-    updates = await self.bot.get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 671, in get_updates
-    updates = await super().get_updates(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 4860, in get_updates
-    await self._post(
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 703, in _post
-    return await self._do_post(
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/ext/_extbot.py", line 369, in _do_post
-    return await super()._do_post(
-           ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/_bot.py", line 732, in _do_post
-    result = await request.post(
-             ^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 198, in post
-    result = await self._request_wrapper(
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/anderss/Documents/projects/daa/venv/lib/python3.12/site-packages/telegram/request/_baserequest.py", line 375, in _request_wrapper
-    raise exception
-telegram.error.Conflict: Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
-=======
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: execute_codex_code
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_code_executor
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: run_code
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_git_ops
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_audit_codebase
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_analyze_code
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: calendar_list
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: calendar_create
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: calendar_update
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: calendar_delete
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_weather
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: web_search
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_system_status
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: execute_codex_code
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_code_executor
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: run_code
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_git_ops
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_audit_codebase
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_analyze_code
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'codex' tools: ['execute_codex_code', 'codex_git_ops', 'codex_audit_codebase']
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_garmin_health
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'garmin' tools: ['get_garmin_health']
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:64 - Skill 'google_calendar' has no tool registry hook.
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:64 - Skill 'homeassistant' has no tool registry hook.
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_strava_activities
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'strava' tools: ['get_strava_activities']
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_weather
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'weather' tools: ['get_weather']
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_withings_health
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'withings' tools: ['get_withings_health']
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: execute_codex_code
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_code_executor
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: run_code
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_git_ops
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: codex_audit_codebase
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: tool_analyze_code
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'codex' tools: ['execute_codex_code', 'codex_git_ops', 'codex_audit_codebase']
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_garmin_health
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'garmin' tools: ['get_garmin_health']
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:64 - Skill 'google_calendar' has no tool registry hook.
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:64 - Skill 'homeassistant' has no tool registry hook.
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_strava_activities
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'strava' tools: ['get_strava_activities']
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_weather
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'weather' tools: ['get_weather']
-2026-02-16 17:04:48 | INFO     | app.services.tool_registry:decorator:22 - Registered tool: get_withings_health
-2026-02-16 17:04:48 | INFO     | skills._core.skill_loader:discover_and_register_skills:62 - Registered skill 'withings' tools: ['get_withings_health']
-INFO:     Started server process [1756179]
-INFO:     Waiting for application startup.
-2026-02-16 17:04:48 | INFO     | main:lifespan:18 - Initializing Mainframe Services...
-2026-02-16 17:04:48 | INFO     | app.services.proactive_service:start:17 - Proactive service started
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:59798 - "WebSocket /socket.io/?EIO=4&transport=websocket" [accepted]
+INFO:     127.0.0.1:57240 - "WebSocket /socket.io/?EIO=4&transport=websocket" [accepted]
 INFO:     connection open
-INFO:     127.0.0.1:59804 - "WebSocket /socket.io/?EIO=4&transport=websocket" [accepted]
-INFO:     connection open
+2026-02-19 08:31:59 | INFO     | main:connect:157 - Client connected: D-mkDplN9kZGkXvJAAAB
+>> [STRAVA] Attempting to refresh token...
+>> [STRAVA] Token refreshed and saved.
+>> [STRAVA] Fetching activities...
+>> [STRAVA] Error: Strava API responded with 401: {"message":"Authorization Error","errors":[{"resource":"AccessToken","field":"activity:read_permission","code":"missing"}]}
+INFO:     127.0.0.1:57256 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57262 - "GET /api/settings/schema HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57280 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57290 - "GET /api/settings/schema HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57266 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57294 - "GET /api/models HTTP/1.1" 200 OK
+2026-02-19 08:32:03 | INFO     | app.services.proactive_service:send_morning_briefing:201 - Morning briefing sent to 8051490627
+INFO:     127.0.0.1:44494 - "POST /api/settings HTTP/1.1" 200 OK
 INFO:     connection closed
-INFO:     127.0.0.1:59820 - "WebSocket /socket.io/?EIO=4&transport=websocket" [accepted]
+2026-02-19 08:32:42 | INFO     | main:disconnect:165 - Client disconnected: D-mkDplN9kZGkXvJAAAB
+/home/netadmin/freja.io/venv/lib/python3.13/site-packages/websockets/legacy/server.py:1178: DeprecationWarning: remove second argument of ws_handler
+  warnings.warn("remove second argument of ws_handler", DeprecationWarning)
+INFO:     127.0.0.1:36754 - "WebSocket /socket.io/?EIO=4&transport=websocket" [accepted]
 INFO:     connection open
-2026-02-16 17:04:51 | INFO     | main:connect:148 - Client connected: kjf9DlTKIbFrCPIgAAAD
-2026-02-16 17:04:51 | INFO     | main:connect:148 - Client connected: Y-i4_KcQ6dDvMeioAAAE
-INFO:     127.0.0.1:59826 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59836 - "GET /api/settings/schema HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59848 - "GET /api/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59862 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59866 - "GET /api/settings/schema HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59874 - "GET /api/models HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56090 - "POST /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57582 - "GET /api/settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57586 - "GET /api/settings HTTP/1.1" 200 OK
+2026-02-19 08:32:42 | INFO     | main:connect:157 - Client connected: H82EYYhgMvUfNS8OAAAD
+INFO:     127.0.0.1:36756 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36766 - "GET /api/settings/schema HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36770 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36778 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36794 - "GET /api/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36810 - "GET /api/settings/schema HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56478 - "POST /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56490 - "GET /api/settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56494 - "GET /api/settings HTTP/1.1" 200 OK
 Mem0 search failed (continuing without memory): Client error '400 Bad Request' for url 'https://api.mem0.ai/v2/memories/search/'
 For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
-2026-02-16 17:21:40 | INFO     | app.services.tool_registry:execute:44 - Executing tool: tool_analyze_code with 
-2026-02-16 17:21:40 | INFO     | app.core.dependencies:get_code_executor:90 - CodeExecutor initialized (Dependency)
-Telegram Markdown send failed for 8051490627, retrying as plain text: Can't parse entities: can't find end of the entity starting at byte offset 56
-INFO:     127.0.0.1:44344 - "POST /api/chat HTTP/1.1" 200 OK
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
+INFO:     127.0.0.1:47980 - "POST /api/chat HTTP/1.1" 200 OK
+Mem0 search failed (continuing without memory): Client error '400 Bad Request' for url 'https://api.mem0.ai/v2/memories/search/'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+INFO:     127.0.0.1:47596 - "GET /health HTTP/1.1" 200 OK

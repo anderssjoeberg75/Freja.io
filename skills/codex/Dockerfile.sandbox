@@ -17,10 +17,14 @@ RUN pip install --no-cache-dir \
     scipy \
     requests \
     beautifulsoup4 \
-    python-dotenv
+    python-dotenv \
+    flask
 
 # Set working directory
 WORKDIR /workspace
 
-# Default command (keep container alive)
-CMD ["tail", "-f", "/dev/null"]
+# Copy execution server
+COPY skills/codex/execution_server.py /execution_server.py
+
+# Default command: Run the execution server
+CMD ["python", "/execution_server.py"]

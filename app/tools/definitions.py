@@ -1,96 +1,85 @@
-from typing import Optional
+from typing import Optional, Union, List
 from pydantic import BaseModel, Field
 
+
 class RunPythonCode(BaseModel):
-    """
-    Executes Python code in a secure sandboxed environment.
-    Use this for calculations, data processing, or logic that requires programming.
-    """
+    """Execute Python code in a secure sandboxed environment."""
+
     code: str = Field(..., description="The valid Python code to execute.")
 
+
 class WebSearch(BaseModel):
-    """
-    Searches the internet for information.
-    Use this when you need current information, facts about recent events, or knowledge outside your training data.
-    """
+    """Search the internet for information."""
+
     query: str = Field(..., description="The search query.")
 
+
 class GetGarminHealth(BaseModel):
-    """
-    Retrieves Garmin health data (steps, sleep, heart rate, body battery) for a specific date.
-    Use this when the user asks about their health, training status, or sleep.
-    """
-    date_str: str = Field(..., description="The date to fetch data for in YYYY-MM-DD format. Defaults to today if not specified.")
+    """Retrieve Garmin health data for a specific date."""
+
+    date_str: str = Field(
+        ...,
+        description="The date to fetch data for in YYYY-MM-DD format. Defaults to today if not specified.",
+    )
+
 
 class GetStravaActivity(BaseModel):
-    """
-    Retrieves recent activities from Strava.
-    Use this when the user asks about their recent workouts, runs, or rides recorded on Strava.
-    """
+    """Retrieve recent activities from Strava."""
+
     limit: int = Field(5, description="The maximum number of activities to retrieve. Defaults to 5.")
 
 
 class GetWeather(BaseModel):
-    """
-    Retrieves weather data for the configured home coordinates.
-    Requires LATITUDE and LONGITUDE settings.
-    """
+    """Retrieve weather data for the configured home coordinates."""
+
     pass
 
-<<<<<<< HEAD
+
+class GetWithingsHealth(BaseModel):
+    """Retrieve Withings health and body-composition data for the current user."""
+
+    pass
+
 
 class RoborockConfigure(BaseModel):
-    """Configure Roborock credentials and optional default device."""
+    """Configure Roborock integration credentials and optional default device."""
 
-    email: str = Field(..., description="Roborock/Xiaomi account e-mail address.")
-    password: str = Field(..., description="Roborock/Xiaomi account password.")
-    device_id: Optional[str] = Field(
-        None,
-        description="Optional default Roborock device identifier. If omitted, first device is auto-selected.",
-    )
+    email: str = Field(..., description="Roborock account e-mail.")
+    password: str = Field(..., description="Roborock account password.")
+    device_id: Optional[str] = Field(None, description="Optional device id to set as default.")
 
 
 class RoborockDeviceInput(BaseModel):
-    """Optional device selector used by most Roborock tools."""
+    """Optional target device for Roborock commands."""
 
-    device_id: Optional[str] = Field(
-        None,
-        description="Device identifier. Uses configured default when omitted.",
-    )
+    device_id: Optional[str] = Field(None, description="Target Roborock device id.")
 
 
 class RoborockCleanRoomsInput(BaseModel):
-    """Room-cleaning input supporting either explicit list or CSV values."""
+    """Room cleaning input for Roborock."""
 
-    device_id: Optional[str] = Field(
-        None,
-        description="Device identifier. Uses configured default when omitted.",
-    )
-    rooms: list[int] | str = Field(
+    device_id: Optional[str] = Field(None, description="Target Roborock device id.")
+    rooms: Union[List[int], str] = Field(
         ...,
-        description="Room/segment IDs either as integer list or comma-separated string (for example '16,17').",
+        description="Room ids as list (e.g. [16,17]) or CSV string (e.g. '16,17').",
     )
 
 
 class RoborockMapImageInput(BaseModel):
-    """Map rendering input for output format control."""
+    """Map image export input for Roborock."""
 
-    device_id: Optional[str] = Field(
-        None,
-        description="Device identifier. Uses configured default when omitted.",
-    )
-    output_format: str = Field(
-        "png",
-        description="Requested map image format. Currently only 'png' is supported.",
-    )
-=======
-class GetWithingsHealth(BaseModel):
-    """
-    Retrieves Withings health data (weight, fat percentage, muscle mass, heart rate) for the user.
-    EXTREMELY IMPORTANT: Use this tool whenever the user asks "vad väger jag?", "vad är min vikt?", 
-    "hur mycket väger jag?" or questions about their current weight, body composition, or vitals.
-    """
-    pass
+    device_id: Optional[str] = Field(None, description="Target Roborock device id.")
+    output_format: str = Field("png", description="Output format. Currently only png is supported.")
 
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
+class AnalyzePfSenseLogs(BaseModel):
+    """Analyze pfSense logs and return a report with anomaly warnings."""
+
+    limit: int = Field(200, description="Number of log lines to sample from pfSense.")
+    lookback_minutes: int = Field(60, description="Time window in minutes used to identify recent spikes.")
+
+
+class GetTibberEnergyAnalysis(BaseModel):
+    """Analyze Tibber hourly energy consumption and electricity prices."""
+
+    days: int = Field(7, description="Number of days to analyze (1-30).")

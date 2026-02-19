@@ -4,11 +4,10 @@ from app.core.database import get_db_settings, save_db_setting, get_db_prompts, 
 import logging
 import google.generativeai as genai
 import time
-from app.core.config import get_credential
-<<<<<<< HEAD
-=======
+import httpx
+import asyncio
+from app.core.config import get_credential, settings
 from app.core.settings_schema import SETTINGS_SCHEMA
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -27,14 +26,11 @@ async def get_settings():
         logger.error(f"Error fetching settings: {e}")
         return {"error": str(e)}
 
-<<<<<<< HEAD
-=======
 @router.get("/api/settings/schema")
 async def get_settings_schema():
     """Returns the metadata schema for all available settings."""
     return [item.model_dump() for item in SETTINGS_SCHEMA]
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 @router.post("/api/settings")
 async def update_setting(payload: dict):
     """Updates a single setting in the database."""
@@ -90,38 +86,49 @@ async def get_models():
     if _model_cache["data"] and (current_time - _model_cache["timestamp"] < CACHE_TTL):
         return {"models": _model_cache["data"]}
 
+    models = []
+    
+    # 1. Fetch Gemini Models
     try:
         GOOGLE_API_KEY = get_credential("GOOGLE_API_KEY")
-        if not GOOGLE_API_KEY:
-            return {"models": []}
-
-        genai.configure(api_key=GOOGLE_API_KEY)
-        
-        models = []
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                name = m.name.replace("models/", "")
-                models.append(name)
-        
-        # Sort and deduplicate
-        models = sorted(list(set(models)), reverse=True)
-        
-        # Default fallback if empty
-        if not models:
-            models = ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"]
-            
-        # Update cache
-        _model_cache = {
-            "data": models,
-            "timestamp": current_time
-        }
-        
-        logger.info(f"Fetched {len(models)} models from Google API")
-        return {"models": models}
-        
+        if GOOGLE_API_KEY:
+            genai.configure(api_key=GOOGLE_API_KEY)
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods:
+                    name = m.name.replace("models/", "")
+                    models.append(name)
     except Exception as e:
-        logger.error(f"Error listing models: {e}")
-        # Return fallback cache or hardcoded list on error
-        if _model_cache["data"]:
-             return {"models": _model_cache["data"]}
-        return {"models": ["gemini-2.0-flash", "gemini-1.5-pro"]}
+        logger.error(f"Error listing Gemini models: {e}")
+
+    # 2. Fetch Ollama Models
+    try:
+        ollama_url = get_credential("OLLAMA_URL") or settings.OLLAMA_URL
+        # Ensure URL logic (some users might set full API path or just base)
+        base_url = ollama_url.rstrip("/")
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            resp = await client.get(f"{base_url}/api/tags")
+            if resp.status_code == 200:
+                data = resp.json()
+                for model in data.get("models", []):
+                    # Ollama models usually have a 'name' field
+                    if "name" in model:
+                        models.append(model["name"])
+    except Exception as e:
+        # Don't log full stack trace for connection errors (common if Ollama is down)
+        logger.warning(f"Could not fetch Ollama models: {e}")
+
+    # Sort and deduplicate
+    models = sorted(list(set(models)), reverse=True)
+    
+    # Default fallback if empty
+    if not models:
+        models = ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"]
+        
+    # Update cache
+    _model_cache = {
+        "data": models,
+        "timestamp": current_time
+    }
+    
+    logger.info(f"Fetched {len(models)} models (Gemini + Ollama)")
+    return {"models": models}

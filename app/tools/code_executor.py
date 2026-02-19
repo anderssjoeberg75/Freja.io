@@ -12,21 +12,14 @@ class CodeExecutor:
     Allows running Python code and shell commands in an isolated container.
     """
     
-<<<<<<< HEAD
-    def __init__(self, image_tag: str = "python:3.10-slim", container_name: str = "mainframe_sandbox"):
-=======
     def __init__(self, image_tag: str = "freja-codex-sandbox", container_name: str = "mainframe_sandbox"):
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
         self.image_tag = image_tag
         self.container_name = container_name
         self.client = None
         self.container = None
         # attempt connection immediately
         self._connect()
-<<<<<<< HEAD
-=======
         self._ensure_image()
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
 
     def _connect(self):
         """Connect to Docker daemon."""
@@ -37,10 +30,6 @@ class CodeExecutor:
             logger.error(f"Failed to connect to Docker: {e}")
             self.client = None
 
-<<<<<<< HEAD
-    def ensure_container_running(self):
-        """Ensures the sandbox container is running."""
-=======
     def _ensure_image(self):
         """Builds the sandbox image if it doesn't exist."""
         if not self.client: return
@@ -61,16 +50,13 @@ class CodeExecutor:
             except Exception as e:
                 logger.error(f"Failed to build sandbox image: {e}")
 
-    def ensure_container_running(self):
+    def ensure_container_running(self, force_recreate: bool = False):
         """Ensures the sandbox container is running and synced."""
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
         if not self.client:
             self._connect()
             if not self.client:
                 return False
 
-<<<<<<< HEAD
-=======
         # Force reload of keys from .env directly to handle hot-updates
         try:
             from dotenv import dotenv_values
@@ -81,14 +67,17 @@ class CodeExecutor:
             google_key = os.environ.get("GOOGLE_API_KEY") or ""
             openai_key = os.environ.get("OPENAI_API_KEY") or ""
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
         try:
             # Check if container exists
             try:
                 self.container = self.client.containers.get(self.container_name)
-<<<<<<< HEAD
-=======
                 
+                if force_recreate:
+                    logger.info("Forced recreation requested.")
+                    self.container.stop()
+                    self.container.remove()
+                    raise docker.errors.NotFound("Forced recreation")
+
                 # Check if container has the keys (recreation needed if missing)
                 self.container.reload()
                 env_list = self.container.attrs['Config']['Env']
@@ -99,12 +88,11 @@ class CodeExecutor:
                 
                 # If we have keys but container doesn't, OR image mismatch, recreate
                 if (google_key and not has_google) or (openai_key and not has_openai) or (image_name != self.image_tag):
-                    logger.info(f"Container configuration mismatch (Image: {image_name} vs {self.image_tag}). Recreating...")
+                    logger.info(f"Container configuration mismatch. Recreating...")
                     self.container.stop()
                     self.container.remove()
                     raise docker.errors.NotFound("Forced recreation")
 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 if self.container.status != "running":
                     logger.info(f"Starting existing container {self.container_name}...")
                     self.container.start()
@@ -112,16 +100,6 @@ class CodeExecutor:
                 # Create and start new container
                 logger.info(f"Creating new container {self.container_name}...")
                 
-<<<<<<< HEAD
-                # Load environment variables to pass to container
-                from app.core.config import settings
-                env_vars = {
-                    "GOOGLE_API_KEY": settings.GOOGLE_API_KEY or "",
-                    "OPENAI_API_KEY": settings.OPENAI_API_KEY or "",
-                    "PYTHONUNBUFFERED": "1"
-                }
-                
-=======
                 env_vars = {
                     "GOOGLE_API_KEY": google_key,
                     "OPENAI_API_KEY": openai_key,
@@ -134,157 +112,110 @@ class CodeExecutor:
                     cwd: {'bind': '/workspace', 'mode': 'rw'}
                 }
                 
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
                 self.container = self.client.containers.run(
                     self.image_tag,
                     detach=True,
                     name=self.container_name,
-                    command="tail -f /dev/null",
-<<<<<<< HEAD
-                    # volumes={'/opt/mainframe': {'bind': '/workspace', 'mode': 'rw'}}, # Removed due to SMB issues
-                    working_dir="/workspace",
-                    network_mode="bridge",
-                    environment=env_vars, # Inject API Keys
-                    restart_policy={"Name": "on-failure"},
-                    mem_limit="512m",
-                )
-                logger.info(f"Started new container: {self.container.id}")
-            
-                # ALWAYS Copy project files into container to ensure sync
-                # This handles both new containers and existing ones (syncing changes)
-                try:
-                    import tarfile
-                    import io
-                    
-                    # Resolve real path to handle symlinks (GVFS/SMB)
-                    source_path = os.path.realpath('/opt/mainframe')
-                    
-                    # Create a tar stream
-                    stream = io.BytesIO()
-                    
-                    def filter_copy(tarinfo):
-                        # Exclude heavy/unnecessary directories
-                        name = tarinfo.name
-                        if "/venv" in name or "/.git" in name or "/__pycache__" in name or "/node_modules" in name or "/data" in name:
-                            return None
-                        return tarinfo
-
-                    with tarfile.open(fileobj=stream, mode='w') as tar:
-                        try:
-                            # Use the resolved path, but keep arcname as '.'
-                            tar.add(source_path, arcname='.', filter=filter_copy)
-                        except Exception as e:
-                            logger.warning(f"Could not add full folder: {e}")
-
-                    stream.seek(0)
-                    self.container.put_archive('/workspace', stream)
-                except Exception as e:
-                    logger.error(f"Failed to sync project files: {e}")
-
-=======
-                    volumes=volumes, # Bind mount!
+                    # CMD is now defined in Dockerfile to run execution_server.py
+                    # We don't override input command unless we want to debug
+                    volumes=volumes, 
                     network_mode="bridge",
                     environment=env_vars,
                     restart_policy={"Name": "on-failure"},
-                    # mem_limit="1g", # Increased for analysis
                 )
                 logger.info(f"Started new container: {self.container.id}")
+                
+                 # Wait a bit for server to start
+                time.sleep(2)
             
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
             return True
         except Exception as e:
             logger.error(f"Error managing container: {e}")
             return False
-<<<<<<< HEAD
 
-=======
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
     def run_code(self, code: str, language: str = "python") -> Dict[str, Any]:
         """
-        Executes code in the container.
+        Executes code in the container via the execution server.
         """
         if not self.ensure_container_running():
             return {"error": "Docker container not available. Is Docker installed and running?"}
 
         try:
-<<<<<<< HEAD
-            # Write code to file
-            filename = f"script_{int(time.time())}.py"
-            with open(filename, "w") as f:
-                f.write(code)
-            
-            # Execute in container
-            # Using python directly on the file inside the container (mounted volume)
-            cmd = f"python {filename}"
-            exec_result = self.container.exec_run(cmd)
-            
-            # Cleanup
-            try:
-                os.remove(filename)
-            except: pass
-            
-            return {
-                "exit_code": exec_result.exit_code,
-                "output": exec_result.output.decode("utf-8"),
-=======
+            import json
             import tarfile
             import io
             
-            # Create script filename
-            script_name = f"script_{int(time.time())}.py"
-            
-            # Create tar stream in memory
-            stream = io.BytesIO()
-            with tarfile.open(fileobj=stream, mode='w') as tar:
-                encoded_code = code.encode('utf-8')
-                tarinfo = tarfile.TarInfo(name=script_name)
-                tarinfo.size = len(encoded_code)
-                tarinfo.mtime = time.time()
-                tar.addfile(tarinfo, io.BytesIO(encoded_code))
+            if language == "python":
+                # Prepare JSON payload for the server
+                payload = json.dumps({"code": code})
+                payload_filename = f"payload_{int(time.time()*1000)}.json"
                 
-            stream.seek(0)
-            
-            # Upload to container
-            self.container.put_archive('/workspace', stream)
-            
-            # Execute in container
-            # Using python directly on the file inside the container (mounted volume)
-            cmd = f"python {script_name}"
-            exec_result = self.container.exec_run(cmd)
-            
-            output_text = exec_result.output.decode("utf-8")
-            
-            if exec_result.exit_code != 0:
-                # With bind mount, file sync issues are unlikely unless permissions are wrong.
-                pass
-            
-            return {
-                "exit_code": exec_result.exit_code,
-                "output": output_text,
->>>>>>> 331190c (Update: 2026-02-16 17:26:31)
-                "command": cmd
-            }
+                # Create tar stream for the payload file
+                stream = io.BytesIO()
+                with tarfile.open(fileobj=stream, mode='w') as tar:
+                    encoded = payload.encode('utf-8')
+                    tarinfo = tarfile.TarInfo(name=payload_filename)
+                    tarinfo.size = len(encoded)
+                    tarinfo.mtime = time.time()
+                    tar.addfile(tarinfo, io.BytesIO(encoded))
+                    
+                stream.seek(0)
+                self.container.put_archive('/workspace', stream)
+                
+                # Execute curl inside container using the payload file
+                # The execution server listens on localhost:5000
+                cmd = f"curl -s -X POST -H 'Content-Type: application/json' -d @{payload_filename} http://localhost:5000/execute"
+                exec_result = self.container.exec_run(cmd)
+                
+                output = exec_result.output.decode("utf-8")
+                
+                # Try to clean up payload file (optional, but good practice)
+                self.container.exec_run(f"rm {payload_filename}")
+
+                if exec_result.exit_code != 0:
+                    return {"exit_code": exec_result.exit_code, "output": f"Execution Server Error: {output}", "command": cmd}
+                
+                try:
+                    # Parse the JSON response from the server
+                    response_data = json.loads(output)
+                    return {
+                        "exit_code": response_data.get("exit_code", 0),
+                        "output": response_data.get("output", ""),
+                        "stdout": response_data.get("stdout", ""),
+                        "stderr": response_data.get("stderr", ""),
+                        "command": "python_execution_server"
+                    }
+                except json.JSONDecodeError:
+                    return {"exit_code": 1, "output": f"Invalid JSON response from server: {output}", "command": cmd}
+                    
+            else:
+                # Fallback for Shell commands - executed directly via docker exec
+                exec_result = self.container.exec_run(code)
+                return {
+                    "exit_code": exec_result.exit_code,
+                    "output": exec_result.output.decode("utf-8"),
+                    "command": code
+                }
+
         except Exception as e:
-            logger.error(f"Execution execution failed: {e}")
+            logger.error(f"Execution failed: {e}")
             return {"error": str(e)}
 
     def run_command(self, command: str) -> Dict[str, Any]:
         """
         Executes a shell command in the container.
         """
-        if not self.ensure_container_running():
-            return {"error": "Docker container not available"}
+        # Shell commands bypass the Python server and run directly in the container
+        return self.run_code(command, language="shell")
 
-        try:
-            exec_result = self.container.exec_run(command)
-            return {
-                "exit_code": exec_result.exit_code,
-                "output": exec_result.output.decode("utf-8"),
-                "command": command
-            }
-        except Exception as e:
-            logger.error(f"Command execution failed: {e}")
-            return {"error": str(e)}
+    def reset_context(self) -> Dict[str, Any]:
+        """Resets the Python execution context."""
+        if not self.ensure_container_running():
+            return {"error": "Container not running"}
+            
+        cmd = "curl -X POST http://localhost:5000/reset"
+        exec_result = self.container.exec_run(cmd)
+        return {"output": exec_result.output.decode("utf-8")}
 
     def stop_container(self):
         """Stops and removes the container."""
