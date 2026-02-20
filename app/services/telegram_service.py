@@ -45,7 +45,7 @@ SELF_UPDATE_TRIGGER_PHRASES = (
 class TelegramService:
     """Telegram bot service for receiving and sending messages."""
 
-    def __init__(self, on_message: Callable[[str], Awaitable[str]]):
+    def __init__(self, on_message: Callable[[str, str], Awaitable[str]]):
         """
         Initialize Telegram service.
 
@@ -369,8 +369,7 @@ class TelegramService:
         await update.effective_chat.send_action("typing")
 
         try:
-            # This callback is intentionally unchanged so voice and text execute identical logic.
-            response = await self.on_message(user_message)
+            response = await self.on_message(user_message, chat_id)
 
             async def send_with_fallback(text: str):
                 """Try Markdown first, then fall back to plain text when parse fails."""
@@ -418,7 +417,7 @@ class TelegramService:
             self._processed_updates.pop(oldest_update_id, None)
 
 
-def init_telegram_service(on_message: Callable[[str], Awaitable[str]]) -> TelegramService:
+def init_telegram_service(on_message: Callable[[str, str], Awaitable[str]]) -> TelegramService:
     """Initialize the global Telegram service instance."""
     global telegram_service
     telegram_service = TelegramService(on_message)

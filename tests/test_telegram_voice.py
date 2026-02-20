@@ -41,7 +41,7 @@ class DummyVoiceHandler:
         return self.text
 
 
-async def _fake_callback(message):
+async def _fake_callback(message, chat_id):
     return f"Svar: {message}"
 
 

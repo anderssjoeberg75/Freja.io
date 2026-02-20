@@ -30,36 +30,19 @@ async def lifespan(app: FastAPI):
     # Initialize Telegram with LLM callback
     from app.services.telegram_service import init_telegram_service
     
-    async def telegram_llm_callback(message: str) -> str:
+    async def telegram_llm_callback(message: str, chat_id: str) -> str:
         """Process Telegram message through Unified Chat Service."""
         try:
             from app.services.chat_service import shared_chat_service
-            from app.services.telegram_service import telegram_service
-            
-            # Use Telegram Chat ID as Session ID
-            # Since the callback only receives the message text in the current implementation,
-            # we need to ensure we have access to the chat_id. 
-            # However, the current `telegram_service` design passes only message text.
-            # We need to hack this slightly or update telegram_service.
-            # OPTION 1: Update telegram_service to pass (text, chat_id)
-            # OPTION 2: Use the primary chat ID if singleton (risky for multi-user)
-            # Checking telegram_service.py: The callback signature is `Callable[[str], Awaitable[str]]`.
-            # This is a limitation. I should update telegram_service.py first to pass chat_id.
-            # But for now, to avoid breaking signatures in this step, let's assume single-user mode 
-            # using the configured chat_id from settings/service.
-            
-            chat_id = "telegram_default"
-            if telegram_service and telegram_service.primary_chat_id:
-                chat_id = telegram_service.primary_chat_id
-                
+
             response = await shared_chat_service.process_message(
                 session_id=chat_id,
                 user_msg=message
             )
             return response
-            
+
         except Exception as e:
-            logger.error(f"Telegram LLM error: {e}", exc_info=True)
+            logger.error(f"Telegram LLM error for chat_id={chat_id}: {e}", exc_info=True)
             return f"Fel vid AI-svar: {str(e)}"
     
     telegram = init_telegram_service(telegram_llm_callback)

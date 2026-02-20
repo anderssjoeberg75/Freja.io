@@ -100,8 +100,9 @@ def get_credential(key: str, fallback=None) -> str:
         db_value = db_settings.get(key)
         if db_value:
             return db_value
-    except Exception:
-        pass
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).warning("Failed to read DB credential for key=%s: %s", key, exc)
 
     env_value = getattr(settings, key, None)
     if env_value:
