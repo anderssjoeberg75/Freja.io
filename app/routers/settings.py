@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from app.core import config
 from app.core.database import get_db_settings, save_db_setting, get_db_prompts, save_db_prompt
 import logging
-import google.generativeai as genai
+from google import genai
 import time
 import httpx
 import asyncio
@@ -90,12 +90,14 @@ async def get_models():
     
     # 1. Fetch Gemini Models
     try:
-        GOOGLE_API_KEY = get_credential("GOOGLE_API_KEY")
-        if GOOGLE_API_KEY:
-            genai.configure(api_key=GOOGLE_API_KEY)
-            for m in genai.list_models():
-                if 'generateContent' in m.supported_generation_methods:
-                    name = m.name.replace("models/", "")
+        google_api_key = get_credential("GOOGLE_API_KEY")
+        if google_api_key:
+            client = genai.Client(api_key=google_api_key)
+            for model in client.models.list():
+                name = getattr(model, "name", "") or ""
+                if name.startswith("models/"):
+                    name = name.replace("models/", "", 1)
+                if name:
                     models.append(name)
     except Exception as e:
         logger.error(f"Error listing Gemini models: {e}")

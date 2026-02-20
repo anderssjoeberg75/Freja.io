@@ -5,8 +5,8 @@ import logging
 import re
 from typing import Dict, List, Optional, Any
 
-import google.generativeai as genai
-from google.generativeai.types import HarmBlockThreshold, HarmCategory
+from google import genai
+from google.genai import types
 
 from app.core.config import get_credential, settings
 from app.core.database import get_history, get_user_state, save_message, save_user_state
@@ -17,14 +17,10 @@ from app.services.web_fallback_service import WebFallbackService, needs_web_fall
 from skills.homeassistant import get_homeassistant_command_processor
 # --- Native Tooling Imports ---
 from app.services.tool_registry import registry
-from skills._core.skill_loader import discover_and_register_skills
 from app.services.llm_providers.ollama import generate_ollama_response
 
 logger = logging.getLogger(__name__)
 
-# Section: Skill bootstrap
-# Register all auto-discovered tools once when chat service is imported.
-discover_and_register_skills(registry)
 
 class UnifiedChatService:
     """
@@ -119,9 +115,6 @@ class UnifiedChatService:
         db_history = get_history(session_id=session_id, limit=10)
         
         gemini_history = []
-        # System Prompt
-        gemini_history.append({"role": "user", "parts": [full_system_block]})
-        gemini_history.append({"role": "model", "parts": ["Jag har tagit emot kontexten och är redo att hjälpa till."]})
 
         # DB History
         for msg in db_history:
@@ -143,8 +136,6 @@ class UnifiedChatService:
                 logger.info("Image attached to request")
             except Exception as exc:
                 logger.error(f"Image decode error: {exc}")
-
-        gemini_history.append({"role": "user", "parts": current_parts})
 
         gemini_history.append({"role": "user", "parts": current_parts})
 
@@ -177,30 +168,34 @@ class UnifiedChatService:
             if not google_api_key:
                 return "Error: GOOGLE_API_KEY is missing."
 
-            genai.configure(api_key=google_api_key)
+            client = genai.Client(api_key=google_api_key)
             tools_def = registry.get_gemini_function_declarations()
-            
-            # Helper to run blocking generate_content
-            def generate(history):
-                model = genai.GenerativeModel(model_id, tools=tools_def)
-                return model.generate_content(
-                    history,
-                    safety_settings={
-                        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-                        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-                        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-                        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-                    }
+            config = types.GenerateContentConfig(
+                system_instruction=full_system_block,
+                tools=[{"function_declarations": tools_def}],
+            )
+            history = [
+                types.Content(
+                    role=("user" if msg["role"] == "user" else "model"),
+                    parts=[types.Part(text=msg["content"])],
                 )
-
-            loop = asyncio.get_event_loop()
+                for msg in db_history
+            ]
+            chat = client.aio.chats.create(model=model_id, config=config, history=history)
+            current_message_parts: list[types.Part] = [types.Part(text=user_msg)]
+            if image_data:
+                try:
+                    b64_data = image_data.split(",", 1)[1] if "," in image_data else image_data
+                    current_message_parts.append(types.Part.from_bytes(data=base64.b64decode(b64_data), mime_type="image/jpeg"))
+                except Exception as exc:
+                    logger.error(f"Image decode error: {exc}")
             
             # --- TOOL EXECUTION LOOP ---
             max_turns = 5
             final_text_response = ""
             
             for _ in range(max_turns):
-                response = await loop.run_in_executor(None, lambda: generate(gemini_history))
+                response = await chat.send_message(current_message_parts)
                 
                 if not response.candidates:
                     return "Error: AI returned no candidates."
@@ -209,15 +204,13 @@ class UnifiedChatService:
                 
                 # Check for Function Calls
                 function_calls = []
-                for part in candidate.content.parts:
-                    if part.function_call:
+                for part in (candidate.content.parts or []):
+                    if getattr(part, "function_call", None):
                         function_calls.append(part.function_call)
                 
                 if function_calls:
-                    # Append AI's processing step to history
-                    gemini_history.append(candidate.content)
-                    
                     # Execute all function calls
+                    next_parts: list[types.Part] = []
                     for fc in function_calls:
                         fname = fc.name
                         fargs = dict(fc.args)
@@ -240,24 +233,21 @@ class UnifiedChatService:
                             if _ == max_turns - 1:
                                 max_turns += 1
 
-                        # Append Result to history
-                        gemini_history.append({
-                            "role": "function",
-                            "parts": [
-                                genai.protos.Part(
-                                    function_response=genai.protos.FunctionResponse(
-                                        name=fname,
-                                        response={"result": result_text}
-                                    )
+                        next_parts.append(
+                            types.Part(
+                                function_response=types.FunctionResponse(
+                                    name=fname,
+                                    response={"result": result_text},
+                                    id=getattr(fc, "id", None),
                                 )
-                            ]
-                        })
+                            )
+                        )
                     
-                    # Loop continues to send results back to AI
+                    current_message_parts = next_parts
                     continue
                 
                 # No function calls -> Final Response
-                final_text_response = response.text
+                final_text_response = response.text or ""
                 break
             
             if not final_text_response:
@@ -330,8 +320,8 @@ class UnifiedChatService:
                 mem_text = "\n".join([f"- {m['memory']}" for m in relevant if 'memory' in m])
                 if mem_text:
                     full_system_block += f"\n\n--- LONG TERM MEMORY ---\n{mem_text}"
-             except Exception:
-                 pass
+             except Exception as exc:
+                 logger.warning(f"Mem0 proactive search failed (continuing without memory): {exc}")
 
         # 4. Construct History for LLM
         # For proactive tasks, we treat the "Prompt" as a User message to trigger the response
@@ -344,11 +334,14 @@ class UnifiedChatService:
         # 5. Generate
         try:
             google_api_key = get_credential("GOOGLE_API_KEY")
-            genai.configure(api_key=google_api_key)
-            model = genai.GenerativeModel(model_id)
-            
-            # Simple generation without tools loop for now, as briefing is mostly text generation from context
-            response = await model.generate_content_async(gemini_history)
+            if not google_api_key:
+                return "Error generating briefing: GOOGLE_API_KEY is missing"
+
+            client = genai.Client(api_key=google_api_key)
+            response = await client.aio.models.generate_content(
+                model=model_id,
+                contents=gemini_history,
+            )
             
             if response.text:
                 # Save only the assistant output to history?

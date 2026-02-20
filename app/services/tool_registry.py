@@ -1,5 +1,5 @@
 from typing import Callable, Any, Dict, List, Type
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.core.logging import logger
 import inspect
 
@@ -9,8 +9,7 @@ class ToolDefinition(BaseModel):
     args_schema: Type[BaseModel]
     func: Callable
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 class ToolRegistry:
     def __init__(self):
@@ -19,6 +18,8 @@ class ToolRegistry:
     def register(self, name: str, description: str, args_schema: Type[BaseModel]):
         """Decorator to register a tool with a Pydantic schema."""
         def decorator(func: Callable):
+            if name in self._tools:
+                logger.warning("Tool already registered, overriding previous definition: {}", name)
             logger.info("Registered tool: {}", name)
             self._tools[name] = ToolDefinition(
                 name=name,

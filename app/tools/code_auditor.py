@@ -20,7 +20,7 @@ Ge en detaljerad rapport i Markdown-format på SVENSKA.
 """
 
 # Standard imports
-import google.generativeai as genai
+from google import genai
 from openai import OpenAI
 try:
     import anthropic
@@ -107,15 +107,12 @@ def run_code_audit(preferred_model=None):
             # --- GOOGLE ---
             if "gemini" in model_name.lower() and GOOGLE_API_KEY:
                 print(f"   - Testar Google: {model_name}")
-                genai.configure(api_key=GOOGLE_API_KEY)
-                # IMPORTANT: Disable filters here too
-                safety = [
-                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-                ]
-                model = genai.GenerativeModel(model_name, safety_settings=safety)
-                response = model.generate_content(final_prompt)
-                return process_and_save_response(response.text, f"Google {model_name}")
+                client = genai.Client(api_key=GOOGLE_API_KEY)
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=final_prompt,
+                )
+                return process_and_save_response(response.text or "", f"Google {model_name}")
 
             # --- OPENAI ---
             elif "gpt" in model_name.lower() and OPENAI_API_KEY:
