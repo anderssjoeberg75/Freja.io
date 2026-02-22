@@ -6,6 +6,7 @@ const WithingsSettings = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
+    const [showHelp, setShowHelp] = useState(false);
 
     useEffect(() => {
         fetchSettings();
@@ -66,11 +67,16 @@ const WithingsSettings = () => {
 
     return (
         <div className="p-8 max-w-4xl mx-auto h-full overflow-auto text-mainframe-text">
-            <div className="flex items-center gap-4 mb-8 border-b border-mainframe-border pb-4">
-                <Activity className="w-8 h-8 text-pink-400" />
-                <h1 className="text-3xl font-orbitron text-mainframe-accent">
-                    Withings Health Mate
-                </h1>
+            <div className="flex items-center justify-between mb-8 border-b border-mainframe-border pb-4">
+                <div className="flex items-center gap-4">
+                    <Activity className="w-8 h-8 text-pink-400" />
+                    <h1 className="text-3xl font-orbitron text-mainframe-accent">
+                        Withings Health Mate
+                    </h1>
+                </div>
+                <button onClick={() => setShowHelp(true)} className="text-mainframe-text/60 hover:text-mainframe-accent transition-colors">
+                    <Info className="w-6 h-6" />
+                </button>
             </div>
 
             {message && (
@@ -142,6 +148,25 @@ const WithingsSettings = () => {
                     </p>
                 </div>
             </div>
+
+            {/* Help Modal */}
+            {showHelp && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowHelp(false)}>
+                    <div className="bg-mainframe-card border-2 border-mainframe-accent rounded-xl p-8 max-w-2xl max-h-[85vh] overflow-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="text-2xl font-orbitron mb-6 text-mainframe-accent tracking-widest border-b border-mainframe-border pb-4">Withings Setup Guide</h2>
+                        <div className="space-y-6 text-mainframe-text/90">
+                            <p>To connect Withings, you need to create a developer application.</p>
+                            <ol className="list-decimal pl-5 space-y-2">
+                                <li>Go to <a href="https://developer.withings.com/developer-dashboard/" target="_blank" className="text-mainframe-accent underline" rel="noreferrer">Developer Dashboard</a> to register an app.</li>
+                                <li>Set <b>Callback URL</b> to your server's domain/IP or localhost.</li>
+                                <li>Copy the <b>Client ID</b> and <b>Consumer Secret (Client Secret)</b> into the fields behind this window.</li>
+                                <li>Click <b>Connect Withings</b> to authorize.</li>
+                            </ol>
+                        </div>
+                        <button onClick={() => setShowHelp(false)} className="mt-10 w-full py-3 bg-mainframe-accent text-black rounded font-bold uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all">Got it</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

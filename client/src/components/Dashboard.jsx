@@ -10,7 +10,7 @@ export default function Dashboard() {
 
     const fetchStatus = async () => {
         try {
-            const res = await fetch(`${API_URL}/status`);
+            const res = await fetch(`${API_URL}/api/status`);
             if (res.ok) {
                 const data = await res.json();
                 setAgents(data.agents || []);

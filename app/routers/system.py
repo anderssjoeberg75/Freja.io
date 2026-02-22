@@ -8,7 +8,7 @@ from skills._core.skill_loader import discover_and_register_skills
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-@router.get("/status")
+@router.get("/api/status")
 async def get_status():
     """Returns system status including active agents"""
     
