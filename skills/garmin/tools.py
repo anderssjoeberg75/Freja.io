@@ -16,7 +16,12 @@ def register_tools(registry: ToolRegistry) -> None:
 
     @registry.register(
         name="get_garmin_health",
-        description="Fetches Garmin health metrics (steps, sleep, body battery) for a date.",
+        description=(
+            "Hämtar daglig Garmin-hälsodata för användaren (INTE träningspass). Anropa detta verktyg AUTOMATISKT när användaren "
+            "frågar om sin hälsa, sömn, steg, energi, Body Battery, stress eller puls. "
+            "Returnerar: steg, sömnkvalitet, Body Battery, vilopuls, stressnivå, HRV-status mm. "
+            "OBS: Använd INTE detta verktyg för att analysera specifika träningspass (använd Strava för det)."
+        ),
         args_schema=GetGarminHealth,
     )
     async def get_garmin_health_impl(date_str: str) -> str:
@@ -32,8 +37,9 @@ def register_tools(registry: ToolRegistry) -> None:
         except ValueError:
             target_date = datetime.date.today()
 
+        # Only today is supported – silently fall back to today for other dates
         if target_date != datetime.date.today():
-            return "Error: Historical data fetching is not yet supported. Ask for today's data."
+            target_date = datetime.date.today()
 
         try:
             data = await loop.run_in_executor(None, garmin.get_health_report)

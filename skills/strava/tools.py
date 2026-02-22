@@ -14,8 +14,13 @@ def register_tools(registry: ToolRegistry) -> None:
 
     @registry.register(
         name="get_strava_activities",
-        description="Fetches recent activities from Strava (runs, rides, etc).",
+        description=(
+            "Hämtar de senaste träningspassen från Strava (löpning, cykling, promenader etc). "
+            "Använd detta verktyg när användaren frågar om specifika träningspass, "
+            "träningsanalys, distans, fart, eller senaste rundan."
+        ),
         args_schema=GetStravaActivity,
+
     )
     async def get_strava_activities_impl(limit: int = 5) -> str:
         try:

@@ -175,7 +175,7 @@ class ProactiveService:
 
             current_time_str = datetime.datetime.now(tz).strftime("%H:%M")
 
-            prompts = get_db_prompts()
+            prompts = await get_db_prompts()
             prompt_template = prompts.get(
                 "MORNING_BRIEFING_PROMPT",
                 (

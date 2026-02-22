@@ -154,6 +154,9 @@ def test_command_parser_missing_config_message(monkeypatch):
     monkeypatch.delenv("HAURL", raising=False)
     monkeypatch.delenv("HATOKEN", raising=False)
 
+    import skills.homeassistant.homeassistant_skill as ha_skill_module
+    monkeypatch.setattr(ha_skill_module, "get_credential", lambda key, fallback=None: fallback or "")
+
     processor = HomeAssistantCommandProcessor()
     import asyncio
 

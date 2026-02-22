@@ -10,18 +10,18 @@ DESCRIPTION: Combines static text from DB with dynamic time/date.
 ==============================================================================
 """
 
-def get_prompts_data():
+async def get_prompts_data():
     """Helper function to fetch all data from DB."""
-    return get_db_prompts()
+    return await get_db_prompts()
 
-def get_system_prompt():
+async def get_system_prompt():
     """
     Builds the system prompt:
     1. Fetches personality/rules from Database.
     2. Adds real-time info (Time/Date) via Python.
     """
     # 1. Fetch base text from database
-    data = get_prompts_data()
+    data = await get_prompts_data()
     # If DB is empty, use a simple fallback
     base_prompt = data.get("SYSTEM_PROMPT", "Du är Freja.Io. Fyll i din prompt i inställningarna.")
 
@@ -74,14 +74,16 @@ def get_system_prompt():
     
     return final_prompt + time_context + self_evolution + language_rule
 
-def get_audit_prompt():
-    return get_prompts_data().get("CODE_AUDIT_PROMPT", "No code analysis prompt found.")
+async def get_audit_prompt():
+    data = await get_prompts_data()
+    return data.get("CODE_AUDIT_PROMPT", "No code analysis prompt found.")
 
-def get_audit_tool_desc():
+async def get_audit_tool_desc():
     # Default description if missing from DB
     default = "Analyzes project source code to find errors and improvements."
-    return get_prompts_data().get("TOOL_DESC_AUDIT", default)
+    data = await get_prompts_data()
+    return data.get("TOOL_DESC_AUDIT", default)
 
-# Variables for import to other files
-CODE_AUDIT_PROMPT = get_audit_prompt()
-ANALYZE_CODE_TOOL_DESC = get_audit_tool_desc()
+# Note: Since these are now async, exporting these precomputed constants is tricky
+# because we'd need an event loop to fetch them here.
+# For now, services needing the prompt should await `get_audit_prompt()` instead.

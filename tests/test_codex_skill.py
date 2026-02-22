@@ -76,29 +76,16 @@ async def test_tool_registrations():
 async def test_audit_execution_in_docker():
     """Test that audit code is executed inside Docker."""
     mock_executor = MagicMock()
-    mock_executor.run_code.return_value = {"exit_code": 0, "output": "Report Generated"}
+    mock_executor.run_command.return_value = {"exit_code": 0, "output": "Report Generated"}
     
-    # Mock code_auditor path and file reading
     with patch("app.core.dependencies.get_code_executor", return_value=mock_executor):
-        with patch("builtins.open", new_callable=MagicMock) as mock_open:
-            mock_file = MagicMock()
-            mock_file.__enter__.return_value.read.return_value = "import foo"
-            mock_open.return_value = mock_file
+        result = await audit_code_impl()
             
-            with patch("app.tools.code_auditor.__file__", "/tmp/code_auditor.py"):
-                 # Mock import to ensure it doesn't fail
-                with patch.dict(sys.modules, {"app.tools.code_auditor": MagicMock(__file__="/tmp/code_auditor.py")}):
-                    result = await audit_code_impl()
-            
-    data = json.loads(result)
-    assert data["exit_code"] == 0
-    assert data["output"] == "Report Generated"
+    assert "Report Generated" in result
     
-    # Verify run_code was called with script content
-    args, _ = mock_executor.run_code.call_args
-    assert "import foo" in args[0]
-    assert "if __name__ == '__main__':" in args[0]
-    assert "run_code_audit()" in args[0]
+    # Verify run_command was called with the python script path
+    args, _ = mock_executor.run_command.call_args
+    assert "python3 app/tools/code_auditor.py" in args[0]
 
 @pytest.mark.asyncio
 async def test_git_clone():

@@ -1,5 +1,6 @@
 import asyncio
 import json
+import httpx
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
 
@@ -81,18 +82,10 @@ async def audit_code_impl() -> str:
     if not executor:
         return "Error: Docker environment not available for code audit. Please install Docker."
 
-    # Read the auditor source code
     try:
-        import app.tools.code_auditor
-        auditor_file = app.tools.code_auditor.__file__
-        with open(auditor_file, "r") as f:
-            script_content = f.read()
-        
-        # Append execution call
-        script_content += "\n\nif __name__ == '__main__':\n    print(run_code_audit())"
-        
+        cmd = "python3 app/tools/code_auditor.py"
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(None, executor.run_code, script_content)
+        result = await loop.run_in_executor(None, executor.run_command, cmd)
         
         # --- Notification Logic ---
         output = result.get("output", "")
@@ -104,30 +97,31 @@ async def audit_code_impl() -> str:
         if match:
             docker_path = match.group(1).strip()
             
-            # With Bind Mounts, /workspace maps to os.getcwd()
-            # Docker: /workspace/docs/file.md -> Host: ./docs/file.md
+            # Handle both Docker paths (/workspace/...) and direct host paths
             if "/workspace/" in docker_path:
                 rel_path = docker_path.replace("/workspace/", "")
                 host_path = os.path.abspath(rel_path)
+            else:
+                host_path = os.path.abspath(docker_path)
                 
-                # Verify file exists on host (should be instant with bind mount)
-                if os.path.exists(host_path):
-                     try:
-                        from app.services.telegram_service import telegram_service
-                        if telegram_service:
-                            if "✅" in output:
-                                clean_output = output.split("✅")[1]
-                                summary = clean_output.split("📂")[0].strip()
-                                msg = f"✅{summary}"
-                            else:
-                                msg = output[:2000]
-                            
-                            await telegram_service.send_message(msg)
-                            await telegram_service.send_document(host_path, caption="Självanalys Rapport")
-                     except Exception as e:
-                        print(f"Telegram notification failed: {e}")
-                else:
-                    print(f"Error: generated file {host_path} not found on host (Bind mount issue?)")
+            # Verify file exists on host
+            if os.path.exists(host_path):
+                try:
+                    from app.services.telegram_service import telegram_service
+                    if telegram_service:
+                        if "✅" in output:
+                            clean_output = output.split("✅")[1]
+                            summary = clean_output.split("📂")[0].strip()
+                            msg = f"✅{summary}"
+                        else:
+                            msg = output[:2000]
+                        
+                        await telegram_service.send_message(msg)
+                        await telegram_service.send_document(host_path, caption="Självanalys Rapport")
+                except Exception as e:
+                    print(f"Telegram notification failed: {e}")
+            else:
+                print(f"Error: generated file {host_path} not found on host (Bind mount issue?)")
 
         return json.dumps(result, indent=2)
         
@@ -138,6 +132,35 @@ class RunAndFixSchema(BaseModel):
     command: str = Field(..., description="The command to run (e.g., 'pytest tests/test_login.py' or 'python script.py').")
     file_path: str = Field(..., description="The path to the file that should be fixed if the command fails.")
     max_retries: int = Field(3, description="Maximum number of auto-fix attempts.")
+# Coding model priority order — most capable first
+_CODING_MODEL_PRIORITY = [
+    "qwen2.5-coder",
+    "codellama",
+    "starcoder2",
+    "deepseek-coder",
+    "llama3.1",
+    "llama3",
+    "mistral",
+]
+
+async def _pick_best_coding_model(base_url: str) -> str:
+    """Query Ollama /api/tags and return the best available coding model."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(f"{base_url}/api/tags")
+            if resp.status_code == 200:
+                models = [m["name"] for m in resp.json().get("models", [])]
+                for preferred in _CODING_MODEL_PRIORITY:
+                    for available in models:
+                        if available.split(":")[0].lower().startswith(preferred):
+                            return available
+                # Return first available model as last resort
+                if models:
+                    return models[0]
+    except Exception:
+        pass
+    return "llama3.1:8b"  # Safe fallback
+
 
 async def run_and_fix_impl(command: str, file_path: str, max_retries: int = 3) -> str:
     """Runs a command and attempts to fix the file if it fails."""
@@ -155,35 +178,29 @@ async def run_and_fix_impl(command: str, file_path: str, max_retries: int = 3) -
         return f"Error: Target file {file_path} not found."
 
     api_key = get_credential("GOOGLE_API_KEY") or settings.GOOGLE_API_KEY
-    
+
     use_ollama = False
-    model_name = "gemini-2.0-flash" # Default "Best"
+    model_name = "gemini-2.0-flash"  # Best quality for code fixing
 
     if api_key:
         try:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel(model_name)
         except Exception:
-            # Fallback to Ollama if Gemini fails configuration
             use_ollama = True
     else:
         use_ollama = True
 
     if use_ollama:
-        print("Using Ollama for self-correction (Gemini not available).")
         ollama_url = get_credential("OLLAMA_URL") or settings.OLLAMA_URL
         if not ollama_url:
-             return "Error: No Google API Key and no OLLAMA_URL found."
+            return "Error: No Google API Key and no OLLAMA_URL found."
         base_url = ollama_url.rstrip("/")
-        
-        # Use the configured default model or a sensible fallback
-        # In a real scenario, we might want to list models and pick the 'coder' one.
-        # for now, use the setting or 'llama3'
-        model_name = get_credential("GEMINI_LIVE_MODEL") or "llama3"
-        # If the setting is a gemini model but we are in ollama mode (missing key), 
-        # we must force a local model name.
-        if model_name.startswith("gemini"):
-            model_name = "llama3"
+        # Dynamically pick best available coding model from Ollama
+        model_name = await _pick_best_coding_model(base_url)
+        import logging
+        logging.getLogger(__name__).info(f"[Codex] Using Ollama coding model: {model_name}")
+
 
     history = []
     
@@ -210,9 +227,11 @@ async def run_and_fix_impl(command: str, file_path: str, max_retries: int = 3) -
         # If failed, try to fix
         print(f"Attempt {attempt+1} failed. Generating fix...")
         
-        # Read current code
-        with open(file_path, "r") as f:
-            current_code = f.read()
+        loop = asyncio.get_event_loop()
+        def _read_current():
+            with open(file_path, "r") as f:
+                return f.read()
+        current_code = await loop.run_in_executor(None, _read_current)
 
         prompt = f"""
         The command `{command}` failed using this code in `{file_path}`.
@@ -256,8 +275,10 @@ async def run_and_fix_impl(command: str, file_path: str, max_retries: int = 3) -
                 fixed_code = fixed_code.rsplit("\n", 1)[0]
             
             # Apply fix
-            with open(file_path, "w") as f:
-                f.write(fixed_code)
+            def _write_fix():
+                with open(file_path, "w") as f:
+                    f.write(fixed_code)
+            await loop.run_in_executor(None, _write_fix)
                 
             history.append(f"Attempt {attempt+1}: Fixed code based on error.")
             

@@ -94,9 +94,9 @@ settings = Settings()
 def get_credential(key: str, fallback=None) -> str:
     """Get credential from DB first, then environment values, then fallback."""
     try:
-        from app.core.database import get_db_settings
+        from app.core.database import get_db_settings_sync
 
-        db_settings = get_db_settings()
+        db_settings = get_db_settings_sync()
         db_value = db_settings.get(key)
         if db_value:
             return db_value

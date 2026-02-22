@@ -23,8 +23,6 @@ async def lifespan(app: FastAPI):
     init_db()
     
     proactive = init_proactive_service(sio)
-    # voice = init_voice_service(sio) # Removed
-    
     await proactive.start()
     
     # Initialize Telegram with LLM callback

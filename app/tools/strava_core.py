@@ -45,7 +45,7 @@ class StravaTool:
                 self.access_token = data["access_token"]
                 self.expires_at = data["expires_at"]
                 self.refresh_token = data["refresh_token"]
-                save_db_setting("STRAVA_REFRESH_TOKEN", self.refresh_token)
+                await save_db_setting("STRAVA_REFRESH_TOKEN", self.refresh_token)
                 print(">> [STRAVA] Token refreshed and saved.")
                 return True
 

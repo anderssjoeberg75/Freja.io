@@ -58,22 +58,19 @@ class UnifiedChatService:
         ha_processor = get_homeassistant_command_processor()
         ha_result = await ha_processor.process_message(session_id, user_msg)
         if ha_result.handled and ha_result.response:
-            save_message(session_id, "user", user_msg)
-            save_message(session_id, "assistant", ha_result.response)
+            await save_message(session_id, "user", user_msg)
+            await save_message(session_id, "assistant", ha_result.response)
             return ha_result.response
 
         # 3. Logic Hook (Self-improving)
         handle_user_prompt_submit(user_msg, project_root=".")
 
         # 3. User State & Profile Memory
-        user_state = get_user_state(session_id)
-        extracted_now = self._extract_user_state(user_msg)
-        if extracted_now:
-            user_state.update(extracted_now)
-            save_user_state(session_id, extracted_now)
+        # Profile is now updated by the LLM calling `update_user_profile_impl` natively
+        user_state = await get_user_state(session_id)
 
         # 4. Build Context (System Prompt + Profile)
-        system_prompt = get_system_prompt()
+        system_prompt = await get_system_prompt()
         
         # User Profile Context
         user_state_context = self._build_user_state_context(user_state)
@@ -112,7 +109,7 @@ class UnifiedChatService:
 
         
         # 5. Build History for Gemini
-        db_history = get_history(session_id=session_id, limit=10)
+        db_history = await get_history(session_id=session_id, limit=10)
         
         gemini_history = []
 
@@ -154,8 +151,8 @@ class UnifiedChatService:
                     image_data=image_data
                 )
                 
-                save_message(session_id, "user", user_msg)
-                save_message(session_id, "assistant", final_text_response)
+                await save_message(session_id, "user", user_msg)
+                await save_message(session_id, "assistant", final_text_response)
                 return final_text_response
                 
             except Exception as e:
@@ -263,8 +260,8 @@ class UnifiedChatService:
                 )
 
             # 9. Save to DB
-            save_message(session_id, "user", user_msg)
-            save_message(session_id, "assistant", final_text_response)
+            await save_message(session_id, "user", user_msg)
+            await save_message(session_id, "assistant", final_text_response)
 
             # --- MEM0 SAVE (Async) ---
             if mem0_client and final_text_response:
@@ -296,8 +293,8 @@ class UnifiedChatService:
         
         # 1. Setup
         model_id = get_credential("SELECTED_MODEL") or "gemini-2.0-flash"
-        system_prompt = get_system_prompt()
-        user_state = get_user_state(session_id)
+        system_prompt = await get_system_prompt()
+        user_state = await get_user_state(session_id)
         
         # 2. Build Context
         user_state_context = self._build_user_state_context(user_state)
@@ -346,7 +343,7 @@ class UnifiedChatService:
             if response.text:
                 # Save only the assistant output to history?
                 # Usually proactive messages are sent to Telegram, so we might want to log them.
-                save_message(session_id, "assistant", response.text)
+                await save_message(session_id, "assistant", response.text)
                 return response.text
                 
             return "Error: No response generated."
@@ -355,63 +352,7 @@ class UnifiedChatService:
             logger.error(f"Proactive gen error: {e}")
             return f"Error generating briefing: {e}"
 
-    # --- Helper Methods (Internal) ---
-
-    def _extract_user_state(self, user_input: str) -> Dict[str, str]:
-        extracted: Dict[str, str] = {}
-        lowered = user_input.lower()
-
-        age_patterns = [
-            r"(?:age|ålder)\s*(?:is|=|:|är)?\s*(\d{1,3})",
-            r"(?:i am|jag är)\s*(\d{1,3})\s*(?:years|år)?",
-        ]
-        for pattern in age_patterns:
-            match = re.search(pattern, lowered, re.IGNORECASE)
-            if match:
-                extracted["age"] = match.group(1)
-                break
-
-        max_hr_patterns = [
-            r"(?:max\s*(?:hr|pulse|puls|maxpuls)|maximum\s*(?:hr|pulse|heart\s*rate))\s*(?:is|=|:|är)?\s*(\d{2,3})",
-            r"(?:min\s*)?maxpuls\s*(?:är|is|=|:)?\s*(\d{2,3})",
-        ]
-        for pattern in max_hr_patterns:
-            match = re.search(pattern, lowered, re.IGNORECASE)
-            if match:
-                extracted["max_hr"] = match.group(1)
-                break
-
-        weight_patterns = [
-            r"(?:weight|vikt)\s*(?:is|=|:|är)?\s*(\d{2,3}(?:[\.,]\d)?)\s*(?:kg|kilo)?",
-            r"(?:i weigh|jag väger|väger)\s*(\d{2,3}(?:[\.,]\d)?)\s*(?:kg|kilo)?",
-        ]
-        for pattern in weight_patterns:
-            match = re.search(pattern, lowered, re.IGNORECASE)
-            if match:
-                extracted["weight"] = match.group(1).replace(",", ".")
-                break
-
-        return extracted
-
-    def _detect_requested_profile_field(self, assistant_text: str) -> Optional[str]:
-        lowered = assistant_text.lower()
-        if any(token in lowered for token in ["ålder", "age"]):
-            return "age"
-        if any(token in lowered for token in ["maxpuls", "max pulse", "max hr", "maximum heart rate"]):
-            return "max_hr"
-        if any(token in lowered for token in ["vikt", "weight"]):
-            return "weight"
-        return None
-
-    def _extract_numeric_fallback(self, user_input: str, field: str) -> Optional[str]:
-        match = re.search(r"(\d{1,3}(?:[\.,]\d)?)", user_input)
-        if not match:
-            return None
-
-        value = match.group(1).replace(",", ".")
-        if field in {"age", "max_hr"}:
-            value = str(int(float(value)))
-        return value
+    # Regex manual profile extraction was removed in favor of tool calling.
 
     def _build_user_state_context(self, user_state: Dict[str, str]) -> str:
         if not user_state:

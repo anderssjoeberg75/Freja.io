@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Loader2, Activity, Info, Link } from 'lucide-react';
+import { Save, Loader2, Activity, Info, Link, AlertTriangle } from 'lucide-react';
 
 const StravaSettings = () => {
     const [settings, setSettings] = useState({});
@@ -123,6 +123,28 @@ const StravaSettings = () => {
                         </button>
                     </div>
                 </div>
+
+                {/* Authorization Helper */}
+                {settings.STRAVA_CLIENT_ID ? (
+                    <div className="mt-8 p-4 border border-green-500/30 bg-green-500/10 rounded-lg">
+                        <h3 className="text-lg font-bold text-green-400 mb-2">Step 2: Initialize Authorization</h3>
+                        <p className="text-sm mb-4">Click the button below to authorize this app to read your workouts (requires activity:read_all scope).</p>
+                        <a
+                            href={`https://www.strava.com/oauth/authorize?client_id=${settings.STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(window.location.origin + '/api/integrations/strava/callback')}&approval_prompt=force&scope=activity:read_all,profile:read_all&state=Anders`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white font-bold rounded hover:bg-orange-600 transition-colors"
+                        >
+                            <Link className="w-5 h-5" />
+                            Authorize with Strava
+                        </a>
+                    </div>
+                ) : (
+                    <div className="mt-8 p-4 border border-orange-500/30 bg-orange-500/10 rounded-lg text-orange-200 text-sm">
+                        <AlertTriangle className="w-5 h-5 inline mr-2" />
+                        Save your Client ID first to generate the mandatory Authorization Link.
+                    </div>
+                )}
             </div>
 
             {/* Help Modal */}
@@ -131,13 +153,13 @@ const StravaSettings = () => {
                     <div className="bg-mainframe-card border-2 border-mainframe-accent rounded-xl p-8 max-w-2xl max-h-[85vh] overflow-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-2xl font-orbitron mb-6 text-mainframe-accent tracking-widest border-b border-mainframe-border pb-4">Strava Setup Guide</h2>
                         <div className="space-y-6 text-mainframe-text/90">
-                            <p>To connect Strava, you need to create an API Application.</p>
+                            <p>To connect Strava, you need to create an API Application and authorize it.</p>
                             <ol className="list-decimal pl-5 space-y-2">
                                 <li>Go to <a href="https://www.strava.com/settings/api" target="_blank" className="text-mainframe-accent underline" rel="noreferrer">strava.com/settings/api</a></li>
                                 <li>Create an app. Category: "Performance Analysis" is fine.</li>
                                 <li>Set <b>Authorization Callback Domain</b> to <code>localhost</code> (or your server domain).</li>
-                                <li>Copy the <b>Client ID</b> and <b>Client Secret</b> here.</li>
-                                <li>Set Redirect URI to match your callback logic if needed, or leave default.</li>
+                                <li>Copy the <b>Client ID</b> and <b>Client Secret</b> into the settings behind this window and save them.</li>
+                                <li>Set Redirect URI to match your domain (e.g. <code>http://localhost</code>).</li>
                             </ol>
                         </div>
                         <button onClick={() => setShowHelp(false)} className="mt-10 w-full py-3 bg-mainframe-accent text-black rounded font-bold uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all">Got it</button>

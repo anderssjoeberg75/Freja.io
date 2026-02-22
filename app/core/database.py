@@ -1,4 +1,4 @@
-import sqlite3
+import aiosqlite
 import os
 import logging
 from app.core.config import DB_PATH
@@ -117,30 +117,44 @@ DATA:
 {context}"""
 }
 
-def get_db_connection():
+def get_db_connection_sync():
+    import sqlite3
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    # check_same_thread=False behövs för FastAPI men var försiktig med skrivningar
     conn = sqlite3.connect(DB_PATH, timeout=10.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
+def get_db_settings_sync():
+    """Synchronous version for when we absolutely must read synchronously (settings init)."""
+    try:
+        with get_db_connection_sync() as conn:
+            c = conn.cursor()
+            c.execute("SELECT key, value FROM settings")
+            return {row["key"]: row["value"] for row in c.fetchall()}
+    except Exception as e:
+        logger.error(f"[DB] Failed to get sync settings: {e}")
+        return {}
+
+
+def get_db_connection():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    return aiosqlite.connect(DB_PATH, timeout=10.0)
+
 def init_db():
     try:
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        with get_db_connection() as conn:
+        # init_db is called during app startup (lifespan), we can keep it synchronous
+        # or we could make the lifespan async and await an async init_db().
+        # Since this happens only once at startup, sync is fine to ensure fast setup
+        # before accepting connections, but we'll do the standard migrations here.
+        import sqlite3
+        with sqlite3.connect(DB_PATH, timeout=10.0) as conn:
             c = conn.cursor()
             c.execute('''CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT, role TEXT, content TEXT, image TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
             c.execute('''CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)''')
             c.execute('''CREATE TABLE IF NOT EXISTS prompts (key TEXT PRIMARY KEY, value TEXT)''')
             c.execute('''CREATE TABLE IF NOT EXISTS user_state (session_id TEXT, key TEXT, value TEXT, PRIMARY KEY (session_id, key))''')
             
-            # Settings: REMOVED auto-population of empty strings.
-            # We want to rely on pydantic-settings (env vars) for defaults.
-            # The DB should ONLY contain user-overridden values.
-            # for key in DEFAULT_SETTINGS:
-            #     c.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (key, ""))
-            
-            # Prompts: INSERT OR IGNORE (Behåll användarens ändringar om de finns)
             for key, val in DEFAULT_PROMPTS.items():
                 c.execute("INSERT OR IGNORE INTO prompts (key, value) VALUES (?, ?)", (key, val))
                 
@@ -149,79 +163,87 @@ def init_db():
     except Exception as e:
         logger.error(f"[DB] Database initialization error: {e}")
 
-def get_db_settings():
+async def get_db_settings():
     try:
-        with get_db_connection() as conn:
-            c = conn.cursor()
-            c.execute("SELECT key, value FROM settings")
-            return {row["key"]: row["value"] for row in c.fetchall()}
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
+            async with conn.execute("SELECT key, value FROM settings") as cursor:
+                rows = await cursor.fetchall()
+                return {row["key"]: row["value"] for row in rows}
     except Exception as e:
         logger.error(f"[DB] Failed to get settings: {e}")
         return {}
 
-def save_db_setting(key, value):
+async def save_db_setting(key, value):
     try:
-        with get_db_connection() as conn:
-            conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, str(value)))
-            conn.commit()
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
+            await conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, str(value)))
+            await conn.commit()
         return True
     except Exception as e:
         logger.error(f"[DB] Failed to save setting {key}: {e}")
         return False
 
-def get_db_prompts():
+async def get_db_prompts():
     try:
-        with get_db_connection() as conn:
-            c = conn.cursor()
-            c.execute("SELECT key, value FROM prompts")
-            return {row["key"]: row["value"] for row in c.fetchall()}
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
+            async with conn.execute("SELECT key, value FROM prompts") as cursor:
+                rows = await cursor.fetchall()
+                return {row["key"]: row["value"] for row in rows}
     except Exception as e:
         logger.error(f"[DB] Failed to get prompts: {e}")
         return {}
 
-def save_db_prompt(key, value):
+async def save_db_prompt(key, value):
     try:
-        with get_db_connection() as conn:
-            conn.execute("INSERT OR REPLACE INTO prompts (key, value) VALUES (?, ?)", (key, str(value)))
-            conn.commit()
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
+            await conn.execute("INSERT OR REPLACE INTO prompts (key, value) VALUES (?, ?)", (key, str(value)))
+            await conn.commit()
         return True
     except Exception as e:
         logger.error(f"[DB] Failed to save prompt {key}: {e}")
         return False
 
-def save_message(session_id, role, content, image=None):
+async def save_message(session_id, role, content, image=None):
     try:
-        with get_db_connection() as conn:
-            conn.execute("INSERT INTO history (session_id, role, content, image) VALUES (?, ?, ?, ?)", (session_id, role, content, image))
-            conn.commit()
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
+            await conn.execute("INSERT INTO history (session_id, role, content, image) VALUES (?, ?, ?, ?)", (session_id, role, content, image))
+            await conn.commit()
     except Exception as e:
         logger.error(f"[DB] Failed to save message: {e}")
 
-def get_history(session_id=None, limit=600):
+async def get_history(session_id=None, limit=600):
     try:
-        with get_db_connection() as conn:
-            c = conn.cursor()
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
             if session_id:
-                c.execute(
+                async with conn.execute(
                     "SELECT * FROM history WHERE session_id = ? ORDER BY id DESC LIMIT ?",
                     (session_id, limit),
-                )
+                ) as cursor:
+                    rows = await cursor.fetchall()
             else:
-                c.execute("SELECT * FROM history ORDER BY id DESC LIMIT ?", (limit,))
+                async with conn.execute("SELECT * FROM history ORDER BY id DESC LIMIT ?", (limit,)) as cursor:
+                    rows = await cursor.fetchall()
+            
             # Return reversed list so it's chronological for the LLM
-            return [{"role": r["role"], "content": r["content"], "image": r["image"]} for r in reversed(c.fetchall())]
+            return [{"role": r["role"], "content": r["content"], "image": r["image"]} for r in reversed(rows)]
     except Exception as e:
         logger.error(f"[DB] Failed to get history: {e}")
         return []
 
-
-def get_user_state(session_id: str):
+async def get_user_state(session_id: str):
     """Return persisted user state for a session as a plain dictionary."""
     try:
-        with get_db_connection() as conn:
-            c = conn.cursor()
-            c.execute("SELECT key, value FROM user_state WHERE session_id = ?", (session_id,))
-            rows = c.fetchall()
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
+            async with conn.execute("SELECT key, value FROM user_state WHERE session_id = ?", (session_id,)) as cursor:
+                rows = await cursor.fetchall()
+                
             state = {}
             for row in rows:
                 state[row["key"]] = row["value"]
@@ -231,20 +253,20 @@ def get_user_state(session_id: str):
         return {}
 
 
-def save_user_state(session_id: str, state: dict):
+async def save_user_state(session_id: str, state: dict):
     """Persist user state values for a session."""
     if not state:
         return True
 
     try:
-        with get_db_connection() as conn:
-            c = conn.cursor()
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
             for key, value in state.items():
-                c.execute(
+                await conn.execute(
                     "INSERT OR REPLACE INTO user_state (session_id, key, value) VALUES (?, ?, ?)",
                     (session_id, key, str(value)),
                 )
-            conn.commit()
+            await conn.commit()
         return True
     except Exception as e:
         logger.error(f"[DB] Failed to save user state for session {session_id}: {e}")

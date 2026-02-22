@@ -6,12 +6,12 @@ import httpx
 from typing import List, Optional, Any
 from pydantic import BaseModel, Field
 from app.services.tool_registry import ToolRegistry
-from app.core.config import settings, get_credential
+from app.core.config import settings, get_credential, BASE_DIR
 
 logger = logging.getLogger(__name__)
 
 # --- Configuration ---
-CHROMA_DB_PATH = os.path.join(settings.BASE_DIR, "db", "chroma")
+CHROMA_DB_PATH = os.path.join(BASE_DIR, "db", "chroma")
 COLLECTION_NAME = "freja_documents"
 # Ensure the embedding model is available in Ollama!
 # Users should run: `ollama pull nomic-embed-text`

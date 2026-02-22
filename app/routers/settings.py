@@ -20,7 +20,7 @@ CACHE_TTL = 300  # 5 minutes
 async def get_settings():
     """Fetches all settings from database."""
     try:
-        settings = get_db_settings()
+        settings = await get_db_settings()
         return settings
     except Exception as e:
         logger.error(f"Error fetching settings: {e}")
@@ -41,7 +41,7 @@ async def update_setting(payload: dict):
         if not key:
             return {"success": False, "message": "Missing key"}
         
-        save_db_setting(key, value)
+        await save_db_setting(key, value)
         logger.info(f"Setting updated: {key} = ***") # Don't log values for security
         return {"success": True, "message": f"Setting '{key}' updated."}
     except Exception as e:
@@ -52,7 +52,7 @@ async def update_setting(payload: dict):
 async def get_prompts():
     """Fetches all prompts from database."""
     try:
-        prompts = get_db_prompts()
+        prompts = await get_db_prompts()
         return prompts
     except Exception as e:
         logger.error(f"Error fetching prompts: {e}")
@@ -68,7 +68,7 @@ async def save_prompt(payload: dict):
         if not key or not value:
             return {"success": False, "message": "Missing key or value"}
         
-        save_db_prompt(key, value)
+        await save_db_prompt(key, value)
         logger.info(f"Prompt saved: {key}")
         return {"success": True, "message": f"Prompt '{key}' saved"}
     except Exception as e:

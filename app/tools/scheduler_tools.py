@@ -14,6 +14,9 @@ class ScheduleTaskSchema(BaseModel):
 class DeleteTaskSchema(BaseModel):
     job_id: str = Field(..., description="The ID of the job to remove.")
 
+class ListTasksSchema(BaseModel):
+    pass
+
 # --- Implementations ---
 
 def schedule_task_impl(instruction: str, cron: str) -> str:
@@ -61,7 +64,7 @@ def register_tools(registry: ToolRegistry) -> None:
     registry.register(
         name="list_scheduled_tasks",
         description="List all currently scheduled autonomous tasks.",
-        args_schema=BaseModel, # No args
+        args_schema=ListTasksSchema, # No args
     )(list_tasks_impl)
     
     registry.register(

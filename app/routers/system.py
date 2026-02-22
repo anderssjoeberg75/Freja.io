@@ -130,3 +130,22 @@ async def backup_database():
     except Exception as e:
         logger.error(f"Backup error: {e}")
         return {"error": str(e)}
+
+@router.get("/api/logs")
+async def get_system_logs(limit: int = 100):
+    """Returns the last N lines of the system log."""
+    import os
+    from app.core.config import BASE_DIR
+    log_path = os.path.join(BASE_DIR, "logs", "daa.log")
+    
+    if not os.path.exists(log_path):
+        return {"logs": []}
+        
+    try:
+        with open(log_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            # Return last `limit` lines
+            return {"logs": lines[-limit:]}
+    except Exception as e:
+        logger.error(f"Error reading logs: {e}")
+        return {"error": str(e), "logs": []}

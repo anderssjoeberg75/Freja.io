@@ -20,8 +20,16 @@ Ge en detaljerad rapport i Markdown-format på SVENSKA.
 """
 
 # Standard imports
-from google import genai
-from openai import OpenAI
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
 try:
     import anthropic
 except ImportError:
@@ -107,11 +115,9 @@ def run_code_audit(preferred_model=None):
             # --- GOOGLE ---
             if "gemini" in model_name.lower() and GOOGLE_API_KEY:
                 print(f"   - Testar Google: {model_name}")
-                client = genai.Client(api_key=GOOGLE_API_KEY)
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=final_prompt,
-                )
+                genai.configure(api_key=GOOGLE_API_KEY)
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(final_prompt)
                 return process_and_save_response(response.text or "", f"Google {model_name}")
 
             # --- OPENAI ---
@@ -126,7 +132,11 @@ def run_code_audit(preferred_model=None):
                 return process_and_save_response(res.choices[0].message.content, model_name)
 
         except Exception as e:
+            # Just print the exception message without traceback so the loop continues
             print(f"   x {model_name} failed: {e}")
             continue
 
     return "⚠️ Could not analyze code. Check API keys and internet connection."
+
+if __name__ == '__main__':
+    print(run_code_audit())

@@ -1,4 +1,5 @@
 from typing import Optional, Union, List
+import datetime as _dt
 from pydantic import BaseModel, Field
 
 
@@ -15,16 +16,16 @@ class WebSearch(BaseModel):
 
 
 class GetGarminHealth(BaseModel):
-    """Retrieve Garmin health data for a specific date."""
+    """Retrieve daily Garmin health metrics (NOT workouts/träningspass)."""
 
     date_str: str = Field(
-        ...,
-        description="The date to fetch data for in YYYY-MM-DD format. Defaults to today if not specified.",
+        default_factory=lambda: _dt.date.today().isoformat(),
+        description="Datumet att hämta data för i formatet YYYY-MM-DD. Om inte angivet används dagens datum.",
     )
 
 
 class GetStravaActivity(BaseModel):
-    """Retrieve recent activities from Strava."""
+    """Retrieve recent workout activities (träningspass) from Strava."""
 
     limit: int = Field(5, description="The maximum number of activities to retrieve. Defaults to 5.")
 

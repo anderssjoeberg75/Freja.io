@@ -18,7 +18,7 @@ SETTINGS_SCHEMA: List[SettingItem] = [
     # Intelligence
     SettingItem(key="GOOGLE_API_KEY", label="Google API Key", type="password", section="Intelligence", description="Gemini Pro / Flash API Key"),
     SettingItem(
-        key="GEMINI_LIVE_MODEL", 
+        key="SELECTED_MODEL", 
         label="Selected Model", 
         type="select", 
         section="Intelligence", 

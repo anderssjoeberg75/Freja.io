@@ -37,13 +37,22 @@ class ToolRegistry:
 
         try:
             tool = self._tools[tool_name]
-            # Validate args against schema
-            # If tool_args is None, treat as empty dict
             tool_args = tool_args or {}
-            validated_args = tool.args_schema(**tool_args)
-            
+
+            # --- Robustness: clean args before Pydantic validation ---
+            # 1. Remove None/null AND empty-string values so schema defaults kick in
+            # 2. Remove unknown keys that Pydantic would reject
+            schema_fields = set(tool.args_schema.model_fields.keys())
+            clean_args = {
+                k: v
+                for k, v in tool_args.items()
+                if v is not None and v != "" and k in schema_fields
+            }
+
+            validated_args = tool.args_schema(**clean_args)
+
             logger.info("Executing tool: {} with {}", tool_name, validated_args)
-            
+
             if inspect.iscoroutinefunction(tool.func):
                 return await tool.func(**validated_args.model_dump())
             else:
@@ -104,6 +113,58 @@ class ToolRegistry:
                     "type": "OBJECT",
                     "properties": properties,
                     "required": required
+                }
+            }
+            declarations.append(function_decl)
+        
+        return declarations
+
+    def get_ollama_function_declarations(self) -> List[Dict[str, Any]]:
+        """Return function definitions in Ollama/OpenAI format."""
+        declarations = []
+        for name, tool in self._tools.items():
+            schema = tool.args_schema.model_json_schema()
+            
+            # Clean schema for Ollama
+            def clean_schema(s):
+                if not isinstance(s, dict):
+                    if isinstance(s, list):
+                        return [clean_schema(v) for v in s]
+                    return s
+
+                if "anyOf" in s:
+                    options = s["anyOf"]
+                    non_null_options = [o for o in options if o.get("type") != "null"]
+                    if non_null_options:
+                        target = {k: v for k, v in s.items() if k != "anyOf"}
+                        target.update(non_null_options[0])
+                        return clean_schema(target)
+                    elif options:
+                        return clean_schema(options[0])
+
+                cleaned = {}
+                for k, v in s.items():
+                    # Ollama allows standard JSON schema types (lowercase string, integer, etc.)
+                    if k in ("title", "default", "$defs", "additionalProperties", "anyOf"):
+                        continue
+                    cleaned[k] = clean_schema(v)
+                return cleaned
+
+            cleaned_schema = clean_schema(schema)
+            properties = cleaned_schema.get("properties", {})
+            required = cleaned_schema.get("required", [])
+            
+            # Standard OpenAI format for tools
+            function_decl = {
+                "type": "function",
+                "function": {
+                    "name": name,
+                    "description": tool.description,
+                    "parameters": {
+                        "type": "object",
+                        "properties": properties,
+                        "required": required
+                    }
                 }
             }
             declarations.append(function_decl)

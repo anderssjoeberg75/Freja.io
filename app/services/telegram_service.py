@@ -28,10 +28,6 @@ logger = logging.getLogger(__name__)
 # Global instance
 telegram_service: Optional["TelegramService"] = None
 
-# Rate limiting
-_last_message_time: float = 0
-RATE_LIMIT_SECONDS = 1.0
-
 # Telegram retry/idempotency safeguards
 PROCESSED_UPDATE_TTL_SECONDS = 600
 PROCESSED_UPDATE_CACHE_SIZE = 5000
@@ -57,6 +53,10 @@ class TelegramService:
         self.bot_token: Optional[str] = None
         self.chat_ids: list[str] = []
         self._running = False
+        
+        # Rate limiting state
+        self._last_message_time: float = 0.0
+        self.RATE_LIMIT_SECONDS: float = 1.0
 
         # This in-memory cache prevents duplicate execution when Telegram retries updates.
         self._processed_updates: OrderedDict[int, float] = OrderedDict()
@@ -66,7 +66,7 @@ class TelegramService:
 
     async def start(self):
         """Start the Telegram bot polling."""
-        settings = get_db_settings()
+        settings = await get_db_settings()
         self.bot_token = settings.get("TELEGRAM_BOT_TOKEN", "").strip()
 
         chat_id_str = settings.get("TELEGRAM_CHAT_ID", "").strip()
@@ -219,7 +219,7 @@ class TelegramService:
         result = await processor.process_message(chat_id, message_text)
 
         if result.handled and result.response:
-            await update.message.reply_text(result.response)
+            await self._send_long_message(update, result.response)
             return
 
         await update.message.reply_text("Svar:\nOkänt Strava-kommando.")
@@ -236,7 +236,7 @@ class TelegramService:
         result = await processor.process_message(chat_id, message_text)
 
         if result.handled and result.response:
-            await update.message.reply_text(result.response)
+            await self._send_long_message(update, result.response)
             return
 
         await update.message.reply_text("Svar:\nOkänt HA-kommando.")
@@ -297,9 +297,9 @@ class TelegramService:
         if not script_path.exists():
             return False, "Update script is missing."
 
-        cmd = f"bash {shlex.quote(str(script_path))}"
-        process = await asyncio.create_subprocess_shell(
-            cmd,
+        process = await asyncio.create_subprocess_exec(
+            "bash",
+            str(script_path),
             cwd=str(repo_root),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
@@ -321,8 +321,6 @@ class TelegramService:
 
     async def _process_user_message(self, update: Update, user_message: str):
         """Shared execution pipeline for all user messages, including transcribed voice."""
-        global _last_message_time
-
         if not update.message or not update.effective_chat:
             return
 
@@ -341,10 +339,10 @@ class TelegramService:
 
         # Rate limiting protects the callback execution pipeline from message bursts.
         current_time = time.time()
-        if current_time - _last_message_time < RATE_LIMIT_SECONDS:
+        if current_time - self._last_message_time < self.RATE_LIMIT_SECONDS:
             await update.message.reply_text("⏳ Vänta lite innan du skickar nästa meddelande.")
             return
-        _last_message_time = current_time
+        self._last_message_time = current_time
 
         logger.info("Telegram message accepted for processing")
 
@@ -362,7 +360,14 @@ class TelegramService:
         strava_processor = get_strava_command_processor()
         strava_result = await strava_processor.process_message(chat_id, user_message)
         if strava_result.handled and strava_result.response:
-            await update.message.reply_text(strava_result.response)
+            await self._send_long_message(update, strava_result.response)
+            return
+
+        # Try Home Assistant skill parser
+        ha_processor = get_homeassistant_command_processor()
+        ha_result = await ha_processor.process_message(chat_id, user_message)
+        if ha_result.handled and ha_result.response:
+            await self._send_long_message(update, ha_result.response)
             return
 
         # Send typing indicator while the command/intent pipeline executes.
@@ -370,24 +375,26 @@ class TelegramService:
 
         try:
             response = await self.on_message(user_message, chat_id)
-
-            async def send_with_fallback(text: str):
-                """Try Markdown first, then fall back to plain text when parse fails."""
-                try:
-                    await update.message.reply_text(text, parse_mode="Markdown")
-                except Exception:
-                    await update.message.reply_text(text)
-
-            # Split long outputs to stay below Telegram's message size limits.
-            if len(response) > 4000:
-                for i in range(0, len(response), 4000):
-                    await send_with_fallback(response[i : i + 4000])
-            else:
-                await send_with_fallback(response)
+            await self._send_long_message(update, response)
 
         except Exception as exc:
             logger.error("Telegram handler error: %s", exc)
             await update.message.reply_text(f"❌ Fel: {str(exc)}")
+
+    async def _send_long_message(self, update: Update, text: str):
+        """Split and send long messages to stay below Telegram's size limits."""
+        async def send_with_fallback(chunk: str):
+            """Try Markdown first, then fall back to plain text when parse fails."""
+            try:
+                await update.message.reply_text(chunk, parse_mode="Markdown")
+            except Exception:
+                await update.message.reply_text(chunk)
+
+        if len(text) > 4000:
+            for i in range(0, len(text), 4000):
+                await send_with_fallback(text[i : i + 4000])
+        else:
+            await send_with_fallback(text)
 
     def _is_duplicate_update(self, update_id: Optional[int]) -> bool:
         """Return True when the update was already processed recently."""
