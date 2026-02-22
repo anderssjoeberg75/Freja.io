@@ -15,7 +15,10 @@ Freja.Io is a modular AI assistant platform with a FastAPI backend, a React/Vite
 - Python 3.11+
 - Node.js 18+
 - npm
+- HashiCorp Vault (for secure secret storage)
+- Ollama (with `nomic-embed-text` model for Local RAG features)
 - (Optional) Docker for Codex sandbox execution
+
 
 ## Installation
 
@@ -55,6 +58,57 @@ ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
 Add integration-specific variables only for the skills you plan to use (for example `HA_URL`/`HA_TOKEN`, `STRAVA_CLIENT_ID`, `TIBBER_API_TOKEN`, etc.).
+Note: Vault connects via `VAULT_URL` and `VAULT_TOKEN` and is used to store high-security API keys instead of SQLite.
+
+## Auto-starting Services (Systemd)
+
+To make Freja and the Vault integration start automatically on boot, create the following systemd service files:
+
+### 1) Backend & Frontend (freja.service)
+Create `/etc/systemd/system/freja.service`:
+```ini
+[Unit]
+Description=DAA Mainframe and Client Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/netadmin/freja.io
+ExecStart=/bin/bash /home/netadmin/freja.io/start.sh
+Restart=always
+RestartSec=10
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 2) Vault Auto-Unsealer (freja-vault-unseal.service)
+This requires `scripts/auto_unseal.sh` to exist and contain your Vault Unseal keys. Create `/etc/systemd/system/freja-vault-unseal.service`:
+```ini
+[Unit]
+Description=Freja Auto-Unseal for HashiCorp Vault
+After=vault.service
+BindsTo=vault.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/netadmin/freja.io/scripts/auto_unseal.sh
+RemainAfterExit=true
+User=netadmin
+Environment="VAULT_ADDR=http://127.0.0.1:8200"
+
+[Install]
+WantedBy=vault.service
+```
+
+Enable and start the services:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now freja.service
+sudo systemctl enable --now freja-vault-unseal.service
+```
 
 ## Running the project
 
