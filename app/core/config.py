@@ -85,6 +85,11 @@ class Settings(BaseSettings):
     TELEGRAM_CHAT_ID: Optional[str] = None
     HA_ALIASES: str = "{}"
 
+    VAULT_URL: str = "http://127.0.0.1:8200"
+    VAULT_TOKEN: Optional[str] = None
+    VAULT_MOUNT_POINT: str = "secret"
+    VAULT_SECRET_PATH: str = "freja"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
@@ -92,7 +97,19 @@ settings = Settings()
 
 
 def get_credential(key: str, fallback=None) -> str:
-    """Get credential from DB first, then environment values, then fallback."""
+    """Get credential from Vault (if secret), DB, then environment values, then fallback."""
+    try:
+        from app.core.settings_schema import SETTINGS_SCHEMA
+        is_secret = any(item.key == key and item.type == "password" for item in SETTINGS_SCHEMA)
+        if is_secret:
+            from app.core.vault import get_vault_secret
+            vault_val = get_vault_secret(key)
+            if vault_val:
+                return vault_val
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).warning("Failed to read Vault credential for key=%s: %s", key, exc)
+
     try:
         from app.core.database import get_db_settings_sync
 

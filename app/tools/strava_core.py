@@ -45,7 +45,11 @@ class StravaTool:
                 self.access_token = data["access_token"]
                 self.expires_at = data["expires_at"]
                 self.refresh_token = data["refresh_token"]
-                await save_db_setting("STRAVA_REFRESH_TOKEN", self.refresh_token)
+                from app.core.vault import save_vault_secret
+                success = save_vault_secret("STRAVA_REFRESH_TOKEN", self.refresh_token)
+                if not success:
+                    # Fallback to DB if Vault is disabled during migration
+                    await save_db_setting("STRAVA_REFRESH_TOKEN", self.refresh_token)
                 print(">> [STRAVA] Token refreshed and saved.")
                 return True
 

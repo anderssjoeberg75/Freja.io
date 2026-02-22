@@ -31,6 +31,10 @@ backend/config/service_account.json
 # Database
 db/mainframe.db
 db/mainframe.db-journal
+db/mainframe.db-shm
+db/mainframe.db-wal
+db/chroma/
+docs/vault_keys.md
 # Temp test scripts
 test_*.py
 _test_*.py

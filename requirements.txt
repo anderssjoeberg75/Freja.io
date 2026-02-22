@@ -41,9 +41,11 @@ python-telegram-bot>=21.0
 # Utilities
 loguru>=0.7.2
 colorama>=0.4.6
+watchdog>=4.0.0
 
 cryptography>=42.0.0
 
 pytest-asyncio>=0.23.0
 
 aiosqlite==0.22.1
+hvac>=2.1.0

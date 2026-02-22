@@ -25,6 +25,10 @@ async def lifespan(app: FastAPI):
     proactive = init_proactive_service(sio)
     await proactive.start()
     
+    # Start Document Watcher for RAG
+    from app.services.document_watcher import document_watcher
+    document_watcher.start()
+    
     # Initialize Telegram with LLM callback
     from app.services.telegram_service import init_telegram_service
     
@@ -50,6 +54,7 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Shutting down Mainframe Services...")
+    document_watcher.stop()
     await telegram.stop()
     await proactive.stop()
 

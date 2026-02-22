@@ -18,9 +18,16 @@ CACHE_TTL = 300  # 5 minutes
 
 @router.get("/api/settings")
 async def get_settings():
-    """Fetches all settings from database."""
+    """Fetches all settings from database and secrets from Vault."""
     try:
         settings = await get_db_settings()
+        from app.core.vault import get_all_vault_secrets
+        vault_secrets = get_all_vault_secrets()
+        
+        # Merge them (Vault overrides DB if any overlap)
+        if vault_secrets:
+            settings.update(vault_secrets)
+            
         return settings
     except Exception as e:
         logger.error(f"Error fetching settings: {e}")
@@ -33,7 +40,7 @@ async def get_settings_schema():
 
 @router.post("/api/settings")
 async def update_setting(payload: dict):
-    """Updates a single setting in the database."""
+    """Updates a single setting in the database or Vault."""
     try:
         key = payload.get("key")
         value = payload.get("value")
@@ -41,7 +48,17 @@ async def update_setting(payload: dict):
         if not key:
             return {"success": False, "message": "Missing key"}
         
-        await save_db_setting(key, value)
+        # Check if setting is a password type to route it to Vault
+        is_secret = any(item.key == key and item.type == "password" for item in SETTINGS_SCHEMA)
+        if is_secret:
+            from app.core.vault import save_vault_secret
+            success = save_vault_secret(key, str(value))
+            if not success:
+                logger.error(f"Failed to save secret {key} to Vault")
+                return {"success": False, "message": f"Failed to save {key} to Vault. Check Vault connection."}
+        else:
+            await save_db_setting(key, value)
+            
         logger.info(f"Setting updated: {key} = ***") # Don't log values for security
         return {"success": True, "message": f"Setting '{key}' updated."}
     except Exception as e:

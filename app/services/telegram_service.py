@@ -66,10 +66,10 @@ class TelegramService:
 
     async def start(self):
         """Start the Telegram bot polling."""
-        settings = await get_db_settings()
-        self.bot_token = settings.get("TELEGRAM_BOT_TOKEN", "").strip()
+        from app.core.config import get_credential
+        self.bot_token = get_credential("TELEGRAM_BOT_TOKEN", "").strip()
 
-        chat_id_str = settings.get("TELEGRAM_CHAT_ID", "").strip()
+        chat_id_str = get_credential("TELEGRAM_CHAT_ID", "").strip()
         self.chat_ids = [cid.strip() for cid in chat_id_str.split(",") if cid.strip()]
 
         if not self.bot_token:

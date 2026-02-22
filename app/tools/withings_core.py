@@ -35,7 +35,10 @@ class WithingsTool:
                 self.access_token = body["access_token"]
                 self.expires_at = time.time() + body["expires_in"] - 60
                 self.refresh_token = body["refresh_token"]
-                save_db_setting("WITHINGS_REFRESH_TOKEN", self.refresh_token)
+                from app.core.vault import save_vault_secret
+                success = save_vault_secret("WITHINGS_REFRESH_TOKEN", self.refresh_token)
+                if not success:
+                    save_db_setting("WITHINGS_REFRESH_TOKEN", self.refresh_token)
                 return True, "Withings connected successfully."
 
             return False, f"Withings token exchange error: {data}"
@@ -70,7 +73,10 @@ class WithingsTool:
                 self.access_token = body["access_token"]
                 self.expires_at = time.time() + body["expires_in"] - 60
                 self.refresh_token = body["refresh_token"]
-                save_db_setting("WITHINGS_REFRESH_TOKEN", self.refresh_token)
+                from app.core.vault import save_vault_secret
+                success = save_vault_secret("WITHINGS_REFRESH_TOKEN", self.refresh_token)
+                if not success:
+                    save_db_setting("WITHINGS_REFRESH_TOKEN", self.refresh_token)
             else:
                 print(f">> [WITHINGS] Token refresh error: {data}")
         except Exception as exc:
