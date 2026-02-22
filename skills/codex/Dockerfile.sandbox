@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
 # Install Common Python Data Science & AI libraries
 # This speeds up execution by avoiding runtime installation
 RUN pip install --no-cache-dir \
-    google-generativeai \
+    google-genai \
     openai \
     anthropic \
     pandas \
