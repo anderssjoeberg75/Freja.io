@@ -7,7 +7,7 @@ import json
 
 from app.core import dependencies
 from app.services.tool_registry import ToolRegistry
-from app.tools.definitions import GetGarminHealth
+from skills._core.definitions import GetGarminHealth
 
 
 # Section: Registry Hook

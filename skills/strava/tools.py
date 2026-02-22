@@ -5,7 +5,7 @@ import json
 
 from app.core import dependencies
 from app.services.tool_registry import ToolRegistry
-from app.tools.definitions import GetStravaActivity
+from skills._core.definitions import GetStravaActivity
 
 
 # Section: Registry Hook

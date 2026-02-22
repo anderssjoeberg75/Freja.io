@@ -6,7 +6,7 @@ import json
 
 from app.core import dependencies
 from app.services.tool_registry import ToolRegistry
-from app.tools.definitions import GetWithingsHealth
+from skills._core.definitions import GetWithingsHealth
 
 
 # Section: Registry Hook

@@ -6,8 +6,7 @@ from pydantic import BaseModel, Field
 
 from app.core import dependencies
 from app.services.tool_registry import ToolRegistry
-from app.tools.git_core import GitTool
-from app.tools.code_auditor import run_code_audit
+from skills.codex.auditor import AuditorModule_audit
 
 # --- Tool Schemas ---
 

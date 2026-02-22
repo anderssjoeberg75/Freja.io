@@ -120,7 +120,7 @@ class ProactiveService:
             from app.core.dependencies import get_garmin, get_strava, get_withings
             from app.services.chat_service import shared_chat_service
             from app.services.telegram_service import telegram_service
-            from app.tools.weather_core import get_weather
+            from skills.weather.core import get_weather
 
             if not telegram_service or not telegram_service.primary_chat_id:
                 logger.warning("Morning briefing skipped: Telegram is not configured")

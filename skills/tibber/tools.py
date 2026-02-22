@@ -1,7 +1,7 @@
 """Tibber tool registrations exposed by the Tibber skill."""
 
 from app.services.tool_registry import ToolRegistry
-from app.tools.definitions import GetTibberEnergyAnalysis
+from skills._core.definitions import GetTibberEnergyAnalysis
 
 
 def register_tools(registry: ToolRegistry) -> None:
@@ -16,7 +16,7 @@ def register_tools(registry: ToolRegistry) -> None:
         args_schema=GetTibberEnergyAnalysis,
     )
     async def get_tibber_energy_analysis_impl(days: int = 7) -> str:
-        from app.tools.tibber_core import TibberConfigError, get_tibber_energy_analysis
+        from skills.tibber.core import TibberConfigError, get_tibber_energy_analysis
 
         try:
             return await get_tibber_energy_analysis(days=days)

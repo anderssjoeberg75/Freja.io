@@ -35,5 +35,5 @@ This skill requires OAuth2 authentication with Withings.
 
 ## Dependencies
 
-- `app.tools.withings_core`: Shared logic for API communication.
+- `skills/withings/core.py`: Shared logic for API communication.
 - `app.core.dependencies`: Dependency injection for the tool instance.

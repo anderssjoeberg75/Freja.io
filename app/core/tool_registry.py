@@ -5,9 +5,9 @@ from app.core.logging_config import logger
 from app.core.config import settings
 
 # Import tool classes
-from app.tools.garmin_core import GarminCoach
-from app.tools.strava_core import StravaTool
-from app.tools.web_core import WebAgent
+from skills.garmin.core import GarminCoach
+from skills.strava.core import StravaTool
+from skills.deep_research.core import WebAgent
 
 class ToolRegistry:
     def __init__(self):

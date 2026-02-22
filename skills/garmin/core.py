@@ -1,7 +1,7 @@
 
 import logging
 import datetime
-from app.tools.garmin.client import GarminClient
+from skills.garmin.client import GarminClient
 
 # Configure logger
 logger = logging.getLogger(__name__)

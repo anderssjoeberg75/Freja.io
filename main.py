@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 # Section: Tool bootstrap imports
 # Importing this module at app startup ensures all auto-discovered skill tools,
 # including integrations, are registered in the shared ToolRegistry before first chat.
-from app.tools.implementations import register_all_tools
+from app.core.legacy_registration import register_all_tools
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

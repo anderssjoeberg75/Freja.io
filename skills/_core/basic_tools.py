@@ -69,7 +69,7 @@ async def get_system_status():
 #         language: Language for code execution (default: python).
 #     """
 #     try:
-#         from app.tools.code_executor import CodeExecutor
+#         from skills.codex.executor import CodeExecutor
 #         executor = CodeExecutor()
 #         
 #         if command:

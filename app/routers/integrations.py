@@ -7,7 +7,7 @@ import os
 from app.core.dependencies import get_withings
 from skills.strava import get_strava_command_processor
 from skills.homeassistant.homeassistant_skill import get_homeassistant_command_processor
-# Monkeypatch workaround: app.tools.weather_core might not be easily importable if hidden
+# Monkeypatch workaround: skills.weather.core might not be easily importable if hidden
 # But we checked tools.py and it imports it.
 
 logger = logging.getLogger(__name__)

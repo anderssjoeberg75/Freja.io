@@ -16,7 +16,7 @@ class DependencyManager:
         self._has_docker = False
 
         try:
-            import app.tools.code_executor  # noqa: F401
+            import skills.codex.executor  # noqa: F401
             self._has_docker = True
         except ImportError:
             self._has_docker = False
@@ -30,7 +30,7 @@ class DependencyManager:
 
         if garmin_email and garmin_password:
             try:
-                from app.tools.garmin_core import GarminCoach
+                from skills.garmin.core import GarminCoach
 
                 self._garmin_tool = GarminCoach()
                 logger.info("Garmin tool initialized (Dependency)")
@@ -48,7 +48,7 @@ class DependencyManager:
 
         if strava_client_id and strava_refresh_token:
             try:
-                from app.tools.strava_core import StravaTool
+                from skills.strava.core import StravaTool
 
                 self._strava_tool = StravaTool()
                 logger.info("Strava tool initialized (Dependency)")
@@ -66,7 +66,7 @@ class DependencyManager:
 
         if withings_client_id and withings_client_secret:
             try:
-                from app.tools.withings_core import WithingsTool
+                from skills.withings.core import WithingsTool
 
                 self._withings_tool = WithingsTool()
                 logger.info("Withings tool initialized (Dependency)")
@@ -82,14 +82,14 @@ class DependencyManager:
         # Retry Docker detection on each call (handles startup race conditions)
         if not self._has_docker:
             try:
-                import app.tools.code_executor  # noqa: F401
+                import skills.codex.executor  # noqa: F401
                 self._has_docker = True
             except ImportError:
                 self._has_docker = False
 
         if self._has_docker:
             try:
-                from app.tools.code_executor import CodeExecutor
+                from skills.codex.executor import CodeExecutor
 
                 self._code_executor = CodeExecutor()
                 logger.info("CodeExecutor initialized (Dependency)")

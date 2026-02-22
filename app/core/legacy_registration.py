@@ -18,13 +18,13 @@ def register_all_tools():
     import skills.deep_research
     skills.deep_research.register_tools(registry)
     
-    import app.tools.scheduler_tools
-    app.tools.scheduler_tools.register_tools(registry)
+    import skills.scheduler.tools
+    skills.scheduler.tools.register_tools(registry)
 
     import skills.github_sentinel
     skills.github_sentinel.register_tools(registry)
 
-    import app.tools.basic_tools # Force register Basic Tools (Weather, WebSearch)
+    import skills._core.basic_tools # Force register Basic Tools
     
     # Register the user profile update tool manually
     from pydantic import BaseModel, Field
@@ -35,7 +35,7 @@ def register_all_tools():
         max_hr: Optional[str] = Field(None, description="The user's maximum heart rate.")
         weight_kg: Optional[str] = Field(None, description="The user's weight in kilograms.")
     
-    from app.tools.tool_update_user_profile import update_user_profile_impl
+    from skills.user_profile.tools import update_user_profile_impl
     registry.register(
         name="tool_update_user_profile",
         description="Uppdaterar användarens profilinformation (ålder, maxpuls, vikt). Använd om användaren direkt indikerar att de väger ett visst antal kg, har en viss maxpuls etc.",
