@@ -22,9 +22,10 @@ class PfSenseConfig:
 
 
 def _get_config() -> PfSenseConfig:
-    base_url = os.getenv("PFSENSE_API_URL", "").strip().rstrip("/")
-    api_key = os.getenv("PFSENSE_API_KEY", "").strip()
-    verify_tls = os.getenv("PFSENSE_VERIFY_TLS", "true").strip().lower() not in {"0", "false", "no"}
+    from app.core.config import get_credential
+    base_url = get_credential("PFSENSE_API_URL").strip().rstrip("/")
+    api_key = get_credential("PFSENSE_API_KEY").strip()
+    verify_tls = get_credential("PFSENSE_VERIFY_TLS", "true").strip().lower() not in {"0", "false", "no"}
     return PfSenseConfig(base_url=base_url, api_key=api_key, verify_tls=verify_tls)
 
 
