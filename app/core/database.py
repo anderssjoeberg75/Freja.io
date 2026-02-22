@@ -121,6 +121,8 @@ def get_db_connection_sync():
     import sqlite3
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH, timeout=10.0, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -138,6 +140,14 @@ def get_db_settings_sync():
 
 def get_db_connection():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    # Using async with inside aiosqlite? No, aiosqlite.connect returns a connection object.
+    # We shouldn't execute PRAGMA here directly since connect is synchronous before await.
+    # aiosqlite handles WAL pragmas best in the execute block or after `await conn`, 
+    # but since it's an async context manager, we'll configure PRAGMA on connect where needed
+    # Actually, WAL mode is persistent on the database file once set by any connection.
+    # Setting it in init_db and get_db_connection_sync is usually sufficient for SQLite,
+    # but doing it on every aiosqlite connection ensures it stays active.
+    # Let's write a small wrapper or just let it be persistent.
     return aiosqlite.connect(DB_PATH, timeout=10.0)
 
 def init_db():

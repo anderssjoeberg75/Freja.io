@@ -307,14 +307,20 @@ class UnifiedChatService:
         # 3. MEM0 (Context Retrieval only)
         # We might want to find relevant memories for "Morning Briefing" or "Goals"
         mem0_key = get_credential("MEM0_API_KEY")
-        if mem0_key:
+        if mem0_key and len(mem0_key) > 5:
              try:
                 from mem0 import AsyncMemoryClient
                 mem0 = AsyncMemoryClient(api_key=mem0_key)
                 # Search for general preferences or goals
-                # "Planning day, goals, preferences"
                 relevant = await mem0.search("My daily goals and preferences", user_id=settings.USER_ID)
-                mem_text = "\n".join([f"- {m['memory']}" for m in relevant if 'memory' in m])
+                # handle both dict-based results (from some mem0 versions) and objects
+                mem_text = ""
+                for m in relevant:
+                    if isinstance(m, dict) and 'memory' in m:
+                        mem_text += f"- {m['memory']}\n"
+                    elif hasattr(m, 'memory'):
+                        mem_text += f"- {m.memory}\n"
+                        
                 if mem_text:
                     full_system_block += f"\n\n--- LONG TERM MEMORY ---\n{mem_text}"
              except Exception as exc:
@@ -340,11 +346,18 @@ class UnifiedChatService:
                 contents=gemini_history,
             )
             
-            if response.text:
-                # Save only the assistant output to history?
-                # Usually proactive messages are sent to Telegram, so we might want to log them.
-                await save_message(session_id, "assistant", response.text)
-                return response.text
+            # Secure text extraction (Google GenAI throws exceptions on BLOCKED content if accessing .text directly)
+            try:
+                output_text = response.text
+            except ValueError:
+                if response.candidates and response.candidates[0].finish_reason:
+                    output_text = f"Content blocked due to: {response.candidates[0].finish_reason.name}"
+                else:
+                    output_text = "Error: Blocked or unparseable text format."
+            
+            if output_text:
+                await save_message(session_id, "assistant", output_text)
+                return output_text
                 
             return "Error: No response generated."
             
