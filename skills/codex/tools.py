@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 
 from app.core import dependencies
 from app.services.tool_registry import ToolRegistry
-from skills.codex.auditor import AuditorModule_audit
 
 # --- Tool Schemas ---
 
@@ -82,7 +81,7 @@ async def audit_code_impl() -> str:
         return "Error: Docker environment not available for code audit. Please install Docker."
 
     try:
-        cmd = "python3 app/tools/code_auditor.py"
+        cmd = "python3 skills/codex/auditor.py"
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(None, executor.run_command, cmd)
         
