@@ -4,6 +4,7 @@ import datetime
 import pytz
 
 from app.core.config import settings
+from app.core.config import get_credential
 from app.core.logging import logger
 
 
@@ -33,10 +34,11 @@ class ProactiveService:
     async def _loop(self):
         last_briefing_date = None
         last_audit_date = None
+        last_briefing_attempt_at = None
 
         while self.running:
             try:
-                tz_name = settings.TIMEZONE
+                tz_name = get_credential("TIMEZONE", settings.TIMEZONE) or settings.TIMEZONE
                 try:
                     tz = pytz.timezone(tz_name)
                 except Exception:
@@ -45,7 +47,19 @@ class ProactiveService:
                 now = datetime.datetime.now(tz)
                 today = now.date()
 
-                target_hour = 7
+                target_hour_raw = get_credential("MORNING_BRIEFING_HOUR", 8)
+                try:
+                    target_hour = int(target_hour_raw)
+                except (TypeError, ValueError):
+                    logger.warning(
+                        "Invalid MORNING_BRIEFING_HOUR=%s, defaulting to 8", target_hour_raw
+                    )
+                    target_hour = 8
+
+                if target_hour < 0 or target_hour > 23:
+                    logger.warning("MORNING_BRIEFING_HOUR out of range (%s), defaulting to 8", target_hour)
+                    target_hour = 8
+
                 catch_up_window_minutes = 180
                 minutes_since_target = ((now.hour * 60) + now.minute) - (target_hour * 60)
 
@@ -55,8 +69,16 @@ class ProactiveService:
                 )
 
                 if should_send_briefing:
-                    last_briefing_date = today
-                    await self.send_morning_briefing()
+                    if last_briefing_attempt_at and (now - last_briefing_attempt_at).total_seconds() < 300:
+                        await asyncio.sleep(30)
+                        continue
+
+                    last_briefing_attempt_at = now
+                    sent = await self.send_morning_briefing()
+                    if sent:
+                        last_briefing_date = today
+                    else:
+                        logger.warning("Morning briefing attempt failed; will retry within window")
 
                 audit_target_hour = 12
                 audit_window_minutes = 180
@@ -87,7 +109,7 @@ class ProactiveService:
         except Exception as exc:
             logger.error(f"Daily audit failed: {exc}")
 
-    async def send_morning_briefing(self):
+    async def send_morning_briefing(self) -> bool:
         """Generate and send the daily morning briefing."""
         logger.info("Generating morning briefing")
 
@@ -102,7 +124,7 @@ class ProactiveService:
 
             if not telegram_service or not telegram_service.primary_chat_id:
                 logger.warning("Morning briefing skipped: Telegram is not configured")
-                return
+                return False
 
             context_parts = []
 
@@ -169,7 +191,8 @@ class ProactiveService:
             context = "\n\n".join(context_parts)
 
             try:
-                tz = pytz.timezone(settings.TIMEZONE)
+                tz_name = get_credential("TIMEZONE", settings.TIMEZONE) or settings.TIMEZONE
+                tz = pytz.timezone(tz_name)
             except Exception:
                 tz = pytz.UTC
 
@@ -199,11 +222,17 @@ class ProactiveService:
                         f"🌅 **Morning Briefing**\n\n{full_response}", chat_id=target_chat
                     )
                     logger.info(f"Morning briefing sent to {target_chat}")
+                    return True
                 else:
                     logger.warning("Morning briefing skipped: No primary chat ID found")
+                    return False
+
+            logger.warning("Morning briefing generation returned an empty response")
+            return False
 
         except Exception as exc:
             logger.error(f"Error sending morning briefing: {exc}")
+            return False
 
     async def trigger_briefing(self):
         """Manually trigger the briefing for testing."""
