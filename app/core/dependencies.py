@@ -79,6 +79,14 @@ class DependencyManager:
         if self._code_executor:
             return self._code_executor
 
+        # Retry Docker detection on each call (handles startup race conditions)
+        if not self._has_docker:
+            try:
+                import app.tools.code_executor  # noqa: F401
+                self._has_docker = True
+            except ImportError:
+                self._has_docker = False
+
         if self._has_docker:
             try:
                 from app.tools.code_executor import CodeExecutor

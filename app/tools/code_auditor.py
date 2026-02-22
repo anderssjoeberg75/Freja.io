@@ -21,9 +21,9 @@ Ge en detaljerad rapport i Markdown-format på SVENSKA.
 
 # Standard imports
 try:
-    import google.generativeai as genai
+    from google import genai as google_genai
 except ImportError:
-    genai = None
+    google_genai = None
 
 try:
     from openai import OpenAI
@@ -108,17 +108,20 @@ def run_code_audit(preferred_model=None):
     final_prompt = f"{CODE_AUDIT_PROMPT}\n\nSOURCE CODE ({count} files):\n{full_code}"
 
     # Lista modeller att testa (Prioritize updated/cheaper models)
-    test_models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gpt-4o', 'gpt-3.5-turbo']
+    test_models = ['gemini-2.0-flash', 'gemini-1.5-pro', 'gpt-4o', 'gpt-3.5-turbo']
 
     for model_name in test_models:
         try:
-            # --- GOOGLE ---
-            if "gemini" in model_name.lower() and GOOGLE_API_KEY:
+            # --- GOOGLE (new google.genai SDK) ---
+            if "gemini" in model_name.lower() and GOOGLE_API_KEY and google_genai:
                 print(f"   - Testar Google: {model_name}")
-                genai.configure(api_key=GOOGLE_API_KEY)
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(final_prompt)
-                return process_and_save_response(response.text or "", f"Google {model_name}")
+                client = google_genai.Client(api_key=GOOGLE_API_KEY)
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=final_prompt
+                )
+                text = response.text if response.text else ""
+                return process_and_save_response(text, f"Google {model_name}")
 
             # --- OPENAI ---
             elif "gpt" in model_name.lower() and OPENAI_API_KEY:
