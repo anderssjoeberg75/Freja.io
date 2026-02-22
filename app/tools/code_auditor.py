@@ -17,6 +17,9 @@ Analysera den bifogade källkoden med avseende på:
 4. Potentiella buggar eller kantfall
 
 Ge en detaljerad rapport i Markdown-format på SVENSKA.
+Använd relevanta emojis för att göra rapporten mer läsbar och trevlig, till exempel:
+✅ för styrkor, ⚠️ för varningar, 🔴 för kritiska problem, 💡 för förbättringsförslag,
+🔒 för säkerhet, ⚡ för prestanda, 🧹 för kodkvalitet, 🏗️ för arkitektur, 🐛 för buggar.
 """
 
 # Standard imports
