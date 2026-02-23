@@ -2,6 +2,7 @@ import docker
 import os
 import time
 import logging
+from pathlib import Path
 from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
@@ -15,11 +16,21 @@ class CodeExecutor:
     def __init__(self, image_tag: str = "freja-codex-sandbox", container_name: str = "mainframe_sandbox"):
         self.image_tag = image_tag
         self.container_name = container_name
+        self.project_root = self._resolve_project_root()
         self.client = None
         self.container = None
         # attempt connection immediately
         self._connect()
         self._ensure_image()
+
+    def _resolve_project_root(self) -> str:
+        """Resolve the host project root that should be bind-mounted into /workspace."""
+        env_root = os.environ.get("FREJA_PROJECT_ROOT")
+        if env_root:
+            return str(Path(env_root).expanduser().resolve())
+
+        # skills/codex/executor.py -> project root is two levels up from skills/
+        return str(Path(__file__).resolve().parents[2])
 
     def _connect(self):
         """Connect to Docker daemon."""
@@ -82,12 +93,22 @@ class CodeExecutor:
                 self.container.reload()
                 env_list = self.container.attrs['Config']['Env']
                 image_name = self.container.attrs['Config']['Image']
+                mounts = self.container.attrs.get('Mounts', [])
                 
                 has_google = any(e.startswith("GOOGLE_API_KEY=") and len(e) > 16 for e in env_list)
                 has_openai = any(e.startswith("OPENAI_API_KEY=") and len(e) > 16 for e in env_list)
+                workspace_mount_ok = any(
+                    m.get('Destination') == '/workspace' and Path(m.get('Source', '')).resolve() == Path(self.project_root)
+                    for m in mounts
+                )
                 
                 # If we have keys but container doesn't, OR image mismatch, recreate
-                if (google_key and not has_google) or (openai_key and not has_openai) or (image_name != self.image_tag):
+                if (
+                    (google_key and not has_google)
+                    or (openai_key and not has_openai)
+                    or (image_name != self.image_tag)
+                    or (not workspace_mount_ok)
+                ):
                     logger.info(f"Container configuration mismatch. Recreating...")
                     self.container.stop()
                     self.container.remove()
@@ -106,10 +127,9 @@ class CodeExecutor:
                     "PYTHONUNBUFFERED": "1"
                 }
                 
-                # Mount current working directory to /workspace
-                cwd = os.getcwd()
+                # Mount project root to /workspace to ensure self-analysis reads latest host files
                 volumes = {
-                    cwd: {'bind': '/workspace', 'mode': 'rw'}
+                    self.project_root: {'bind': '/workspace', 'mode': 'rw'}
                 }
                 
                 self.container = self.client.containers.run(
