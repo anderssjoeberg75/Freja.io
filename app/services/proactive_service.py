@@ -5,6 +5,7 @@ import pytz
 
 from app.core.config import settings
 from app.core.config import get_credential
+from app.core.database import get_db_settings, save_db_setting
 from app.core.logging import logger
 
 
@@ -32,9 +33,10 @@ class ProactiveService:
         logger.info("Proactive service stopped")
 
     async def _loop(self):
-        last_briefing_date = None
+        last_briefing_date = await self._load_last_briefing_date()
         last_audit_date = None
         last_briefing_attempt_at = None
+        last_skip_reason_date = None
 
         while self.running:
             try:
@@ -60,7 +62,12 @@ class ProactiveService:
                     logger.warning("MORNING_BRIEFING_HOUR out of range (%s), defaulting to 8", target_hour)
                     target_hour = 8
 
-                catch_up_window_minutes = 180
+                catch_up_window_minutes = self._parse_int_setting(
+                    "MORNING_BRIEFING_CATCH_UP_MINUTES",
+                    fallback=720,
+                    min_value=30,
+                    max_value=1440,
+                )
                 minutes_since_target = ((now.hour * 60) + now.minute) - (target_hour * 60)
 
                 should_send_briefing = (
@@ -77,8 +84,20 @@ class ProactiveService:
                     sent = await self.send_morning_briefing()
                     if sent:
                         last_briefing_date = today
+                        await save_db_setting("LAST_MORNING_BRIEFING_DATE", today.isoformat())
                     else:
                         logger.warning("Morning briefing attempt failed; will retry within window")
+                elif last_skip_reason_date != today:
+                    logger.info(
+                        "Morning briefing not due yet (today=%s, last_sent=%s, now=%02d:%02d, target_hour=%s, catch_up_window_minutes=%s)",
+                        today,
+                        last_briefing_date,
+                        now.hour,
+                        now.minute,
+                        target_hour,
+                        catch_up_window_minutes,
+                    )
+                    last_skip_reason_date = today
 
                 audit_target_hour = 12
                 audit_window_minutes = 180
@@ -212,7 +231,7 @@ class ProactiveService:
             )
 
             prompt = prompt_template.replace("{time}", current_time_str).replace("{context}", context)
-            session_id = f"proactive_morning_{datetime.date.today()}"
+            session_id = f"proactive_morning_{datetime.datetime.now(tz).date()}"
             full_response = await shared_chat_service.run_proactive_task(session_id, prompt)
 
             if full_response:
@@ -237,6 +256,41 @@ class ProactiveService:
     async def trigger_briefing(self):
         """Manually trigger the briefing for testing."""
         await self.send_morning_briefing()
+
+    async def _load_last_briefing_date(self):
+        """Load last successful morning briefing date from settings table."""
+        try:
+            db_settings = await get_db_settings()
+            stored_date = (db_settings.get("LAST_MORNING_BRIEFING_DATE") or "").strip()
+            if stored_date:
+                return datetime.date.fromisoformat(stored_date)
+        except Exception as exc:
+            logger.warning("Could not load LAST_MORNING_BRIEFING_DATE: %s", exc)
+        return None
+
+    def _parse_int_setting(
+        self,
+        key: str,
+        fallback: int,
+        min_value: int | None = None,
+        max_value: int | None = None,
+    ) -> int:
+        raw_value = get_credential(key, fallback)
+        try:
+            parsed = int(raw_value)
+        except (TypeError, ValueError):
+            logger.warning("Invalid %s=%s, defaulting to %s", key, raw_value, fallback)
+            return fallback
+
+        if min_value is not None and parsed < min_value:
+            logger.warning("%s below minimum (%s), defaulting to %s", key, min_value, fallback)
+            return fallback
+
+        if max_value is not None and parsed > max_value:
+            logger.warning("%s above maximum (%s), defaulting to %s", key, max_value, fallback)
+            return fallback
+
+        return parsed
 
 
 proactive_service = None
