@@ -15,19 +15,19 @@ def get_vault_client():
     vault_url = getattr(settings, "VAULT_URL", "http://127.0.0.1:8200")
     vault_token = getattr(settings, "VAULT_TOKEN", "")
     
-    if not vault_token:
-        logger.debug("[Vault] No VAULT_TOKEN provided, skipping authentication")
-        return None
-
     try:
+        logger.debug(f"[Vault] Attempting connection to {vault_url} with token (len {len(vault_token)})")
         client = hvac.Client(url=vault_url, token=vault_token, verify=False)
         # Suppress urllib3 insecure request warnings for local development
         import urllib3
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
         if client.is_authenticated():
+            logger.debug("[Vault] Client successfully authenticated.")
             _vault_client = client
             return client
+        else:
+            logger.warning("[Vault] Client connection established but authentication failed.")
     except hvac.exceptions.Unauthorized:
         logger.error("[Vault] Unauthorized - check your VAULT_TOKEN")
     except Exception as e:

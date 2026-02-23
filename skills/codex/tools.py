@@ -81,6 +81,22 @@ async def audit_code_impl() -> str:
         return "Error: Docker environment not available for code audit. Please install Docker."
 
     try:
+        import subprocess
+        
+        # Uppdatera från GitHub innan analysen så att vi alltid analyserar senaste filerna
+        try:
+            print("[AUDIT] Drar senaste koden från GitHub innan analys...")
+            pull_result = subprocess.run(
+                ["git", "pull"],
+                cwd=executor.project_root,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            print(f"[AUDIT] Git pull lyckades: {pull_result.stdout.strip()}")
+        except subprocess.CalledProcessError as e:
+            print(f"[AUDIT] Varning: Git pull misslyckades. Analyserar lokala filer istället. Fel: {e.stderr.strip()}")
+            
         cmd = "python3 skills/codex/auditor.py"
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(None, executor.run_command, cmd)

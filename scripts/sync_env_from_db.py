@@ -13,9 +13,10 @@ sys.path.append(os.getcwd())
 
 try:
     from app.core.database import get_db_settings
+    import asyncio
     
     print("Fetching settings from database...")
-    settings = get_db_settings()
+    settings = asyncio.run(get_db_settings())
     
     if not settings:
         print("No settings found in database!")

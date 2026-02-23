@@ -4,7 +4,9 @@ from typing import Optional
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-load_dotenv()
+# Load .env using absolute path (relative to this file) to avoid cwd issues when run as a service
+_env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env")
+load_dotenv(_env_path)
 
 
 class Settings(BaseSettings):
@@ -85,7 +87,7 @@ class Settings(BaseSettings):
     TELEGRAM_CHAT_ID: Optional[str] = None
     HA_ALIASES: str = "{}"
 
-    VAULT_URL: str = "http://127.0.0.1:8200"
+    VAULT_URL: str = "https://127.0.0.1:8200"
     VAULT_TOKEN: Optional[str] = None
     VAULT_MOUNT_POINT: str = "secret"
     VAULT_SECRET_PATH: str = "freja"
@@ -95,9 +97,14 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-
 def get_credential(key: str, fallback=None) -> str:
     """Get credential from Vault (if secret), DB, then environment values, then fallback."""
+    # First priority: Environment variables (like VAULT_TOKEN from .env)
+    env_value = getattr(settings, key, None)
+
+    if key == "VAULT_TOKEN" and env_value:
+        return env_value
+
     try:
         from app.core.settings_schema import SETTINGS_SCHEMA
         is_secret = any(item.key == key and item.type == "password" for item in SETTINGS_SCHEMA)
