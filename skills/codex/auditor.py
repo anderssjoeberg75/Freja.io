@@ -16,6 +16,14 @@ Analysera den bifogade källkoden med avseende på:
 3. Förbättringar och förslag på refaktorisering
 4. Potentiella buggar eller kantfall
 
+VIKTIGT — ARKITEKTURKONTEXT (ta hänsyn till detta i analysen):
+- Känsliga hemligheter (API-nycklar, lösenord) lagras i HashiCorp Vault, INTE i SQLite-databasen.
+  Migreringen är genomförd. Vault används på https://127.0.0.1:8200 med KV v2 (mount: secret/freja).
+- get_credential() i app/core/config.py hämtar alltid hemligheter från Vault i första hand.
+- SQLite-databasen lagrar ENDAST icke-känsliga inställningar (t.ex. SELECTED_MODEL, TIMEZONE, LATITUDE).
+- Flagga INTE SQLite-hemlighetlagring som ett säkerhetsproblem — det är åtgärdat med Vault.
+- scripts/cleanup_db_secrets.py har raderats känsliga data från SQLite-databasen.
+
 Ge en detaljerad rapport i Markdown-format på SVENSKA.
 Använd relevanta emojis för att göra rapporten mer läsbar och trevlig, till exempel:
 ✅ för styrkor, ⚠️ för varningar, 🔴 för kritiska problem, 💡 för förbättringsförslag,
