@@ -136,6 +136,11 @@ def get_credential(key: str, fallback=None) -> str:
     if secret_key:
         if env_value:
             return env_value
+        # pydantic-settings loads .env into settings but NOT into os.environ,
+        # so check getattr(settings, key) as a second env fallback.
+        settings_value = getattr(settings, key, None)
+        if settings_value:
+            return settings_value
         try:
             from app.core.vault import get_vault_secret
             vault_val = get_vault_secret(key)
