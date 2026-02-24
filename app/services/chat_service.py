@@ -86,7 +86,7 @@ class UnifiedChatService:
         # --- MEM0 INTEGRATION (Long Term Memory) ---
         mem0_client = None
         mem0_key = get_credential("MEM0_API_KEY")
-        user_id = settings.USER_ID
+        user_id = get_credential("USER_NAME") or settings.USER_NAME or settings.USER_ID
         
         if mem0_key and len(mem0_key) > 5:
             try:
@@ -312,7 +312,7 @@ class UnifiedChatService:
                 from mem0 import AsyncMemoryClient
                 mem0 = AsyncMemoryClient(api_key=mem0_key)
                 # Search for general preferences or goals
-                relevant = await mem0.search("My daily goals and preferences", user_id=settings.USER_ID)
+                relevant = await mem0.search("My daily goals and preferences", user_id=(get_credential("USER_NAME") or settings.USER_NAME or settings.USER_ID))
                 # handle both dict-based results (from some mem0 versions) and objects
                 mem_text = ""
                 for m in relevant:

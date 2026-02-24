@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Info, Loader2 } from 'lucide-react';
 import HaAliasManager from './HaAliasManager';
+import { adminFetch } from '../utils/adminFetch';
 
 const AliasView = () => {
     const [settings, setSettings] = useState({});
@@ -14,7 +15,10 @@ const AliasView = () => {
 
     const fetchSettings = async () => {
         try {
-            const res = await fetch('/api/settings');
+            const res = await adminFetch('/api/settings');
+            if (!res.ok) {
+                throw new Error("Admin token required.");
+            }
             const data = await res.json();
             setSettings(data);
         } catch (err) {
@@ -34,7 +38,7 @@ const AliasView = () => {
         setMessage(null);
         const valueToSave = directValue !== null ? directValue : settings[key];
         try {
-            const res = await fetch('/api/settings', {
+            const res = await adminFetch('/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key, value: valueToSave })

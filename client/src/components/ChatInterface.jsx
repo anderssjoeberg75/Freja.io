@@ -21,7 +21,7 @@ export default function ChatInterface() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/settings`);
+                const res = await fetch(`${API_URL}/api/settings/public`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data.SELECTED_MODEL) {

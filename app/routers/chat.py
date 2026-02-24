@@ -5,6 +5,7 @@ import logging
 
 # We import the new service instance
 from app.services.chat_service import shared_chat_service
+from app.core.database import get_history, save_message
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,15 @@ async def chat(request: ChatRequest):
         user_msg = messages[-1].content
     else:
         user_msg = "..."
+
+    # Seed DB history from client payload if this is a fresh session
+    try:
+        existing = await get_history(session_id=session_id, limit=1)
+        if not existing and messages and messages[-1].role == "user":
+            for msg in messages[:-1]:
+                await save_message(session_id, msg.role, msg.content)
+    except Exception as exc:
+        logger.warning(f"Failed to seed history for session {session_id}: {exc}")
 
     # Delegate to Service
     try:

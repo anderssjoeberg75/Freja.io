@@ -70,27 +70,29 @@ async def lifespan(app: FastAPI):
     await proactive.stop()
 
 # Initialize FastAPI
+app = FastAPI(lifespan=lifespan)
 
 # --- Centralized Exception Handler ---
 from fastapi.responses import JSONResponse
-from fastapi.exception_handlers import RequestValidationError
 from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"[EXCEPTION] {request.method} {request.url}: {exc}", exc_info=True)
+    detail = str(exc) if settings.DEBUG else "An internal error occurred."
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal server error", "detail": str(exc)}
+        content={"error": "Internal server error", "detail": detail}
     )
 
 # Optional: Handle validation errors more gracefully
 @app.exception_handler(FastAPIRequestValidationError)
 async def validation_exception_handler(request: Request, exc: FastAPIRequestValidationError):
     logger.warning(f"[VALIDATION] {request.method} {request.url}: {exc}")
+    detail = exc.errors() if settings.DEBUG else "Validation error."
     return JSONResponse(
         status_code=422,
-        content={"error": "Validation error", "detail": exc.errors()}
+        content={"error": "Validation error", "detail": detail}
     )
 
 # CORS Middleware

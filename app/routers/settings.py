@@ -1,13 +1,13 @@
-from fastapi import APIRouter
-from app.core import config
+import os
+from fastapi import APIRouter, Depends
 from app.core.database import get_db_settings, save_db_setting, get_db_prompts, save_db_prompt
 import logging
 from google import genai
 import time
 import httpx
-import asyncio
-from app.core.config import get_credential, settings
+from app.core.config import get_credential, settings, get_secret_keys, is_secret_key
 from app.core.settings_schema import SETTINGS_SCHEMA
+from app.core.security import require_admin
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -16,29 +16,49 @@ router = APIRouter()
 _model_cache = {"data": [], "timestamp": 0}
 CACHE_TTL = 300  # 5 minutes
 
-@router.get("/api/settings")
+@router.get("/api/settings", dependencies=[Depends(require_admin)])
 async def get_settings():
-    """Fetches all settings from database and secrets from Vault."""
+    """Fetches settings from database and returns secret presence flags."""
     try:
-        settings = await get_db_settings()
+        db_settings = await get_db_settings()
         from app.core.vault import get_all_vault_secrets
         vault_secrets = get_all_vault_secrets()
-        
-        # Merge them (Vault overrides DB if any overlap)
-        if vault_secrets:
-            settings.update(vault_secrets)
-            
-        return settings
+
+        # Strip secrets from output (never return secret values to clients)
+        public_settings = {k: v for k, v in db_settings.items() if not is_secret_key(k)}
+
+        # Provide a minimal secrets presence map for UI hints
+        secrets_present = {}
+        secret_keys = get_secret_keys()
+        for key in secret_keys:
+            if vault_secrets.get(key):
+                secrets_present[key] = True
+            elif db_settings.get(key):
+                # Legacy DB storage (should be migrated away)
+                secrets_present[key] = True
+            elif os.getenv(key):
+                secrets_present[key] = True
+
+        if secrets_present:
+            public_settings["__secrets"] = secrets_present
+
+        return public_settings
     except Exception as e:
         logger.error(f"Error fetching settings: {e}")
         return {"error": str(e)}
 
-@router.get("/api/settings/schema")
+@router.get("/api/settings/public")
+async def get_public_settings():
+    """Public settings needed by the client without admin auth."""
+    public_keys = ("APP_NAME", "USER_NAME", "SELECTED_MODEL")
+    return {key: get_credential(key) for key in public_keys}
+
+@router.get("/api/settings/schema", dependencies=[Depends(require_admin)])
 async def get_settings_schema():
     """Returns the metadata schema for all available settings."""
     return [item.model_dump() for item in SETTINGS_SCHEMA]
 
-@router.post("/api/settings")
+@router.post("/api/settings", dependencies=[Depends(require_admin)])
 async def update_setting(payload: dict):
     """Updates a single setting in the database or Vault."""
     try:
@@ -49,8 +69,10 @@ async def update_setting(payload: dict):
             return {"success": False, "message": "Missing key"}
         
         # Check if setting is a password type to route it to Vault
-        is_secret = any(item.key == key and item.type == "password" for item in SETTINGS_SCHEMA)
+        is_secret = is_secret_key(key)
         if is_secret:
+            if value is None or str(value).strip() == "":
+                return {"success": True, "message": f"No change for '{key}'."}
             from app.core.vault import save_vault_secret
             success = save_vault_secret(key, str(value))
             if not success:
@@ -65,7 +87,7 @@ async def update_setting(payload: dict):
         logger.error(f"Error updating setting: {e}")
         return {"success": False, "message": str(e)}
 
-@router.get("/api/prompts")
+@router.get("/api/prompts", dependencies=[Depends(require_admin)])
 async def get_prompts():
     """Fetches all prompts from database."""
     try:
@@ -75,7 +97,7 @@ async def get_prompts():
         logger.error(f"Error fetching prompts: {e}")
         return {"error": str(e)}
 
-@router.post("/api/prompts")
+@router.post("/api/prompts", dependencies=[Depends(require_admin)])
 async def save_prompt(payload: dict):
     """Saves a prompt to database."""
     try:
@@ -92,7 +114,7 @@ async def save_prompt(payload: dict):
         logger.error(f"Error saving prompt: {e}")
         return {"success": False, "message": str(e)}
 
-@router.get("/api/models")
+@router.get("/api/models", dependencies=[Depends(require_admin)])
 async def get_models():
     """Fetches available models dynamically with 5-minute TTL cache."""
     global _model_cache

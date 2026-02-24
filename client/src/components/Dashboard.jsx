@@ -1,28 +1,35 @@
 import { Activity, Cpu, Wifi } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { API_URL } from '../config';
+import { adminFetch } from '../utils/adminFetch';
 
 export default function Dashboard() {
     const [agents, setAgents] = useState([]);
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const logsEndRef = useRef(null);
 
     const fetchStatus = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/status`);
+            const res = await adminFetch(`${API_URL}/api/status`);
             if (res.ok) {
                 const data = await res.json();
                 setAgents(data.agents || []);
+            } else if (res.status === 401 || res.status === 503) {
+                setError("Admin token required.");
             }
 
-            const logsRes = await fetch(`${API_URL}/api/logs`);
+            const logsRes = await adminFetch(`${API_URL}/api/logs`);
             if (logsRes.ok) {
                 const logData = await logsRes.json();
                 setLogs(logData.logs || []);
+            } else if (logsRes.status === 401 || logsRes.status === 503) {
+                setError("Admin token required.");
             }
         } catch (err) {
             console.error("Failed to fetch dashboard data:", err);
+            setError("Could not load admin data.");
         } finally {
             setLoading(false);
         }
@@ -55,6 +62,7 @@ export default function Dashboard() {
             <header className="mb-8 shrink-0">
                 <h1 className="text-3xl font-bold text-white mb-2">Mainframe Overview</h1>
                 <p className="text-zinc-400">System Status: <span className="text-green-400">Operational</span></p>
+                {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
             </header>
 
             {/* Grid */}

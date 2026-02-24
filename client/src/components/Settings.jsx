@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Bot, Loader2, Activity, AlertTriangle, Download, ChevronRight } from 'lucide-react';
 import { getAvailableSkills, loadSkillSettings } from '../utils/skillRegistry';
+import { adminFetch, getAdminToken, setAdminToken } from '../utils/adminFetch';
 
 const Settings = () => {
     const [settings, setSettings] = useState({});
@@ -9,6 +10,8 @@ const Settings = () => {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
     const [models, setModels] = useState([]);
+    const [adminToken, setAdminTokenState] = useState(getAdminToken());
+    const [tokenMessage, setTokenMessage] = useState(null);
 
     // Dynamic Skill State
     const [availableSkills, setAvailableSkills] = useState([]);
@@ -48,10 +51,13 @@ const Settings = () => {
         setLoading(true);
         try {
             const [settingsRes, schemaRes, modelsRes] = await Promise.all([
-                fetch('/api/settings'),
-                fetch('/api/settings/schema'),
-                fetch('/api/models')
+                adminFetch('/api/settings'),
+                adminFetch('/api/settings/schema'),
+                adminFetch('/api/models')
             ]);
+            if (!settingsRes.ok || !schemaRes.ok || !modelsRes.ok) {
+                throw new Error("Admin token required or invalid.");
+            }
             const settingsData = await settingsRes.json();
             const schemaData = await schemaRes.json();
             const modelsData = await modelsRes.json();
@@ -75,14 +81,22 @@ const Settings = () => {
         setSaving(true);
         setMessage(null);
         try {
-            const res = await fetch('/api/settings', {
+            const res = await adminFetch('/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key, value: settings[key] })
             });
             const data = await res.json();
             if (data.success) {
-                setMessage({ type: 'success', text: `Uppdaterade ${key} framgångsrikt!` });
+                setMessage({ type: 'success', text: data.message || `Uppdaterade ${key} framgångsrikt!` });
+                const isSecret = schema.some((item) => item.key === key && item.type === 'password');
+                if (isSecret) {
+                    setSettings(prev => ({
+                        ...prev,
+                        [key]: '',
+                        __secrets: { ...(prev.__secrets || {}), [key]: true }
+                    }));
+                }
             } else {
                 setMessage({ type: 'error', text: 'Kunde inte spara inställningen.' });
             }
@@ -94,8 +108,35 @@ const Settings = () => {
         }
     };
 
-    const handleBackup = () => {
-        window.open('/api/system/backup_db', '_blank');
+    const handleBackup = async () => {
+        try {
+            const res = await adminFetch('/api/system/backup_db');
+            if (!res.ok) {
+                throw new Error("Kunde inte hämta backup.");
+            }
+            const blob = await res.blob();
+            const disposition = res.headers.get("content-disposition") || "";
+            const match = disposition.match(/filename="([^"]+)"/);
+            const filename = match ? match[1] : "mainframe_backup.db";
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Backup misslyckades.' });
+        }
+    };
+
+    const handleTokenSave = () => {
+        const cleaned = adminToken.trim();
+        setAdminToken(cleaned);
+        setTokenMessage(cleaned ? "Admin-token sparad." : "Admin-token rensad.");
+        fetchInitialData();
+        setTimeout(() => setTokenMessage(null), 3000);
     };
 
     if (loading) return (
@@ -108,12 +149,20 @@ const Settings = () => {
     const identityItems = schema.filter(i => i.section === 'Identity');
     const intelligenceItems = schema.filter(i => i.section === 'Intelligence');
 
-    const renderField = (item) => (
+    const renderField = (item) => {
+        const secretConfigured = settings.__secrets && settings.__secrets[item.key];
+        const placeholder = secretConfigured
+            ? "Konfigurerad (ersätt för att uppdatera)"
+            : (item.description || `Ange ${item.label}`);
+        return (
         <div key={item.key} className="grid gap-2">
             <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-mainframe-text/70 uppercase tracking-tight">
                     {item.label}
                 </label>
+                {item.type === 'password' && secretConfigured && (
+                    <span className="text-[10px] uppercase tracking-wider text-green-400">Set</span>
+                )}
             </div>
             <div className="flex gap-2">
                 {item.type === 'select' ? (
@@ -132,7 +181,7 @@ const Settings = () => {
                         type={item.type}
                         value={settings[item.key] || ''}
                         onChange={(e) => handleChange(item.key, e.target.value)}
-                        placeholder={item.description || `Ange ${item.label}`}
+                        placeholder={placeholder}
                         className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm"
                     />
                 )}
@@ -147,10 +196,31 @@ const Settings = () => {
             </div>
             {item.description && <p className="text-xs text-zinc-500 italic mt-1">{item.description}</p>}
         </div>
-    );
+        );
+    };
 
     return (
         <div className="p-8 max-w-4xl mx-auto h-full overflow-auto">
+            <div className="mb-6 p-4 border border-mainframe-border rounded-lg bg-mainframe-card/60">
+                <div className="flex items-center gap-4 flex-wrap">
+                    <label className="text-xs uppercase tracking-wider text-mainframe-text/60">Admin Token</label>
+                    <input
+                        type="password"
+                        value={adminToken}
+                        onChange={(e) => setAdminTokenState(e.target.value)}
+                        placeholder="X-Admin-Token"
+                        className="flex-1 min-w-[240px] bg-black/40 border border-mainframe-border rounded px-3 py-2 text-mainframe-text text-sm"
+                    />
+                    <button
+                        onClick={handleTokenSave}
+                        className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30 text-sm"
+                    >
+                        Spara token
+                    </button>
+                </div>
+                {tokenMessage && <p className="text-xs text-mainframe-text/60 mt-2">{tokenMessage}</p>}
+            </div>
+
             <div className="flex items-center justify-between mb-8 border-b border-mainframe-border pb-4 gap-4">
                 <h1 className="text-3xl font-orbitron text-mainframe-accent whitespace-nowrap">
                     System Configuration
@@ -231,7 +301,7 @@ const Settings = () => {
                         <AlertTriangle className="w-6 h-6 shrink-0" />
                         <div>
                             <strong className="block mb-1 text-yellow-500 uppercase tracking-tighter">Säkerhetsnotis</strong>
-                            <p>Konfiguration och känsliga nycklar lagras i en lokal SQLite-databas. Se till att miljö och fysisk åtkomst är begränsad.</p>
+                            <p>Känsliga nycklar lagras i Vault och returneras aldrig till webbläsaren. Administrations-API kräver nu en admin‑token.</p>
                         </div>
                     </div>
                 </div>

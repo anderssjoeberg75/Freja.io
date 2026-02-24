@@ -10,7 +10,7 @@ from typing import Any, Awaitable, Callable
 from google import genai
 from google.genai import types
 
-from app.core.config import settings
+from app.core.config import get_credential, settings
 from app.core.logging import logger
 from app.services.tool_call_router import ToolCallRouter
 
@@ -22,10 +22,11 @@ class GeminiLiveSession:
 
     def __init__(self, *, on_downstream_event: DownstreamCallback) -> None:
         # API key is loaded from server config only to avoid key leakage to the frontend.
-        if not settings.GOOGLE_API_KEY:
+        api_key = get_credential("GOOGLE_API_KEY")
+        if not api_key:
             raise ValueError("GOOGLE_API_KEY is missing on backend")
 
-        self.client = genai.Client(api_key=settings.GOOGLE_API_KEY, http_options={"api_version": "v1alpha"})
+        self.client = genai.Client(api_key=api_key, http_options={"api_version": "v1alpha"})
         self.model = settings.GEMINI_LIVE_MODEL
         self.on_downstream_event = on_downstream_event
         self.tool_router = ToolCallRouter()

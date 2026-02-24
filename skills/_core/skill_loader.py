@@ -66,6 +66,23 @@ def discover_and_register_skills(registry) -> list[SkillManifest]:
     return manifests
 
 
+def discover_skill_manifests(_registry=None) -> list[SkillManifest]:
+    """Discover skill manifests without registering tools."""
+    manifests: list[SkillManifest] = []
+
+    for skill_name in _iter_skill_names():
+        module = _discovered_modules.get(skill_name) or _import_skill_module(skill_name)
+        if module is None:
+            continue
+
+        _discovered_modules[skill_name] = module
+        manifest = getattr(module, "SKILL", None)
+        if isinstance(manifest, SkillManifest):
+            manifests.append(manifest)
+
+    return manifests
+
+
 def register_telegram_handlers(application) -> None:
     """Run optional Telegram handler hooks for all discovered skills."""
     for skill_name in _iter_skill_names():

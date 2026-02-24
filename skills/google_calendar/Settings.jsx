@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Calendar, Info, Link, AlertTriangle } from 'lucide-react';
+import { adminFetch } from '../../client/src/utils/adminFetch';
 
 const GoogleCalendarSettings = () => {
     const [settings, setSettings] = useState({});
@@ -15,7 +16,7 @@ const GoogleCalendarSettings = () => {
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/settings');
+            const res = await adminFetch('/api/settings');
             const data = await res.json();
             setSettings(data || {});
         } catch (err) {
@@ -33,7 +34,7 @@ const GoogleCalendarSettings = () => {
         setSaving(true);
         setMessage(null);
         try {
-            const res = await fetch('/api/settings', {
+            const res = await adminFetch('/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key, value: settings[key] })

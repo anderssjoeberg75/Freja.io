@@ -1,17 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.core import config
 import logging
-import os
 
 # Skill helpers
 from app.core.dependencies import get_withings
 from skills.strava import get_strava_command_processor
 from skills.homeassistant.homeassistant_skill import get_homeassistant_command_processor
+from app.core.security import require_admin
 # Monkeypatch workaround: skills.weather.core might not be easily importable if hidden
 # But we checked tools.py and it imports it.
 
 logger = logging.getLogger(__name__)
-router = APIRouter(tags=["integrations"])
+router = APIRouter(tags=["integrations"], dependencies=[Depends(require_admin)])
 
 @router.post("/api/integrations/ha/test")
 async def test_ha():
@@ -32,7 +32,7 @@ async def test_ha():
 @router.post("/api/integrations/weather/test")
 async def test_weather():
     try:
-        from app.tools.weather_core import get_weather
+        from skills.weather.core import get_weather
         data = await get_weather()
         return {"success": True, "message": "Weather data fetched successfully."}
     except ImportError:

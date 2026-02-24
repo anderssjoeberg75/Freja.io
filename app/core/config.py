@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, Set
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     HA_URL: Optional[str] = None
     HA_TOKEN: Optional[str] = None
 
+    USER_NAME: str = "Anders"
     USER_ID: str = "Anders"
     LATITUDE: Optional[str] = None
     LONGITUDE: Optional[str] = None
@@ -89,37 +90,65 @@ class Settings(BaseSettings):
 
     VAULT_URL: str = "https://127.0.0.1:8200"
     VAULT_TOKEN: Optional[str] = None
+    VAULT_VERIFY: bool = True
     VAULT_MOUNT_POINT: str = "secret"
     VAULT_SECRET_PATH: str = "freja"
+
+    ADMIN_API_TOKEN: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 settings = Settings()
 
+_SECRET_KEY_HINTS = ("_TOKEN", "_SECRET", "_API_KEY", "PASSWORD", "PASS")
+
+def get_secret_keys() -> Set[str]:
+    try:
+        from app.core.settings_schema import SETTINGS_SCHEMA
+        return {item.key for item in SETTINGS_SCHEMA if item.type == "password"}
+    except Exception:
+        return set()
+
+def is_secret_key(key: str) -> bool:
+    """Best-effort classification of secret keys to avoid storing them in DB."""
+    try:
+        from app.core.settings_schema import SETTINGS_SCHEMA
+        for item in SETTINGS_SCHEMA:
+            if item.key == key and item.type == "password":
+                return True
+    except Exception:
+        pass
+
+    upper_key = (key or "").upper()
+    return any(hint in upper_key for hint in _SECRET_KEY_HINTS)
+
 def get_credential(key: str, fallback=None) -> str:
     """Get credential from Vault (if secret), DB, then environment values, then fallback."""
-    # First priority: Environment variables (like VAULT_TOKEN from .env)
-    env_value = getattr(settings, key, None)
+    env_value = os.getenv(key)
 
     if key == "VAULT_TOKEN" and env_value:
         return env_value
 
-    try:
-        from app.core.settings_schema import SETTINGS_SCHEMA
-        is_secret = any(item.key == key and item.type == "password" for item in SETTINGS_SCHEMA)
-        if is_secret:
+    secret_key = is_secret_key(key)
+
+    # Secrets should never be pulled from DB (only Vault or env).
+    if secret_key:
+        if env_value:
+            return env_value
+        try:
             from app.core.vault import get_vault_secret
             vault_val = get_vault_secret(key)
             if vault_val:
                 return vault_val
-    except Exception as exc:
-        import logging
-        logging.getLogger(__name__).warning("Failed to read Vault credential for key=%s: %s", key, exc)
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning("Failed to read Vault credential for key=%s: %s", key, exc)
+        return fallback or ""
 
+    # Non-secret settings: prefer DB, then env, then defaults.
     try:
         from app.core.database import get_db_settings_sync
-
         db_settings = get_db_settings_sync()
         db_value = db_settings.get(key)
         if db_value:
@@ -128,9 +157,12 @@ def get_credential(key: str, fallback=None) -> str:
         import logging
         logging.getLogger(__name__).warning("Failed to read DB credential for key=%s: %s", key, exc)
 
-    env_value = getattr(settings, key, None)
     if env_value:
         return env_value
+
+    setting_value = getattr(settings, key, None)
+    if setting_value:
+        return setting_value
 
     return fallback or ""
 

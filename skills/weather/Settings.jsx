@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Cloud } from 'lucide-react';
+import { adminFetch } from '../../client/src/utils/adminFetch';
 
 const WeatherSettings = () => {
     const [settings, setSettings] = useState({});
@@ -14,7 +15,7 @@ const WeatherSettings = () => {
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/settings');
+            const res = await adminFetch('/api/settings');
             const data = await res.json();
             setSettings(data || {});
         } catch (err) {
@@ -32,7 +33,7 @@ const WeatherSettings = () => {
         setSaving(true);
         setMessage(null);
         try {
-            const res = await fetch('/api/settings', {
+            const res = await adminFetch('/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key, value: settings[key] })

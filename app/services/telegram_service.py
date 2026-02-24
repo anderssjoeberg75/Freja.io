@@ -77,7 +77,8 @@ class TelegramService:
             return
 
         if not self.chat_ids:
-            logger.warning("Telegram: No chat ID configured, will accept all chats (WARNING)")
+            logger.error("Telegram: No chat ID configured, service disabled for safety")
+            return
 
         try:
             # Build application.

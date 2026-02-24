@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Save, Loader2, Edit3, Terminal } from 'lucide-react';
+import { adminFetch } from '../utils/adminFetch';
 
 const Prompts = () => {
     const [prompts, setPrompts] = useState({});
@@ -15,7 +16,10 @@ const Prompts = () => {
 
     const fetchPrompts = async () => {
         try {
-            const res = await fetch('/api/prompts');
+            const res = await adminFetch('/api/prompts');
+            if (!res.ok) {
+                throw new Error("Admin token required.");
+            }
             const data = await res.json();
             setPrompts(data);
             if (Object.keys(data).length > 0 && !selectedKey) {
@@ -44,7 +48,7 @@ const Prompts = () => {
         setMessage(null);
 
         try {
-            const res = await fetch('/api/prompts', {
+            const res = await adminFetch('/api/prompts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key: selectedKey, value: editValue })
