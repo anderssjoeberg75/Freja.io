@@ -304,8 +304,8 @@ class UnifiedChatService:
         """
         logger.info(f"Running proactive task for session {session_id}")
         
-        # 1. Setup
-        model_id = get_credential("SELECTED_MODEL") or "gemini-2.0-flash"
+        # 1. Setup — proactive tasks always use Gemini (Ollama has no WebSocket context here)
+        model_id = "gemini-2.0-flash"
         system_prompt = await get_system_prompt()
         user_state = await get_user_state(session_id)
         
