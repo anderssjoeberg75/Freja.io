@@ -1,3 +1,96 @@
+class AuditAndFixSchema(BaseModel):
+    base_branch: str = Field("main", description="Branch to base the fix on.")
+    pr_title: str = Field("Auto-fix: Critical findings", description="Title for the pull request.")
+    pr_body: str = Field("Automated fix for critical findings detected by audit.", description="Body for the pull request.")
+
+async def audit_and_fix_impl(base_branch: str = "main", pr_title: str = "Auto-fix: Critical findings", pr_body: str = "Automated fix for critical findings detected by audit.") -> str:
+    """
+    Kör audit, identifierar kritiska findings, försöker auto-fixa, testar, kör statisk analys, committar och pushar till ny branch, och skapar PR via GitHub API.
+    """
+    import os
+    import re
+    import uuid
+    import subprocess
+    import httpx
+    from app.core.config import get_credential, settings
+    loop = asyncio.get_event_loop()
+    executor = dependencies.get_code_executor()
+    if not executor:
+        return "Error: Code Execution environment not available."
+
+    # 1. Kör audit (självanalys)
+    audit_cmd = "python3 skills/codex/auditor.py"
+    audit_result = await loop.run_in_executor(None, executor.run_command, audit_cmd)
+    output = audit_result.get("output", "")
+    # 2. Identifiera kritiska findings (🔴 eller 'Kritiskt:')
+    critical = re.findall(r"🔴|Kritiskt:", output)
+    if not critical:
+        return "✅ Ingen kritisk issue hittad vid audit."
+
+    # 3. Generera fix med LLM (använd run_and_fix_impl på de filer som nämns i findings)
+    # För demo: försök auto-fixa alla .py-filer som nämns i rapporten efter 🔴
+    files_to_fix = set(re.findall(r"FIL: ([^\s]+\.py)", output))
+    fix_results = []
+    for file_path in files_to_fix:
+        # Kör run_and_fix_impl för varje fil
+        fix_result = await run_and_fix_impl(f"pytest {file_path}", file_path, max_retries=2)
+        fix_results.append(f"{file_path}: {fix_result}")
+
+    # 4. Kör tester (pytest)
+    test_result = await loop.run_in_executor(None, executor.run_command, "pytest --maxfail=1 --disable-warnings")
+    if test_result.get("exit_code", 1) != 0:
+        return f"❌ Tester misslyckades efter fix: {test_result.get('output','')}"
+
+    # 5. Kör statisk analys (flake8)
+    static_result = await static_analysis_impl(tool="flake8", path=".")
+    if "No issues found" not in static_result:
+        return f"❌ Statisk analys misslyckades: {static_result}"
+
+    # 6. Skapa ny branch, commit, push
+    branch_name = f"auto-fix-{uuid.uuid4().hex[:8]}"
+    git_tool = __import__("skills.codex.git_core", fromlist=["GitTool"]).GitTool()
+    await loop.run_in_executor(None, git_tool._run_git, ["checkout", base_branch])
+    await loop.run_in_executor(None, git_tool._run_git, ["pull"])
+    await loop.run_in_executor(None, git_tool._run_git, ["checkout", "-b", branch_name])
+    await loop.run_in_executor(None, git_tool._run_git, ["add", "."])
+    await loop.run_in_executor(None, git_tool._run_git, ["commit", "-m", pr_title])
+    await loop.run_in_executor(None, git_tool._run_git, ["push", "-u", "origin", branch_name])
+
+    # 7. Skapa PR via GitHub API
+    github_token = get_credential("GITHUB_TOKEN") or getattr(settings, "GITHUB_TOKEN", None)
+    repo_url = os.environ.get("GITHUB_REPO") or getattr(settings, "GITHUB_REPO", None)
+    if not github_token or not repo_url:
+        return f"Fix och push klar på branch {branch_name}, men PR kunde inte skapas (saknar GITHUB_TOKEN eller GITHUB_REPO)."
+    owner_repo = repo_url.split("github.com/")[-1].replace(".git", "")
+    api_url = f"https://api.github.com/repos/{owner_repo}/pulls"
+    headers = {"Authorization": f"token {github_token}", "Accept": "application/vnd.github+json"}
+    pr_data = {"title": pr_title, "head": branch_name, "base": base_branch, "body": pr_body}
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(api_url, headers=headers, json=pr_data)
+        if resp.status_code == 201:
+            pr_url = resp.json().get("html_url", "")
+            return f"✅ Fix klar och PR skapad: {pr_url}\n\nFixade filer: {', '.join(files_to_fix)}\nTestresultat: OK\nStatisk analys: OK"
+        else:
+            return f"Fix och push klar på branch {branch_name}, men PR kunde inte skapas: {resp.text}"
+class StaticAnalysisSchema(BaseModel):
+    tool: Literal["flake8", "ruff"] = Field("flake8", description="Which static analysis tool to use.")
+    path: str = Field(".", description="Path to analyze (default: project root)")
+
+async def static_analysis_impl(tool: str = "flake8", path: str = ".") -> str:
+    """Runs static code analysis (flake8 or ruff) in the Docker sandbox."""
+    executor = dependencies.get_code_executor()
+    if not executor:
+        return "Error: Code Execution environment not available."
+    loop = asyncio.get_event_loop()
+    if tool == "ruff":
+        cmd = f"ruff {path} --format=github"
+    else:
+        cmd = f"flake8 {path} --format=default"
+    result = await loop.run_in_executor(None, executor.run_command, cmd)
+    output = result.get("output", "")
+    if not output.strip():
+        return f"✅ No issues found by {tool}."
+    return f"{tool} output:\n{output}"
 import asyncio
 import json
 import httpx
@@ -304,6 +397,18 @@ async def run_and_fix_impl(command: str, file_path: str, max_retries: int = 3) -
 # --- Registration ---
 
 def register_tools(registry: ToolRegistry) -> None:
+
+    registry.register(
+        name="codex_audit_and_fix",
+        description="Performs audit, auto-fixes critical findings, tests, runs static analysis, and creates a pull request.",
+        args_schema=AuditAndFixSchema,
+    )(audit_and_fix_impl)
+
+        registry.register(
+            name="codex_static_analysis",
+            description="Runs static code analysis (flake8 or ruff) in the Docker sandbox.",
+            args_schema=StaticAnalysisSchema,
+        )(static_analysis_impl)
     """Register Codex tools."""
 
     # Register main tool

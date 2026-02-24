@@ -1,3 +1,48 @@
+## Documentation & auto-generation
+
+The backend uses [Sphinx](https://www.sphinx-doc.org/) for auto-generating API and code documentation from docstrings.
+
+To set up and build the documentation:
+
+```bash
+cd docs
+pip install -r requirements.txt
+sphinx-quickstart  # (run once, answer prompts)
+# Enable autodoc in conf.py:
+# extensions = ['sphinx.ext.autodoc', 'sphinx_autodoc_typehints']
+sphinx-apidoc -o source ../app
+make html
+```
+
+Open `docs/_build/html/index.html` in your browser to view the generated documentation.
+
+You can document your Python code with standard docstrings and type hints for best results.
+## Code style & linting
+
+To ensure a consistent and high-quality codebase, use the following tools for Python code style and linting:
+
+- **Black** – automatic code formatter
+- **Flake8** – linter for code quality
+- **isort** – import sorting
+
+Install development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Check and format code:
+
+```bash
+# Check code style
+flake8
+
+# Format code automatically
+black .
+isort .
+```
+
+You can also add these checks to your CI/CD pipeline for automated enforcement.
 # Freja.Io
 
 Freja.Io is a modular AI assistant platform with a FastAPI backend, a React/Vite frontend, and a skill-based tool system for integrations such as Home Assistant, Strava, Garmin, Tibber, Withings, Roborock, Weather, and Google Calendar.
@@ -15,7 +60,7 @@ Freja.Io is a modular AI assistant platform with a FastAPI backend, a React/Vite
 - Python 3.11+
 - Node.js 18+
 - npm
-- HashiCorp Vault (for secure secret storage)
+- HashiCorp Vault (**all secrets and API keys must be stored in Vault, never in the database**)
 - Ollama (with `nomic-embed-text` model for Local RAG features)
 - (Optional) Docker for Codex sandbox execution
 
@@ -47,6 +92,13 @@ cd ..
 
 ### 4) Configure environment
 
+
+## Security Notice: Secret Storage
+
+**All API keys, tokens, and other secrets must be stored in HashiCorp Vault.**
+
+Do not store secrets in the SQLite database or in plaintext files. If du migrerar från en äldre version, kör `scripts/cleanup_db_secrets.py` för att rensa gamla hemligheter ur databasen.
+
 Create a `.env` file in project root and set at least your base AI/API configuration:
 
 ```env
@@ -59,6 +111,18 @@ ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 
 Add integration-specific variables only for the skills you plan to use (for example `HA_URL`/`HA_TOKEN`, `STRAVA_CLIENT_ID`, `TIBBER_API_TOKEN`, etc.).
 Note: Vault connects via `VAULT_URL` and `VAULT_TOKEN` and is used to store high-security API keys instead of SQLite.
+
+**Viktigt! Efter migrering av secrets till Vault måste du köra scriptet `scripts/cleanup_db_secrets.py` för att rensa känsliga nycklar ur databasen.**
+
+Om du inte gör detta finns risken att gamla API-nycklar och lösenord ligger kvar okrypterat i SQLite-databasen (`db/mainframe.db`).
+
+Kör så här efter migrering:
+
+```bash
+python scripts/cleanup_db_secrets.py
+```
+
+Scriptet tar bort alla secrets av typen "password" från databasen. Alla secrets hanteras därefter uteslutande av HashiCorp Vault.
 
 ## Auto-starting Services (Systemd)
 

@@ -38,7 +38,7 @@ class WithingsTool:
                 from app.core.vault import save_vault_secret
                 success = save_vault_secret("WITHINGS_REFRESH_TOKEN", self.refresh_token)
                 if not success:
-                    save_db_setting("WITHINGS_REFRESH_TOKEN", self.refresh_token)
+                    return False, "Kunde inte spara Withings refresh token i Vault. Kontrollera Vault-konfigurationen."
                 return True, "Withings connected successfully."
 
             return False, f"Withings token exchange error: {data}"
@@ -76,7 +76,7 @@ class WithingsTool:
                 from app.core.vault import save_vault_secret
                 success = save_vault_secret("WITHINGS_REFRESH_TOKEN", self.refresh_token)
                 if not success:
-                    save_db_setting("WITHINGS_REFRESH_TOKEN", self.refresh_token)
+                    print(">> [WITHINGS] Kunde inte spara refresh token i Vault. Kontrollera Vault-konfigurationen.")
             else:
                 print(f">> [WITHINGS] Token refresh error: {data}")
         except Exception as exc:

@@ -76,23 +76,40 @@ async def ha_control_impl(command: str) -> str:
         # turn on / off
         if "turn on" in cmd or "sätt på" in cmd or "aktivera" in cmd:
             entity = cmd.split()[-1]
+            # Validera entity
+            valid_entities = await loop.run_in_executor(None, client.list_entities)
+            resolved = client._resolve_entity_id(entity)
+            if resolved not in valid_entities:
+                return f"Ogiltig entity: {entity}"
             result = await loop.run_in_executor(None, client.turn_on, entity)
             return f"✅ Slog på {entity}"
 
         if "turn off" in cmd or "stäng av" in cmd or "inaktivera" in cmd:
             entity = cmd.split()[-1]
+            valid_entities = await loop.run_in_executor(None, client.list_entities)
+            resolved = client._resolve_entity_id(entity)
+            if resolved not in valid_entities:
+                return f"Ogiltig entity: {entity}"
             result = await loop.run_in_executor(None, client.turn_off, entity)
             return f"✅ Stängde av {entity}"
 
         # get state
         if "get" in cmd or "status" in cmd or "tillstånd" in cmd:
             entity = cmd.split()[-1]
+            valid_entities = await loop.run_in_executor(None, client.list_entities)
+            resolved = client._resolve_entity_id(entity)
+            if resolved not in valid_entities:
+                return f"Ogiltig entity: {entity}"
             state = await loop.run_in_executor(None, client.get_state, entity)
             return json.dumps(state, ensure_ascii=False, indent=2)
 
         # scene
         if "scene" in cmd or "scen" in cmd:
             scene_id = cmd.split()[-1]
+            valid_entities = await loop.run_in_executor(None, client.list_entities, "scene")
+            resolved = client._resolve_entity_id(scene_id)
+            if resolved not in valid_entities:
+                return f"Ogiltig scen: {scene_id}"
             result = await loop.run_in_executor(None, client.trigger_scene, scene_id)
             return f"✅ Aktiverade scen {scene_id}"
 

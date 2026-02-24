@@ -1,3 +1,26 @@
+import os
+import sys
+import subprocess
+from fastapi import BackgroundTasks
+# --- SELF-UPDATE ENDPOINT ---
+@router.post("/api/self_update")
+async def self_update(background_tasks: BackgroundTasks):
+    """
+    Uppdaterar Freja till senaste kod från GitHub och startar om tjänsten.
+    """
+    def do_update_and_restart():
+        try:
+            subprocess.run(["git", "pull"], check=True)
+        except Exception as e:
+            logger.error(f"Git pull misslyckades: {e}")
+        # Starta om processen (systemd eller execv)
+        if os.environ.get("FREJA_SYSTEMD", "0") == "1":
+            subprocess.run(["systemctl", "restart", "freja.service"])
+        else:
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    background_tasks.add_task(do_update_and_restart)
+    return {"status": "Uppdatering påbörjad. Freja startar om sig själv."}
 from fastapi import APIRouter
 from app.core import config
 import logging

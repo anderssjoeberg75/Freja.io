@@ -1,5 +1,5 @@
 import socketio
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings, get_allowed_origins
 from app.core.logging import logger
@@ -15,23 +15,34 @@ from app.core.legacy_registration import register_all_tools
 async def lifespan(app: FastAPI):
     # Startup
     logger.info("Initializing Mainframe Services...")
-    
+
     # Explicitly register tools
     register_all_tools()
-    
-    from app.core.database import init_db
+
+    from app.core.database import init_db, get_db_settings_sync
     init_db()
-    
+
+    # --- Kontrollera om känsliga nycklar finns kvar i databasen ---
+    try:
+        from app.core.settings_schema import SETTINGS_SCHEMA
+        secret_keys = {item.key for item in SETTINGS_SCHEMA if item.type == "password"}
+        db_settings = get_db_settings_sync()
+        secrets_in_db = [k for k in secret_keys if db_settings.get(k)]
+        if secrets_in_db:
+            logger.warning(f"⚠️ Känsliga nycklar finns kvar i databasen: {secrets_in_db}. Kör scripts/cleanup_db_secrets.py för att rensa!")
+    except Exception as e:
+        logger.error(f"Fel vid kontroll av känsliga nycklar i DB: {e}")
+
     proactive = init_proactive_service(sio)
     await proactive.start()
-    
+
     # Start Document Watcher for RAG
     from app.services.document_watcher import document_watcher
     document_watcher.start()
-    
+
     # Initialize Telegram with LLM callback
     from app.services.telegram_service import init_telegram_service
-    
+
     async def telegram_llm_callback(message: str, chat_id: str) -> str:
         """Process Telegram message through Unified Chat Service."""
         try:
@@ -46,12 +57,12 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Telegram LLM error for chat_id={chat_id}: {e}", exc_info=True)
             return f"Fel vid AI-svar: {str(e)}"
-    
+
     telegram = init_telegram_service(telegram_llm_callback)
     await telegram.start()
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Mainframe Services...")
     document_watcher.stop()
@@ -59,7 +70,28 @@ async def lifespan(app: FastAPI):
     await proactive.stop()
 
 # Initialize FastAPI
-app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
+
+# --- Centralized Exception Handler ---
+from fastapi.responses import JSONResponse
+from fastapi.exception_handlers import RequestValidationError
+from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"[EXCEPTION] {request.method} {request.url}: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "detail": str(exc)}
+    )
+
+# Optional: Handle validation errors more gracefully
+@app.exception_handler(FastAPIRequestValidationError)
+async def validation_exception_handler(request: Request, exc: FastAPIRequestValidationError):
+    logger.warning(f"[VALIDATION] {request.method} {request.url}: {exc}")
+    return JSONResponse(
+        status_code=422,
+        content={"error": "Validation error", "detail": exc.errors()}
+    )
 
 # CORS Middleware
 app.add_middleware(

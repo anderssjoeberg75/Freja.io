@@ -119,8 +119,7 @@ class StravaAuthManager:
             expires_at=response.expires_at,
             athlete_id=response.athlete_id,
         )
-        # Also store it in global settings so strava_core.py picks it up
-        await save_db_setting("STRAVA_REFRESH_TOKEN", response.refresh_token)
+        # Vault används nu för alla hemligheter. Ingen lagring i DB.
         return response
 
     async def _refresh_from_refresh_token(self, refresh_token: str) -> StravaTokenResponse:
