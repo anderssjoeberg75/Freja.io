@@ -339,12 +339,11 @@ class UnifiedChatService:
              except Exception as exc:
                  logger.warning(f"Mem0 proactive search failed (continuing without memory): {exc}")
 
-        # 4. Construct History for LLM
-        # For proactive tasks, we treat the "Prompt" as a User message to trigger the response
+        # 4. Construct History for LLM using proper SDK types
         gemini_history = [
-            {"role": "user", "parts": [full_system_block]},
-            {"role": "model", "parts": ["System ready."]},
-            {"role": "user", "parts": [prompt]}
+            types.Content(role="user", parts=[types.Part(text=full_system_block)]),
+            types.Content(role="model", parts=[types.Part(text="System ready.")]),
+            types.Content(role="user", parts=[types.Part(text=prompt)]),
         ]
 
         # 5. Generate
