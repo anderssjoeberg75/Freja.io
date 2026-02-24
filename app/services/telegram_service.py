@@ -130,13 +130,7 @@ class TelegramService:
     async def send_message(self, text: str, chat_id: Optional[str] = None) -> bool:
         """
         Send a message to resolving chat IDs.
-
-        Args:
-            text: Message to send.
-            chat_id: Specific chat ID to send to. If None, sends to all configured IDs.
-
-        Returns:
-            True if sent successfully to at least one chat.
+        Automatically splits messages longer than 4000 characters.
         """
         if not self.application or not self.chat_ids:
             logger.warning("Telegram: Cannot send message, not configured")
@@ -145,17 +139,22 @@ class TelegramService:
         target_ids = [chat_id] if chat_id else self.chat_ids
         success = False
 
+        # Split into chunks to stay below Telegram's 4096-char limit
+        MAX_CHUNK = 4000
+        chunks = [text[i:i+MAX_CHUNK] for i in range(0, len(text), MAX_CHUNK)] if len(text) > MAX_CHUNK else [text]
+
         for cid in target_ids:
-            try:
-                await self.application.bot.send_message(chat_id=int(cid), text=text, parse_mode="Markdown")
-                success = True
-            except Exception as e:
-                logger.warning(f"Telegram Markdown send failed for {cid}, retrying as plain text: {e}")
+            for chunk in chunks:
                 try:
-                    await self.application.bot.send_message(chat_id=int(cid), text=text, parse_mode=None)
+                    await self.application.bot.send_message(chat_id=int(cid), text=chunk, parse_mode="Markdown")
                     success = True
-                except Exception as e2:
-                    logger.error(f"Telegram send error for {cid}: {e2}")
+                except Exception as e:
+                    logger.warning(f"Telegram Markdown send failed for {cid}, retrying as plain text: {e}")
+                    try:
+                        await self.application.bot.send_message(chat_id=int(cid), text=chunk, parse_mode=None)
+                        success = True
+                    except Exception as e2:
+                        logger.error(f"Telegram send error for {cid}: {e2}")
 
         return success
 
