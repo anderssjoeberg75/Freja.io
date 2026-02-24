@@ -1,3 +1,16 @@
+import asyncio
+import json
+import httpx
+from typing import Optional, Literal
+from pydantic import BaseModel, Field
+
+from app.core import dependencies
+from app.services.tool_registry import ToolRegistry
+from skills.codex.git_core import GitTool
+
+
+# --- Tool Schemas ---
+
 class AuditAndFixSchema(BaseModel):
     base_branch: str = Field("main", description="Branch to base the fix on.")
     pr_title: str = Field("Auto-fix: Critical findings", description="Title for the pull request.")
@@ -91,16 +104,7 @@ async def static_analysis_impl(tool: str = "flake8", path: str = ".") -> str:
     if not output.strip():
         return f"✅ No issues found by {tool}."
     return f"{tool} output:\n{output}"
-import asyncio
-import json
-import httpx
-from typing import Optional, Literal
-from pydantic import BaseModel, Field
-
-from app.core import dependencies
-from app.services.tool_registry import ToolRegistry
-
-# --- Tool Schemas ---
+# --- Additional Schemas ---
 
 class ExecuteCodeSchema(BaseModel):
     # This schema defines the arguments required for execute_codex_code
@@ -397,21 +401,21 @@ async def run_and_fix_impl(command: str, file_path: str, max_retries: int = 3) -
 # --- Registration ---
 
 def register_tools(registry: ToolRegistry) -> None:
+    """Register Codex tools."""
 
+    # Register main tool
     registry.register(
         name="codex_audit_and_fix",
         description="Performs audit, auto-fixes critical findings, tests, runs static analysis, and creates a pull request.",
         args_schema=AuditAndFixSchema,
     )(audit_and_fix_impl)
 
-        registry.register(
-            name="codex_static_analysis",
-            description="Runs static code analysis (flake8 or ruff) in the Docker sandbox.",
-            args_schema=StaticAnalysisSchema,
-        )(static_analysis_impl)
-    """Register Codex tools."""
+    registry.register(
+        name="codex_static_analysis",
+        description="Runs static code analysis (flake8 or ruff) in the Docker sandbox.",
+        args_schema=StaticAnalysisSchema,
+    )(static_analysis_impl)
 
-    # Register main tool
     registry.register(
         name="execute_codex_code",
         description="Executes Python code or Shell commands in a secure Docker sandbox. Use to run scripts, tests, or system administration tasks.",
