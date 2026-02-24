@@ -194,6 +194,12 @@ def _build_tool_header(tools: List[Dict[str, Any]]) -> str:
         "You have access to tools. When the user asks about health, Garmin, weather, "
         "energy, calendar, Strava, Withings, or smart home — you MUST call the relevant tool. "
         "NEVER answer from memory when a tool exists for that topic.\n"
+        "TOOL ROUTING RULES (follow exactly):\n"
+        "  - 'självanalys', 'analysera koden', 'self-analysis', 'granska koden' → call: codex_audit_codebase (no arguments needed)\n"
+        "  - 'spring', 'löpning', 'aktiviteter', 'strava' → call: get_strava_activities\n"
+        "  - 'garmin', 'hälsa', 'sömn', 'hjärtfrekvens', 'steg' → call: get_garmin_health\n"
+        "  - 'väder', 'temperatur', 'regn' → call: get_weather\n"
+        "  - 'hem', 'lampor', 'home assistant' → call: homeassistant_control or homeassistant_service\n"
         "To call a tool respond with ONLY valid JSON (no other text, no markdown):\n"
         '{"name": "tool_name", "arguments": {"param": "value"}}\n'
         "Omit optional params you don't know. After [Result of tool ...] answer in Swedish.\n"
