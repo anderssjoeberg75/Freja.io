@@ -45,12 +45,14 @@ class StravaTool:
                 self.access_token = data["access_token"]
                 self.expires_at = data["expires_at"]
                 self.refresh_token = data["refresh_token"]
-                from app.core.vault import save_vault_secret
-                success = save_vault_secret("STRAVA_REFRESH_TOKEN", self.refresh_token)
-                if not success:
-                    print(">> [STRAVA] Kunde inte spara refresh token i Vault. Kontrollera Vault-konfigurationen.")
-                    return False
-                print(">> [STRAVA] Token refreshed and saved.")
+                # Best-effort: save updated refresh token to Vault (non-blocking)
+                try:
+                    from app.core.vault import save_vault_secret
+                    if not save_vault_secret("STRAVA_REFRESH_TOKEN", self.refresh_token):
+                        print(">> [STRAVA] Varning: Kunde inte spara refresh token i Vault (fortsätter ändå).")
+                except Exception as vault_exc:
+                    print(f">> [STRAVA] Varning: Vault-sparning misslyckades: {vault_exc}")
+                print(">> [STRAVA] Token refreshed.")
                 return True
 
             print(f">> [STRAVA] Token error: {data}")
