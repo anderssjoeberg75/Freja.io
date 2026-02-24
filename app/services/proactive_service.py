@@ -237,9 +237,46 @@ class ProactiveService:
             if full_response:
                 target_chat = telegram_service.primary_chat_id
                 if target_chat:
+                    # Save full report to file
+                    import os
+                    import subprocess
+                    try:
+                        report_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "docs")
+                        os.makedirs(report_dir, exist_ok=True)
+                        timestamp = datetime.datetime.now(tz).strftime("%Y%m%d_%H%M%S")
+                        report_path = os.path.join(report_dir, f"morning_briefing_{timestamp}.md")
+                        with open(report_path, "w", encoding="utf-8") as f:
+                            f.write(f"# 🌅 Morgon-Briefing {datetime.datetime.now(tz).strftime('%Y-%m-%d %H:%M')}\n\n")
+                            f.write(full_response)
+                        logger.info(f"Morning briefing report saved to {report_path}")
+                    except Exception as exc:
+                        logger.warning(f"Could not save briefing report: {exc}")
+                        report_path = None
+
+                    # Build short summary for Telegram (first ~1200 chars)
+                    lines = full_response.strip().splitlines()
+                    summary_lines = []
+                    char_count = 0
+                    for line in lines:
+                        if char_count + len(line) > 1200:
+                            summary_lines.append("_...se bifogad rapport för fullständig information._")
+                            break
+                        summary_lines.append(line)
+                        char_count += len(line) + 1
+
+                    short_summary = "\n".join(summary_lines)
                     await telegram_service.send_message(
-                        f"🌅 **Morning Briefing**\n\n{full_response}", chat_id=target_chat
+                        f"🌅 *Morning Briefing*\n\n{short_summary}", chat_id=target_chat
                     )
+
+                    # Send full report as file attachment
+                    if report_path and os.path.exists(report_path):
+                        await telegram_service.send_document(
+                            report_path,
+                            caption="📄 Komplett Morning Briefing",
+                            chat_id=target_chat
+                        )
+
                     logger.info(f"Morning briefing sent to {target_chat}")
                     return True
                 else:
