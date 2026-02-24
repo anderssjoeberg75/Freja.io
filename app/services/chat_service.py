@@ -62,7 +62,20 @@ class UnifiedChatService:
             await save_message(session_id, "assistant", ha_result.response)
             return ha_result.response
 
-        # 3. Logic Hook (Self-improving)
+        # 3. Keyword shortcut routing — bypass LLM tool selection for well-known commands
+        _AUDIT_KEYWORDS = {"självanalys", "self-analysis", "analysera koden", "granska koden", "systemanalys", "kodanalys"}
+        if any(kw in user_msg.lower() for kw in _AUDIT_KEYWORDS):
+            logger.info("[ChatService] Keyword shortcut: routing to codex_audit_codebase directly")
+            try:
+                result = await registry.execute("codex_audit_codebase", {})
+                response = f"🔍 Självanalys klar!\n\n{result}"
+            except Exception as e:
+                response = f"❌ Självanalysen misslyckades: {e}"
+            await save_message(session_id, "user", user_msg)
+            await save_message(session_id, "assistant", response)
+            return response
+
+        # 4. Logic Hook (Self-improving)
         handle_user_prompt_submit(user_msg, project_root=".")
 
         # 3. User State & Profile Memory
