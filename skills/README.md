@@ -25,6 +25,7 @@ Freja decides when to call the underlying tool automatically.
 ## Skill index
 
 - `codex` – code execution, Git operations, and codebase auditing.
+- `cybersecurity` – authorization-gated defensive security assessment planning and reporting.
 - `garmin` – health snapshot from Garmin Connect.
 - `google_calendar` – list/create/update/delete calendar events.
 - `homeassistant` – smart-home control via Home Assistant API.
