@@ -117,7 +117,7 @@ async def health_check():
     return {"status": "ok", "app": settings.APP_NAME}
 
 # Include API Routers
-from app.routers import chat, settings as settings_router, system, live, strava, withings
+from app.routers import chat, settings as settings_router, system, live, strava, withings, document_analysis
 
 app.include_router(chat.router)
 app.include_router(settings_router.router)
@@ -125,6 +125,7 @@ app.include_router(system.router)
 app.include_router(live.router)
 app.include_router(strava.router)
 app.include_router(withings.router)
+app.include_router(document_analysis.router)
 
 from app.routers import integrations
 app.include_router(integrations.router)

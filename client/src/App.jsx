@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3, Hash, Cpu } from 'lucide-react';
+import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3, Hash, Cpu, Database } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import ChatInterface from './components/ChatInterface';
 import Settings from './components/Settings';
@@ -7,6 +7,7 @@ import Prompts from './components/Prompts';
 import LiveSession from './components/LiveSession';
 import AliasView from './components/AliasView';
 import OllamaManager from './components/OllamaManager';
+import DocumentManager from './components/DocumentManager';
 
 import { useSocket } from './hooks/useSocket';
 
@@ -29,6 +30,7 @@ function App() {
                     <NavIcon icon={<Mic />} active={activeView === 'voice'} onClick={() => setActiveView('voice')} title="Voice Mode" />
                     <NavIcon icon={<Hash />} active={activeView === 'aliases'} onClick={() => setActiveView('aliases')} title="Aliases" />
                     <NavIcon icon={<Cpu />} active={activeView === 'ollama'} onClick={() => setActiveView('ollama')} title="Ollama Models" />
+                    <NavIcon icon={<Database />} active={activeView === 'documents'} onClick={() => setActiveView('documents')} title="Kunskapsdatabas" />
 
                     <div className="w-8 h-px bg-mainframe-border/50 my-2" />
 
@@ -52,6 +54,12 @@ function App() {
                     <div className="p-8 max-w-3xl mx-auto h-full overflow-auto">
                         <h1 className="text-3xl font-orbitron text-mainframe-accent mb-8 border-b border-mainframe-border pb-4">Ollama Models</h1>
                         <OllamaManager standalone />
+                    </div>
+                )}
+                {activeView === 'documents' && (
+                    <div className="p-8 max-w-3xl mx-auto h-full overflow-auto">
+                        <h1 className="text-3xl font-orbitron text-mainframe-accent mb-8 border-b border-mainframe-border pb-4">Kunskapsdatabas</h1>
+                        <DocumentManager />
                     </div>
                 )}
             </main>
