@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import shlex
+import tempfile
 import time
 from pathlib import Path
 from collections import OrderedDict
@@ -22,6 +24,7 @@ from app.services.telegram_voice_handler import TelegramVoiceError, TelegramVoic
 from skills.strava import get_strava_command_processor
 from skills.homeassistant import get_homeassistant_command_processor
 from skills._core.skill_loader import register_telegram_handlers
+from skills.document_analysis.tools import ingest_document_impl
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +98,7 @@ class TelegramService:
             self.application.add_handler(CommandHandler("ha", self._handle_homeassistant_command))
             self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_text_message))
             self.application.add_handler(MessageHandler(filters.VOICE, self._handle_voice_message))
+            self.application.add_handler(MessageHandler(filters.Document.ALL, self._handle_document_message))
 
             # Allow skills to register optional Telegram handlers via plugin hooks.
             register_telegram_handlers(self.application)
@@ -282,6 +286,56 @@ class TelegramService:
             await update.message.reply_text(
                 "Jag kunde inte transkribera ljudet. Försök igen eller skriv kommandot som text."
             )
+
+    async def _handle_document_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle incoming documents (PDF, TXT, MD) and ingest them into ChromaDB."""
+        if not update.message or not update.message.document:
+            return
+
+        chat_id = str(update.effective_chat.id)
+        if self.chat_ids and chat_id not in self.chat_ids:
+            await update.message.reply_text("⛔ Obehörig användare.")
+            return
+
+        doc = update.message.document
+        filename = doc.file_name or "dokument"
+        ext = Path(filename).suffix.lower()
+
+        SUPPORTED = {".pdf", ".txt", ".md"}
+        if ext not in SUPPORTED:
+            await update.message.reply_text(
+                f"⚠️ Filtypen `{ext}` stöds inte. Skicka en PDF-, TXT- eller MD-fil.",
+                parse_mode="Markdown",
+            )
+            return
+
+        await update.effective_chat.send_action("upload_document")
+        await update.message.reply_text(f"📄 Tar emot *{filename}*...", parse_mode="Markdown")
+
+        tmp_path = None
+        try:
+            tg_file = await context.bot.get_file(doc.file_id)
+
+            # Write to a temp file with the correct extension so ingest can detect format.
+            with tempfile.NamedTemporaryFile(
+                suffix=ext, prefix="tg_doc_", delete=False
+            ) as tmp:
+                tmp_path = tmp.name
+
+            await tg_file.download_to_drive(tmp_path)
+
+            result = await ingest_document_impl(tmp_path, source_name=filename)
+
+            # Show the original filename in the response, not the temp path.
+            friendly = result.replace(Path(tmp_path).name, filename)
+            await update.message.reply_text(f"✅ {friendly}", parse_mode="Markdown")
+
+        except Exception as exc:
+            logger.error("Document ingestion error: %s", exc, exc_info=True)
+            await update.message.reply_text(f"❌ Fel vid inläsning: {exc}")
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                os.remove(tmp_path)
 
     @staticmethod
     def _is_self_update_command(user_message: str) -> bool:

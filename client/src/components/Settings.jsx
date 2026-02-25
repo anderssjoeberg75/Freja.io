@@ -189,8 +189,8 @@ const Settings = () => {
                             onChange={(e) => handleChange(item.key, e.target.value)}
                             placeholder={placeholder}
                             className={`flex-1 bg-black/40 border rounded px-4 py-2.5 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm ${secretConfigured && !settings[item.key]
-                                    ? 'border-green-500/30 placeholder-green-400/60'
-                                    : 'border-mainframe-border'
+                                ? 'border-green-500/30 placeholder-green-400/60'
+                                : 'border-mainframe-border'
                                 }`}
                         />
                     )}

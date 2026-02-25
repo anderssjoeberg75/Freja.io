@@ -36,6 +36,7 @@ class ToolRegistry:
             return f"Error: Tool {tool_name} not found."
 
         try:
+            from pydantic import ValidationError as PydanticValidationError
             tool = self._tools[tool_name]
             tool_args = tool_args or {}
 
@@ -49,7 +50,15 @@ class ToolRegistry:
                 if v is not None and v != "" and k in schema_fields
             }
 
-            validated_args = tool.args_schema(**clean_args)
+            try:
+                validated_args = tool.args_schema(**clean_args)
+            except PydanticValidationError as ve:
+                # Extract missing/invalid field names and return a short, actionable message
+                # so the LLM can retry with correct arguments instead of paraphrasing a long error.
+                missing = [e["loc"][0] for e in ve.errors() if e.get("loc")]
+                msg = f"Tool '{tool_name}' called with missing or invalid required argument(s): {', '.join(str(m) for m in missing)}. Please retry with a valid value."
+                logger.warning("Tool validation failed for {}: {}", tool_name, msg)
+                return msg
 
             logger.info("Executing tool: {} with {}", tool_name, validated_args)
 

@@ -65,10 +65,13 @@ def get_collection():
         embedding_function=embedding_fn
     )
 
-async def ingest_document_impl(file_path: str) -> str:
+async def ingest_document_impl(file_path: str, source_name: str = None) -> str:
     """Reads a file, chunks it, and stores embeddings in ChromaDB."""
     if not os.path.exists(file_path):
         return f"Error: File not found at {file_path}"
+    
+    # Use provided source_name (e.g. original Telegram filename) or fall back to path
+    display_name = source_name or os.path.basename(file_path)
     
     try:
         text_content = ""
@@ -99,7 +102,8 @@ async def ingest_document_impl(file_path: str) -> str:
         collection = get_collection()
         
         ids = [str(uuid.uuid4()) for _ in chunks]
-        metadatas = [{"source": file_path, "chunk_index": i} for i in range(len(chunks))]
+        # Store display_name as source so results show the original filename
+        metadatas = [{"source": display_name, "chunk_index": i} for i in range(len(chunks))]
         
         collection.add(
             documents=chunks,
@@ -107,11 +111,12 @@ async def ingest_document_impl(file_path: str) -> str:
             ids=ids
         )
         
-        return f"Successfully ingested {os.path.basename(file_path)}. Created {len(chunks)} chunks."
+        return f"Successfully ingested {display_name}. Created {len(chunks)} chunks."
 
     except Exception as e:
         logger.error(f"Ingestion error: {e}", exc_info=True)
         return f"Error ingesting document: {str(e)}"
+
 
 async def query_knowledge_base_impl(query: str, n_results: int = 3) -> str:
     """Searches the knowledge base for relevant context."""

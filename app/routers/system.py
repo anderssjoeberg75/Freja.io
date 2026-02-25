@@ -162,3 +162,143 @@ async def get_system_logs(limit: int = 100):
     except Exception as e:
         logger.error(f"Error reading logs: {e}")
         return {"error": str(e), "logs": []}
+
+
+# ---------------------------------------------------------------------------
+# Ollama Model Management
+# ---------------------------------------------------------------------------
+
+@router.get("/api/ollama/models")
+async def list_ollama_models():
+    """List all locally installed Ollama models."""
+    import httpx
+    from app.core.config import get_credential, settings as app_settings
+
+    ollama_url = (get_credential("OLLAMA_URL") or app_settings.OLLAMA_URL).rstrip("/")
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(f"{ollama_url}/api/tags")
+            resp.raise_for_status()
+            data = resp.json()
+            return {"models": data.get("models", [])}
+    except Exception as e:
+        logger.error(f"Ollama list error: {e}")
+        return {"models": [], "error": str(e)}
+
+
+@router.post("/api/ollama/pull")
+async def pull_ollama_model(body: dict):
+    """
+    Pull (download/install) an Ollama model.
+    Body: {"model": "llama3.2"}
+    Returns streaming JSON lines from Ollama so the frontend can show progress.
+    """
+    import httpx
+    from fastapi.responses import StreamingResponse
+    from app.core.config import get_credential, settings as app_settings
+
+    model = (body.get("model") or "").strip()
+    if not model:
+        return {"error": "model name required"}
+
+    ollama_url = (get_credential("OLLAMA_URL") or app_settings.OLLAMA_URL).rstrip("/")
+
+    async def stream_pull():
+        try:
+            async with httpx.AsyncClient(timeout=600.0) as client:
+                async with client.stream(
+                    "POST",
+                    f"{ollama_url}/api/pull",
+                    json={"name": model, "stream": True},
+                ) as resp:
+                    async for line in resp.aiter_lines():
+                        if line:
+                            yield line + "\n"
+        except Exception as e:
+            import json
+            yield json.dumps({"error": str(e)}) + "\n"
+
+    return StreamingResponse(stream_pull(), media_type="application/x-ndjson")
+
+
+@router.delete("/api/ollama/models/{model_name:path}")
+async def delete_ollama_model(model_name: str):
+    """Delete a locally installed Ollama model."""
+    import httpx
+    from app.core.config import get_credential, settings as app_settings
+
+    ollama_url = (get_credential("OLLAMA_URL") or app_settings.OLLAMA_URL).rstrip("/")
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.request(
+                "DELETE",
+                f"{ollama_url}/api/delete",
+                json={"name": model_name},
+            )
+            if resp.status_code in (200, 204):
+                return {"success": True, "message": f"Deleted {model_name}"}
+            return {"success": False, "error": resp.text}
+    except Exception as e:
+        logger.error(f"Ollama delete error: {e}")
+        return {"success": False, "error": str(e)}
+
+
+@router.get("/api/ollama/ps")
+async def ollama_ps():
+    """Return currently running Ollama models and their memory usage."""
+    import httpx
+    from app.core.config import get_credential, settings as app_settings
+
+    ollama_url = (get_credential("OLLAMA_URL") or app_settings.OLLAMA_URL).rstrip("/")
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(f"{ollama_url}/api/ps")
+            resp.raise_for_status()
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Ollama ps error: {e}")
+        return {"models": [], "error": str(e)}
+
+
+@router.get("/api/ollama/resources")
+async def ollama_resources():
+    """Return system memory and GPU info relevant to Ollama."""
+    try:
+        import psutil
+        vm = psutil.virtual_memory()
+        ram = {
+            "total_gb": round(vm.total / 1024 ** 3, 1),
+            "used_gb": round(vm.used / 1024 ** 3, 1),
+            "available_gb": round(vm.available / 1024 ** 3, 1),
+            "percent": vm.percent,
+        }
+    except ImportError:
+        ram = {"error": "psutil not installed"}
+    except Exception as e:
+        ram = {"error": str(e)}
+
+    gpu = []
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=name,memory.total,memory.used,memory.free,utilization.gpu",
+             "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            for line in result.stdout.strip().splitlines():
+                parts = [p.strip() for p in line.split(",")]
+                if len(parts) >= 5:
+                    gpu.append({
+                        "name": parts[0],
+                        "vram_total_mb": int(parts[1]),
+                        "vram_used_mb": int(parts[2]),
+                        "vram_free_mb": int(parts[3]),
+                        "utilization_pct": int(parts[4]),
+                    })
+    except Exception:
+        pass  # No GPU or nvidia-smi not available
+
+    return {"ram": ram, "gpu": gpu}
+
+
