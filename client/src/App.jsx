@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3, Hash, Cpu, Database } from 'lucide-react';
+import { Terminal, Settings as SettingsIcon, Activity, Mic, MessageSquare, Edit3, Hash, Cpu, Database, Shield } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import ChatInterface from './components/ChatInterface';
 import Settings from './components/Settings';
@@ -8,6 +8,7 @@ import LiveSession from './components/LiveSession';
 import AliasView from './components/AliasView';
 import OllamaManager from './components/OllamaManager';
 import DocumentManager from './components/DocumentManager';
+import IPAllowlist from './components/IPAllowlist';
 
 import { useSocket } from './hooks/useSocket';
 
@@ -36,6 +37,7 @@ function App() {
 
                     <div className="flex-1" /> {/* Spacer */}
 
+                    <NavIcon icon={<Shield />} active={activeView === 'access_control'} onClick={() => setActiveView('access_control')} title="Access Control" />
                     <NavIcon icon={<SettingsIcon />} active={activeView === 'settings'} onClick={() => setActiveView('settings')} title="System Settings" />
                 </nav>
 
@@ -50,6 +52,7 @@ function App() {
                 {activeView === 'voice' && <LiveSession />}
                 {activeView === 'aliases' && <AliasView />}
                 {activeView === 'settings' && <Settings />}
+                {activeView === 'access_control' && <IPAllowlist />}
                 {activeView === 'ollama' && (
                     <div className="p-8 max-w-3xl mx-auto h-full overflow-auto">
                         <h1 className="text-3xl font-orbitron text-mainframe-accent mb-8 border-b border-mainframe-border pb-4">Ollama Models</h1>

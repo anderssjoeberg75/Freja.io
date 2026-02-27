@@ -17,7 +17,6 @@ from app.services.web_fallback_service import WebFallbackService, needs_web_fall
 from skills.homeassistant import get_homeassistant_command_processor
 # --- Native Tooling Imports ---
 from app.services.tool_registry import registry
-from app.services.llm_providers.ollama import generate_ollama_response
 
 logger = logging.getLogger(__name__)
 

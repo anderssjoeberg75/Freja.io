@@ -14,10 +14,21 @@ def get_vault_client():
 
     vault_url = getattr(settings, "VAULT_URL", "http://127.0.0.1:8200")
     vault_token = getattr(settings, "VAULT_TOKEN", "")
-    vault_verify = getattr(settings, "VAULT_VERIFY", True)
+    vault_verify = getattr(settings, "VAULT_VERIFY", None)
     
+    if vault_verify is None:
+        # Auto-detect: disable verification for localhost/127.0.0.1
+        if "127.0.0.1" in vault_url or "localhost" in vault_url:
+            vault_verify = False
+        else:
+            vault_verify = True
+    
+    # Ensure it's a boolean (pydantic might load it as string from .env)
+    if isinstance(vault_verify, str):
+        vault_verify = vault_verify.lower() in ("true", "1", "yes", "on")
+            
     try:
-        logger.debug(f"[Vault] Attempting connection to {vault_url} with token (len {len(vault_token)})")
+        logger.debug(f"[Vault] Attempting connection to {vault_url} with token (len {len(vault_token)}) and verify={vault_verify}")
         client = hvac.Client(url=vault_url, token=vault_token, verify=vault_verify)
         if not vault_verify:
             # Suppress urllib3 insecure request warnings for local development

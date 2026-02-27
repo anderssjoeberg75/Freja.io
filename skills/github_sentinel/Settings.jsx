@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Loader2, Cloud } from 'lucide-react';
+import { Save, Loader2, Github, AlertTriangle } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
 import SettingsField from '../../client/src/components/SettingsField';
 
-const WeatherSettings = () => {
+const GitHubSettings = () => {
     const [settings, setSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -58,9 +58,9 @@ const WeatherSettings = () => {
     return (
         <div className="p-8 max-w-4xl mx-auto h-full overflow-auto text-mainframe-text">
             <div className="flex items-center gap-4 mb-8 border-b border-mainframe-border pb-4">
-                <Cloud className="w-8 h-8 text-gray-400" />
+                <Github className="w-8 h-8 text-github-text" />
                 <h1 className="text-3xl font-orbitron text-mainframe-accent">
-                    Weather & Location
+                    GitHub Sentinel
                 </h1>
             </div>
 
@@ -71,36 +71,37 @@ const WeatherSettings = () => {
             )}
 
             <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                    <SettingsField
-                        label="Latitude"
-                        value={settings.LATITUDE}
-                        onChange={(val) => handleChange('LATITUDE', val)}
-                        onSave={() => handleSave('LATITUDE')}
-                        placeholder="59.3293"
-                        saving={saving}
-                    />
-                    <SettingsField
-                        label="Longitude"
-                        value={settings.LONGITUDE}
-                        onChange={(val) => handleChange('LONGITUDE', val)}
-                        onSave={() => handleSave('LONGITUDE')}
-                        placeholder="18.0686"
-                        saving={saving}
-                    />
-                </div>
+                <p className="text-sm text-mainframe-text/70 mb-4">
+                    GitHub Sentinel monitors your notifications and allows you to interact with issues and repositories.
+                </p>
 
+                {/* GitHub Token */}
                 <SettingsField
-                    label="Timezone"
-                    value={settings.TIMEZONE}
-                    onChange={(val) => handleChange('TIMEZONE', val)}
-                    onSave={() => handleSave('TIMEZONE')}
-                    placeholder="Europe/Stockholm"
+                    label="GitHub Personal Access Token"
+                    value={settings.GITHUB_TOKEN}
+                    onChange={(val) => handleChange('GITHUB_TOKEN', val)}
+                    onSave={() => handleSave('GITHUB_TOKEN')}
+                    type="password"
+                    secretConfigured={settings.__secrets && settings.__secrets.GITHUB_TOKEN}
+                    placeholder="Enter token"
+                    description="Create a classic PAT with repo and notifications scopes."
                     saving={saving}
                 />
+            </div>
+
+            <div className="mt-8 p-4 bg-blue-900/10 border border-blue-700/30 rounded text-blue-400/80 text-sm flex gap-3">
+                <AlertTriangle className="w-5 h-5 shrink-0 text-blue-500" />
+                <div>
+                    <h3 className="font-bold text-blue-400">Available Tools:</h3>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li><code>github_list_issues</code>: List issues assigned to you.</li>
+                        <li><code>github_create_issue</code>: Create a new issue in a repo.</li>
+                        <li><code>github_check_notifications</code>: Check unread notifications.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     );
 };
 
-export default WeatherSettings;
+export default GitHubSettings;

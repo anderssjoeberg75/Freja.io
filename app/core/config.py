@@ -90,7 +90,7 @@ class Settings(BaseSettings):
 
     VAULT_URL: str = "https://127.0.0.1:8200"
     VAULT_TOKEN: Optional[str] = None
-    VAULT_VERIFY: bool = True
+    VAULT_VERIFY: Optional[bool] = None  # None means auto-detect based on URL
     VAULT_MOUNT_POINT: str = "secret"
     VAULT_SECRET_PATH: str = "freja"
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Loader2, Cloud } from 'lucide-react';
+import { User, Save, Loader2, Database, Info } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
 import SettingsField from '../../client/src/components/SettingsField';
 
-const WeatherSettings = () => {
+const UserProfileSettings = () => {
     const [settings, setSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -58,9 +58,9 @@ const WeatherSettings = () => {
     return (
         <div className="p-8 max-w-4xl mx-auto h-full overflow-auto text-mainframe-text">
             <div className="flex items-center gap-4 mb-8 border-b border-mainframe-border pb-4">
-                <Cloud className="w-8 h-8 text-gray-400" />
+                <User className="w-8 h-8 text-pink-400" />
                 <h1 className="text-3xl font-orbitron text-mainframe-accent">
-                    Weather & Location
+                    User Persona & Identity
                 </h1>
             </div>
 
@@ -70,37 +70,53 @@ const WeatherSettings = () => {
                 </div>
             )}
 
-            <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+            <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <SettingsField
-                        label="Latitude"
-                        value={settings.LATITUDE}
-                        onChange={(val) => handleChange('LATITUDE', val)}
-                        onSave={() => handleSave('LATITUDE')}
-                        placeholder="59.3293"
+                        label="Preferred Name"
+                        value={settings.USER_NAME}
+                        onChange={(val) => handleChange('USER_NAME', val)}
+                        onSave={() => handleSave('USER_NAME')}
+                        description="How the system should address you."
                         saving={saving}
                     />
                     <SettingsField
-                        label="Longitude"
-                        value={settings.LONGITUDE}
-                        onChange={(val) => handleChange('LONGITUDE', val)}
-                        onSave={() => handleSave('LONGITUDE')}
-                        placeholder="18.0686"
+                        label="Instance Personality"
+                        value={settings.APP_NAME}
+                        onChange={(val) => handleChange('APP_NAME', val)}
+                        onSave={() => handleSave('APP_NAME')}
+                        description="The name of your personal AI assistant."
                         saving={saving}
                     />
                 </div>
 
-                <SettingsField
-                    label="Timezone"
-                    value={settings.TIMEZONE}
-                    onChange={(val) => handleChange('TIMEZONE', val)}
-                    onSave={() => handleSave('TIMEZONE')}
-                    placeholder="Europe/Stockholm"
-                    saving={saving}
-                />
+                <div className="pt-6 border-t border-mainframe-border/30">
+                    <div className="flex items-center gap-3 mb-4 text-mainframe-text/80">
+                        <Database className="w-5 h-5 text-pink-400" />
+                        <h3 className="font-bold uppercase tracking-widest text-sm">Conversational Memory (Mem0)</h3>
+                    </div>
+
+                    <SettingsField
+                        label="Mem0 API Key"
+                        value={settings.MEM0_API_KEY}
+                        onChange={(val) => handleChange('MEM0_API_KEY', val)}
+                        onSave={() => handleSave('MEM0_API_KEY')}
+                        type="password"
+                        secretConfigured={settings.__secrets && settings.__secrets.MEM0_API_KEY}
+                        placeholder="Enter Mem0 key"
+                        saving={saving}
+                    />
+                </div>
+            </div>
+
+            <div className="mt-8 p-4 bg-zinc-900/30 border border-mainframe-border/50 rounded-lg flex items-center gap-4">
+                <Info className="w-5 h-5 text-mainframe-dim opacity-50" />
+                <div className="text-xs text-mainframe-text/40">
+                    Personalization data helps the AI understand your preferences and daily routine over time.
+                </div>
             </div>
         </div>
     );
 };
 
-export default WeatherSettings;
+export default UserProfileSettings;

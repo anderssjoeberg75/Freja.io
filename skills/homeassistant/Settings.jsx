@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Home } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
+import SettingsField from '../../client/src/components/SettingsField';
 
 const HASettings = () => {
     const [settings, setSettings] = useState({});
@@ -72,38 +73,26 @@ const HASettings = () => {
             <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
 
                 {/* HA URL */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">Server URL</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            placeholder="http://homeassistant.local:8123"
-                            value={settings.HA_URL || ''}
-                            onChange={(e) => handleChange('HA_URL', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                        />
-                        <button onClick={() => handleSave('HA_URL')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30">
-                            <Save className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="Server URL"
+                    value={settings.HA_URL}
+                    onChange={(val) => handleChange('HA_URL', val)}
+                    onSave={() => handleSave('HA_URL')}
+                    placeholder="http://homeassistant.local:8123"
+                    saving={saving}
+                />
 
                 {/* HA Token */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">Long-Lived Access Token</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="password"
-                            placeholder="Long token from HA Profile..."
-                            value={settings.HA_TOKEN || ''}
-                            onChange={(e) => handleChange('HA_TOKEN', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                        />
-                        <button onClick={() => handleSave('HA_TOKEN')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30">
-                            <Save className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="Long-Lived Access Token"
+                    value={settings.HA_TOKEN}
+                    onChange={(val) => handleChange('HA_TOKEN', val)}
+                    onSave={() => handleSave('HA_TOKEN')}
+                    type="password"
+                    secretConfigured={settings.__secrets && settings.__secrets.HA_TOKEN}
+                    placeholder="Long token from HA Profile..."
+                    saving={saving}
+                />
             </div>
         </div>
     );

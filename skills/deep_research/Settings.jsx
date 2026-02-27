@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Loader2, Cloud } from 'lucide-react';
+import { Save, Loader2, Globe, AlertTriangle } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
 import SettingsField from '../../client/src/components/SettingsField';
 
-const WeatherSettings = () => {
+const DeepResearchSettings = () => {
     const [settings, setSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -58,9 +58,9 @@ const WeatherSettings = () => {
     return (
         <div className="p-8 max-w-4xl mx-auto h-full overflow-auto text-mainframe-text">
             <div className="flex items-center gap-4 mb-8 border-b border-mainframe-border pb-4">
-                <Cloud className="w-8 h-8 text-gray-400" />
+                <Globe className="w-8 h-8 text-blue-500" />
                 <h1 className="text-3xl font-orbitron text-mainframe-accent">
-                    Weather & Location
+                    Deep Research (Web Agent)
                 </h1>
             </div>
 
@@ -71,36 +71,40 @@ const WeatherSettings = () => {
             )}
 
             <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                    <SettingsField
-                        label="Latitude"
-                        value={settings.LATITUDE}
-                        onChange={(val) => handleChange('LATITUDE', val)}
-                        onSave={() => handleSave('LATITUDE')}
-                        placeholder="59.3293"
-                        saving={saving}
-                    />
-                    <SettingsField
-                        label="Longitude"
-                        value={settings.LONGITUDE}
-                        onChange={(val) => handleChange('LONGITUDE', val)}
-                        onSave={() => handleSave('LONGITUDE')}
-                        placeholder="18.0686"
-                        saving={saving}
-                    />
-                </div>
+                <p className="text-sm text-mainframe-text/70 mb-4">
+                    The Web Agent can navigate the web, research topics, and interact with websites to provide up-to-date information.
+                </p>
 
+                {/* SerpAPI Key */}
                 <SettingsField
-                    label="Timezone"
-                    value={settings.TIMEZONE}
-                    onChange={(val) => handleChange('TIMEZONE', val)}
-                    onSave={() => handleSave('TIMEZONE')}
-                    placeholder="Europe/Stockholm"
+                    label="SerpAPI Key (Search)"
+                    value={settings.SERPAPI_API_KEY}
+                    onChange={(val) => handleChange('SERPAPI_API_KEY', val)}
+                    onSave={() => handleSave('SERPAPI_API_KEY')}
+                    type="password"
+                    secretConfigured={settings.__secrets && settings.__secrets.SERPAPI_API_KEY}
+                    placeholder="Enter SerpAPI key"
                     saving={saving}
                 />
+
+                {/* Web Agent Model */}
+                <SettingsField
+                    label="Web Agent Model"
+                    value={settings.WEB_AGENT_MODEL}
+                    onChange={(val) => handleChange('WEB_AGENT_MODEL', val)}
+                    onSave={() => handleSave('WEB_AGENT_MODEL')}
+                    placeholder="gemini-2.0-flash-exp"
+                    description='Recommended: Models with "computer-use" or "thinking" capabilities.'
+                    saving={saving}
+                />
+            </div>
+
+            <div className="mt-8 p-4 bg-yellow-900/10 border border-yellow-700/30 rounded text-yellow-500/80 text-sm flex gap-3">
+                <AlertTriangle className="w-5 h-5 shrink-0" />
+                <p>The Web Agent requires <code>playwright</code> to be installed on the system. It uses a headless browser to perform tasks.</p>
             </div>
         </div>
     );
 };
 
-export default WeatherSettings;
+export default DeepResearchSettings;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Activity, Info, Link } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
+import SettingsField from '../../client/src/components/SettingsField';
 
 const WithingsSettings = () => {
     const [settings, setSettings] = useState({});
@@ -89,52 +90,33 @@ const WithingsSettings = () => {
             <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
 
                 {/* Client ID */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">Client ID</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={settings.WITHINGS_CLIENT_ID || ''}
-                            onChange={(e) => handleChange('WITHINGS_CLIENT_ID', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                        />
-                        <button onClick={() => handleSave('WITHINGS_CLIENT_ID')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30">
-                            <Save className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="Client ID"
+                    value={settings.WITHINGS_CLIENT_ID}
+                    onChange={(val) => handleChange('WITHINGS_CLIENT_ID', val)}
+                    onSave={() => handleSave('WITHINGS_CLIENT_ID')}
+                    saving={saving}
+                />
 
                 {/* Client Secret */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">Client Secret</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="password"
-                            value={settings.WITHINGS_CLIENT_SECRET || ''}
-                            onChange={(e) => handleChange('WITHINGS_CLIENT_SECRET', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                        />
-                        <button onClick={() => handleSave('WITHINGS_CLIENT_SECRET')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30">
-                            <Save className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="Client Secret"
+                    value={settings.WITHINGS_CLIENT_SECRET}
+                    onChange={(val) => handleChange('WITHINGS_CLIENT_SECRET', val)}
+                    onSave={() => handleSave('WITHINGS_CLIENT_SECRET')}
+                    type="password"
+                    secretConfigured={settings.__secrets && settings.__secrets.WITHINGS_CLIENT_SECRET}
+                    saving={saving}
+                />
 
                 {/* Redirect URI */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">Redirect URI</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={settings.WITHINGS_REDIRECT_URI || ''}
-                            onChange={(e) => handleChange('WITHINGS_REDIRECT_URI', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                        />
-                        <button onClick={() => handleSave('WITHINGS_REDIRECT_URI')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30">
-                            <Save className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="Redirect URI"
+                    value={settings.WITHINGS_REDIRECT_URI}
+                    onChange={(val) => handleChange('WITHINGS_REDIRECT_URI', val)}
+                    onSave={() => handleSave('WITHINGS_REDIRECT_URI')}
+                    saving={saving}
+                />
 
                 <div className="pt-4 border-t border-mainframe-border/50">
                     <button

@@ -202,7 +202,7 @@ def _should_use_think(model_id: str) -> bool:
 
 def _should_skip_native_tools(model_id: str) -> bool:
     """Return True if we already know this model doesn't support native tool_calls."""
-    if model_id in _FALLBACK_MODELS:
+    if model_id in _FALLBACK_MODELS or model_id.lower() in _KNOWN_NO_NATIVE_TOOLS:
         return True
     base = _model_base(model_id)
     return any(base.startswith(k) for k in _KNOWN_NO_NATIVE_TOOLS)

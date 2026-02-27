@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Loader2, Cloud } from 'lucide-react';
+import { Save, Loader2, Send, MessageSquare } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
 import SettingsField from '../../client/src/components/SettingsField';
 
-const WeatherSettings = () => {
+const TelegramSettings = () => {
     const [settings, setSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -58,9 +58,9 @@ const WeatherSettings = () => {
     return (
         <div className="p-8 max-w-4xl mx-auto h-full overflow-auto text-mainframe-text">
             <div className="flex items-center gap-4 mb-8 border-b border-mainframe-border pb-4">
-                <Cloud className="w-8 h-8 text-gray-400" />
+                <Send className="w-8 h-8 text-blue-400" />
                 <h1 className="text-3xl font-orbitron text-mainframe-accent">
-                    Weather & Location
+                    Telegram Integration
                 </h1>
             </div>
 
@@ -71,36 +71,42 @@ const WeatherSettings = () => {
             )}
 
             <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                    <SettingsField
-                        label="Latitude"
-                        value={settings.LATITUDE}
-                        onChange={(val) => handleChange('LATITUDE', val)}
-                        onSave={() => handleSave('LATITUDE')}
-                        placeholder="59.3293"
-                        saving={saving}
-                    />
-                    <SettingsField
-                        label="Longitude"
-                        value={settings.LONGITUDE}
-                        onChange={(val) => handleChange('LONGITUDE', val)}
-                        onSave={() => handleSave('LONGITUDE')}
-                        placeholder="18.0686"
-                        saving={saving}
-                    />
-                </div>
+                <p className="text-sm text-mainframe-text/70 mb-4">
+                    Telegram integration allows the system to send you proactive notifications and morning briefings.
+                </p>
 
+                {/* Bot Token */}
                 <SettingsField
-                    label="Timezone"
-                    value={settings.TIMEZONE}
-                    onChange={(val) => handleChange('TIMEZONE', val)}
-                    onSave={() => handleSave('TIMEZONE')}
-                    placeholder="Europe/Stockholm"
+                    label="Bot Token"
+                    value={settings.TELEGRAM_BOT_TOKEN}
+                    onChange={(val) => handleChange('TELEGRAM_BOT_TOKEN', val)}
+                    onSave={() => handleSave('TELEGRAM_BOT_TOKEN')}
+                    type="password"
+                    secretConfigured={settings.__secrets && settings.__secrets.TELEGRAM_BOT_TOKEN}
+                    placeholder="Enter Bot Token"
                     saving={saving}
                 />
+
+                {/* Chat ID */}
+                <SettingsField
+                    label="Chat ID"
+                    value={settings.TELEGRAM_CHAT_ID}
+                    onChange={(val) => handleChange('TELEGRAM_CHAT_ID', val)}
+                    onSave={() => handleSave('TELEGRAM_CHAT_ID')}
+                    placeholder="Enter Chat ID"
+                    description="Use a bot like @userinfobot to find your Chat ID."
+                    saving={saving}
+                />
+            </div>
+
+            <div className="mt-8 p-4 bg-zinc-900/30 border border-mainframe-border/50 rounded-lg flex items-center gap-4">
+                <MessageSquare className="w-5 h-5 text-mainframe-dim opacity-50" />
+                <div className="text-xs text-mainframe-text/40">
+                    Proactive messages are sent when certain triggers are met (e.g. morning reports, security alerts).
+                </div>
             </div>
         </div>
     );
 };
 
-export default WeatherSettings;
+export default TelegramSettings;

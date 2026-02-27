@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Activity, AlertTriangle, RefreshCw } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
+import SettingsField from '../../client/src/components/SettingsField';
 
 const GarminSettings = () => {
     const [settings, setSettings] = useState({});
@@ -89,36 +90,24 @@ const GarminSettings = () => {
                 </p>
 
                 {/* Email */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">Email</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={settings.GARMIN_EMAIL || ''}
-                            onChange={(e) => handleChange('GARMIN_EMAIL', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                        />
-                        <button onClick={() => handleSave('GARMIN_EMAIL')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30">
-                            <Save className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="Email"
+                    value={settings.GARMIN_EMAIL}
+                    onChange={(val) => handleChange('GARMIN_EMAIL', val)}
+                    onSave={() => handleSave('GARMIN_EMAIL')}
+                    saving={saving}
+                />
 
                 {/* Password */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">Password</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="password"
-                            value={settings.GARMIN_PASSWORD || ''}
-                            onChange={(e) => handleChange('GARMIN_PASSWORD', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                        />
-                        <button onClick={() => handleSave('GARMIN_PASSWORD')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30">
-                            <Save className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="Password"
+                    value={settings.GARMIN_PASSWORD}
+                    onChange={(val) => handleChange('GARMIN_PASSWORD', val)}
+                    onSave={() => handleSave('GARMIN_PASSWORD')}
+                    type="password"
+                    secretConfigured={settings.__secrets && settings.__secrets.GARMIN_PASSWORD}
+                    saving={saving}
+                />
 
                 {/* Actions */}
                 <div className="pt-4 border-t border-mainframe-border/50">

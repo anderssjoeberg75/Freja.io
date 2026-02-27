@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Zap, Info } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
+import SettingsField from '../../client/src/components/SettingsField';
 
 const TibberSettings = () => {
     const [settings, setSettings] = useState({});
@@ -78,23 +79,17 @@ const TibberSettings = () => {
             <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
 
                 {/* API Token */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">Tibber API Token</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="password"
-                            value={settings.TIBBER_API_TOKEN || ''}
-                            onChange={(e) => handleChange('TIBBER_API_TOKEN', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                            placeholder="Enter your Personal Access Token"
-                        />
-                        <button onClick={() => handleSave('TIBBER_API_TOKEN')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30 flex items-center gap-2">
-                            {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
-                            Save
-                        </button>
-                    </div>
-                    <p className="text-xs text-mainframe-text/40 italic mt-1">This token allows Freja to read your hourly electricity consumption and prices.</p>
-                </div>
+                <SettingsField
+                    label="Tibber API Token"
+                    value={settings.TIBBER_API_TOKEN}
+                    onChange={(val) => handleChange('TIBBER_API_TOKEN', val)}
+                    onSave={() => handleSave('TIBBER_API_TOKEN')}
+                    type="password"
+                    secretConfigured={settings.__secrets && settings.__secrets.TIBBER_API_TOKEN}
+                    placeholder="Enter your Personal Access Token"
+                    description="This token allows Freja to read your hourly electricity consumption and prices."
+                    saving={saving}
+                />
 
             </div>
 

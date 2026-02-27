@@ -1,7 +1,7 @@
 import secrets
 from typing import Optional
 
-from fastapi import Header, HTTPException
+from fastapi import Header, HTTPException, Request
 
 from app.core.config import get_credential
 from app.core.logging import logger
@@ -31,3 +31,25 @@ def require_admin(
         provided = provided.strip()
     if not provided or not secrets.compare_digest(provided, token):
         raise HTTPException(status_code=401, detail="Unauthorized")
+
+
+def check_ip_allowlist(request: Request) -> None:
+    """
+    Check if the client's IP is in the ALLOWED_IPS list.
+    Localhost is always allowed.
+    """
+    allowed_ips_str = get_credential("ALLOWED_IPS")
+    if not allowed_ips_str:
+        return
+
+    client_ip = request.client.host
+    if client_ip in ("127.0.0.1", "::1"):
+        return
+
+    allowed_ips = [ip.strip() for ip in allowed_ips_str.split(",") if ip.strip()]
+    if not allowed_ips:
+        return
+
+    if client_ip not in allowed_ips:
+        logger.warning(f"Access denied for IP: {client_ip}")
+        raise HTTPException(status_code=403, detail="Access denied: IP not allowed.")

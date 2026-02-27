@@ -7,9 +7,12 @@ export const useSocket = () => {
     const socketRef = useRef(null);
 
     useEffect(() => {
-        const socket = io(API_URL, {
+        const socket = io(API_URL || window.location.origin, {
+            path: '/socket.io',
             transports: ['websocket'],
-            autoConnect: true
+            autoConnect: true,
+            reconnection: true,
+            reconnectionAttempts: 10
         });
 
         socket.on('connect', () => {

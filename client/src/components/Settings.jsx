@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Save, Bot, Loader2, Activity, AlertTriangle, Download, ChevronRight } from 'lucide-react';
 import { getAvailableSkills, loadSkillSettings } from '../utils/skillRegistry';
 import { adminFetch, getAdminToken, setAdminToken } from '../utils/adminFetch';
+import SettingsField from './SettingsField';
 
 const Settings = () => {
     const [settings, setSettings] = useState({});
@@ -151,60 +152,40 @@ const Settings = () => {
 
     const renderField = (item) => {
         const secretConfigured = settings.__secrets && settings.__secrets[item.key];
-        const placeholder = secretConfigured
-            ? "••••••••••••••••"
-            : (item.description || `Ange ${item.label}`);
 
-        // For configured password fields, show masked value so user sees something is set
-        const displayValue = (item.type === 'password' && secretConfigured && !settings[item.key])
-            ? ''
-            : (settings[item.key] || '');
-
-        return (
-            <div key={item.key} className="grid gap-2">
-                <div className="flex items-center gap-2">
+        if (item.type === 'select') {
+            return (
+                <div key={item.key} className="grid gap-2">
                     <label className="text-sm font-medium text-mainframe-text/70 uppercase tracking-tight">
                         {item.label}
                     </label>
-                    {item.type === 'password' && secretConfigured && (
-                        <span className="text-[10px] uppercase tracking-wider text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded">● Satt</span>
-                    )}
-                </div>
-                <div className="flex gap-2">
-                    {item.type === 'select' ? (
-                        <select
-                            value={settings[item.key] || ''}
-                            onChange={(e) => handleChange(item.key, e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
-                        >
-                            <option value="" disabled>Välj modell...</option>
-                            {(item.options || models).map((opt) => (
-                                <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                        </select>
-                    ) : (
-                        <input
-                            type={item.type}
-                            value={displayValue}
-                            onChange={(e) => handleChange(item.key, e.target.value)}
-                            placeholder={placeholder}
-                            className={`flex-1 bg-black/40 border rounded px-4 py-2.5 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm ${secretConfigured && !settings[item.key]
-                                ? 'border-green-500/30 placeholder-green-400/60'
-                                : 'border-mainframe-border'
-                                }`}
-                        />
-                    )}
-
-                    <button
-                        onClick={() => handleSave(item.key)}
-                        disabled={saving}
-                        className="px-5 py-2.5 bg-mainframe-accent/10 border border-mainframe-accent/30 text-mainframe-accent hover:bg-mainframe-accent/30 hover:border-mainframe-accent rounded transition-all flex items-center shadow-lg"
+                    <select
+                        value={settings[item.key] || ''}
+                        onChange={(e) => handleChange(item.key, e.target.value)}
+                        className="w-full bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
                     >
-                        {saving ? <Loader2 className="w-4 h-5 animate-spin" /> : <Save className="w-4 h-5" />}
-                    </button>
+                        <option value="" disabled>Välj modell...</option>
+                        {(item.options || models).map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                    </select>
+                    {item.description && <p className="text-xs text-zinc-500 italic mt-1">{item.description}</p>}
                 </div>
-                {item.description && <p className="text-xs text-zinc-500 italic mt-1">{item.description}</p>}
-            </div>
+            );
+        }
+
+        return (
+            <SettingsField
+                key={item.key}
+                label={item.label}
+                value={settings[item.key]}
+                onChange={(val) => handleChange(item.key, val)}
+                onSave={() => handleSave(item.key)}
+                type={item.type}
+                secretConfigured={secretConfigured}
+                saving={saving}
+                description={item.description}
+            />
         );
     };
 

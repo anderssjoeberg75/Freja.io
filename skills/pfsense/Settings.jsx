@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Wifi, Info } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
+import SettingsField from '../../client/src/components/SettingsField';
 
 const PfSenseSettings = () => {
     const [settings, setSettings] = useState({});
@@ -78,40 +79,26 @@ const PfSenseSettings = () => {
             <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
 
                 {/* API URL */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">pfSense API URL</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={settings.PFSENSE_API_URL || ''}
-                            onChange={(e) => handleChange('PFSENSE_API_URL', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                            placeholder="e.g. https://192.168.1.1"
-                        />
-                        <button onClick={() => handleSave('PFSENSE_API_URL')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30 flex items-center gap-2">
-                            {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
-                            Save
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="pfSense API URL"
+                    value={settings.PFSENSE_API_URL}
+                    onChange={(val) => handleChange('PFSENSE_API_URL', val)}
+                    onSave={() => handleSave('PFSENSE_API_URL')}
+                    placeholder="e.g. https://192.168.1.1"
+                    saving={saving}
+                />
 
                 {/* API Key */}
-                <div className="grid gap-2">
-                    <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">pfSense API Key</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="password"
-                            value={settings.PFSENSE_API_KEY || ''}
-                            onChange={(e) => handleChange('PFSENSE_API_KEY', e.target.value)}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2"
-                            placeholder="username:password or API Token"
-                        />
-                        <button onClick={() => handleSave('PFSENSE_API_KEY')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30 flex items-center gap-2">
-                            {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
-                            Save
-                        </button>
-                    </div>
-                </div>
+                <SettingsField
+                    label="pfSense API Key"
+                    value={settings.PFSENSE_API_KEY}
+                    onChange={(val) => handleChange('PFSENSE_API_KEY', val)}
+                    onSave={() => handleSave('PFSENSE_API_KEY')}
+                    type="password"
+                    secretConfigured={settings.__secrets && settings.__secrets.PFSENSE_API_KEY}
+                    placeholder="username:password or API Token"
+                    saving={saving}
+                />
 
                 {/* Verify TLS */}
                 <div className="grid gap-2">
@@ -127,9 +114,8 @@ const PfSenseSettings = () => {
                             <option value="true">Yes (Strict SSL)</option>
                             <option value="false">No (Allow self-signed)</option>
                         </select>
-                        <button onClick={() => handleSave('PFSENSE_VERIFY_TLS')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30 flex items-center gap-2">
-                            {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
-                            Save
+                        <button onClick={() => handleSave('PFSENSE_VERIFY_TLS')} disabled={saving} className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30 flex items-center justify-center min-w-[50px]">
+                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         </button>
                     </div>
                     <p className="text-xs text-mainframe-text/40 italic mt-1">Set to "No" if your router uses a self-signed HTTPS certificate.</p>
@@ -147,7 +133,7 @@ const PfSenseSettings = () => {
                             <ol className="list-decimal pl-5 space-y-2">
                                 <li>Ensure `pfrest` is running on your pfSense firewall.</li>
                                 <li>Enter the router's base URL (e.g., <code>https://192.168.1.1</code>).</li>
-                                <li>Generate an API client/token in the pfSense `System > API` settings.</li>
+                                <li>Generate an API client/token in the pfSense `System → API` settings.</li>
                                 <li>Enter the API credentials (often in <code>client_id:client_secret</code> format).</li>
                                 <li>If you haven't assigned a valid SSL certificate to pfSense, change <b>Verify TLS Certificate</b> to <b>No</b>.</li>
                             </ol>

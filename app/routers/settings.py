@@ -72,20 +72,23 @@ async def update_setting(payload: dict):
         is_secret = is_secret_key(key)
         if is_secret:
             if value is None or str(value).strip() == "":
-                return {"success": True, "message": f"No change for '{key}'."}
+                return {"success": True, "message": f"Ingen ändring för '{key}'."}
             from app.core.vault import save_vault_secret
             success = save_vault_secret(key, str(value))
             if not success:
                 logger.error(f"Failed to save secret {key} to Vault")
-                return {"success": False, "message": f"Failed to save {key} to Vault. Check Vault connection."}
+                return {"success": False, "message": f"Kunde inte spara {key} i Vault. Kontrollera anslutningen."}
         else:
-            await save_db_setting(key, value)
+            success = await save_db_setting(key, value)
+            if not success:
+                logger.error(f"Failed to save setting {key} to database")
+                return {"success": False, "message": f"Kunde inte spara {key} i databasen."}
             
         logger.info(f"Setting updated: {key} = ***") # Don't log values for security
-        return {"success": True, "message": f"Setting '{key}' updated."}
+        return {"success": True, "message": f"Inställningen '{key}' uppdaterades."}
     except Exception as e:
-        logger.error(f"Error updating setting: {e}")
-        return {"success": False, "message": str(e)}
+        logger.error(f"Error updating setting: {e}", exc_info=True)
+        return {"success": False, "message": f"Internt fel: {str(e)}"}
 
 @router.get("/api/prompts", dependencies=[Depends(require_admin)])
 async def get_prompts():
