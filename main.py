@@ -104,6 +104,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# IP Access Control Middleware
+@app.middleware("http")
+async def ip_middleware(request: Request, call_next):
+    from app.core.security import check_ip_allowlist
+    try:
+        check_ip_allowlist(request)
+    except HTTPException as e:
+        return JSONResponse(status_code=e.status_code, content={"error": e.detail})
+    except Exception as e:
+        logger.error(f"IP Middleware error: {e}")
+        # In case of unexpected error, we default to allow to prevent lockout
+        # but log the incident.
+    
+    response = await call_next(request)
+    return response
+
 # Socket.IO Setup
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins=get_allowed_origins())
 app_socketio = socketio.ASGIApp(sio, app)

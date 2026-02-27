@@ -29,14 +29,20 @@ async def get_settings():
 
         # Provide a minimal secrets presence map for UI hints
         secrets_present = {}
+        
+        # 1. Flag everything in Vault as a secret
+        for key in vault_secrets.keys():
+            secrets_present[key] = True
+            
+        # 2. Add keys from schema defined as password
         secret_keys = get_secret_keys()
         for key in secret_keys:
-            if vault_secrets.get(key):
+            if db_settings.get(key) or os.getenv(key):
                 secrets_present[key] = True
-            elif db_settings.get(key):
-                # Legacy DB storage (should be migrated away)
-                secrets_present[key] = True
-            elif os.getenv(key):
+        
+        # 3. Add legacy env-based secrets if they match naming hints
+        for key, val in db_settings.items():
+            if val and is_secret_key(key):
                 secrets_present[key] = True
 
         if secrets_present:
