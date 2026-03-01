@@ -13,6 +13,7 @@ class SettingItem(BaseModel):
 SETTINGS_SCHEMA: List[SettingItem] = [
     # Intelligence Core
     SettingItem(key="GOOGLE_API_KEY", label="Google API Key", type="password", section="Intelligence", description="Gemini Pro / Flash API Key"),
+    SettingItem(key="OPENAI_API_KEY", label="OpenAI API Key", type="password", section="Intelligence", description="Required for GPT and o-series models"),
     SettingItem(
         key="SELECTED_MODEL", 
         label="Selected Model", 

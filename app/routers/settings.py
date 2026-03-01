@@ -167,6 +167,22 @@ async def get_models():
         # Don't log full stack trace for connection errors (common if Ollama is down)
         logger.warning(f"Could not fetch Ollama models: {e}")
 
+    # 3. Fetch OpenAI Models
+    try:
+        openai_api_key = get_credential("OPENAI_API_KEY")
+        if openai_api_key:
+            import openai
+            client = openai.AsyncOpenAI(api_key=openai_api_key)
+            resp = await client.models.list()
+            for model in resp.data:
+                name = getattr(model, "id", "") or ""
+                if name.startswith(("gpt-", "o1", "o3")):
+                    # Keep only standard conversational models
+                    if not any(suffix in name for suffix in ["-audio", "-realtime", "babbage", "davinci"]):
+                        models.append(name)
+    except Exception as e:
+        logger.warning(f"Could not fetch OpenAI models: {e}")
+
     # Sort and deduplicate
     models = sorted(list(set(models)), reverse=True)
     

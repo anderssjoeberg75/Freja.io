@@ -1,7 +1,65 @@
-import React from 'react';
-import { Terminal, Code, Cpu, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Terminal, Code, Cpu, Save, Loader2 } from 'lucide-react';
+import { adminFetch } from '../../client/src/utils/adminFetch';
 
 const CodexSettings = () => {
+    const [settings, setSettings] = useState({});
+    const [models, setModels] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState(null);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [settingsRes, modelsRes] = await Promise.all([
+                adminFetch('/api/settings'),
+                adminFetch('/api/models')
+            ]);
+            const settingsData = await settingsRes.json();
+            const modelsData = await modelsRes.json();
+            setSettings(settingsData || {});
+            setModels(modelsData.models || []);
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Failed to load data.' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleChange = (key, value) => {
+        setSettings(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleSave = async (key) => {
+        setSaving(true);
+        setMessage(null);
+        try {
+            const res = await adminFetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key, value: settings[key] })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setMessage({ type: 'success', text: 'Sparat!' });
+            } else {
+                setMessage({ type: 'error', text: 'Kunde inte spara inställningen.' });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Ett fel uppstod.' });
+        } finally {
+            setSaving(false);
+            setTimeout(() => setMessage(null), 3000);
+        }
+    };
+
+    if (loading) return <div className="p-8"><Loader2 className="animate-spin text-mainframe-text/50" /></div>;
+
     return (
         <div className="p-8 max-w-4xl mx-auto h-full overflow-auto text-mainframe-text">
             <div className="flex items-center gap-4 mb-8 border-b border-mainframe-border pb-4">
@@ -11,6 +69,12 @@ const CodexSettings = () => {
                 </h1>
             </div>
 
+            {message && (
+                <div className={`mb-6 p-4 rounded border ${message.type === 'error' ? 'bg-red-900/20 border-red-500 text-red-200' : 'bg-green-900/20 border-green-500 text-green-200'}`}>
+                    {message.text}
+                </div>
+            )}
+
             <div className="bg-mainframe-card p-6 rounded-lg border border-mainframe-border shadow-xl space-y-6">
                 <div className="flex items-start gap-4 p-4 bg-green-900/10 border border-green-900/30 rounded-lg">
                     <Code className="w-6 h-6 text-green-400 shrink-0 mt-1" />
@@ -19,6 +83,36 @@ const CodexSettings = () => {
                         <p className="text-sm text-mainframe-text/80 leading-relaxed">
                             Codex provides advanced code analysis, refactoring, and generation tools.
                             It is integrated directly into the system's core loop.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="py-4 border-t border-b border-mainframe-border/30">
+                    <div className="grid gap-2 mb-4">
+                        <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">
+                            Codex Model Override
+                        </label>
+                        <div className="flex gap-2">
+                            <select
+                                value={settings.CODEX_MODEL || ''}
+                                onChange={(e) => handleChange('CODEX_MODEL', e.target.value)}
+                                className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
+                            >
+                                <option value="">Använd systemets standardmodell</option>
+                                {models.map((opt) => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={() => handleSave('CODEX_MODEL')}
+                                disabled={saving}
+                                className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30 disabled:opacity-50 transition-all flex items-center justify-center min-w-[50px]"
+                            >
+                                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            </button>
+                        </div>
+                        <p className="text-xs text-mainframe-text/40 italic">
+                            Välj specifik modell för kodanalys. Använder annars `SELECTED_MODEL` från huvudinställningarna. Modeller hämtas från Ollama, Gemini och OpenAI.
                         </p>
                     </div>
                 </div>
@@ -43,12 +137,6 @@ const CodexSettings = () => {
                             <p className="text-xs text-mainframe-text/50 text-wrap">Long-term memory of project structure and logic.</p>
                         </div>
                     </div>
-                </div>
-
-                <div className="pt-4 border-t border-mainframe-border/50 text-center">
-                    <p className="text-xs text-mainframe-text/40">
-                        Codex relies on the <strong>Intelligence</strong> settings (selected model) for its operations.
-                    </p>
                 </div>
             </div>
 
