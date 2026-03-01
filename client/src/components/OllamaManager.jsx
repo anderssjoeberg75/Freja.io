@@ -4,13 +4,16 @@ import { adminFetch } from '../utils/adminFetch';
 
 const RECOMMENDED_MODELS = [
     { id: 'llama3.2', name: 'Llama 3.2 (3B)', minRamGB: 4, desc: 'Snabb standardmodell' },
-    { id: 'phi4', name: 'Phi-4 (14B)', minRamGB: 8, desc: 'Bra på logik & matte' },
-    { id: 'gemma-2', name: 'Gemma 2 (9B)', minRamGB: 8, desc: 'Googles open-weights' },
     { id: 'qwen2.5', name: 'Qwen 2.5 (7B)', minRamGB: 8, desc: 'Stark all-around' },
     { id: 'mistral', name: 'Mistral (7B)', minRamGB: 8, desc: 'Klassisk & pålitlig' },
     { id: 'llama3.1:8b', name: 'Llama 3.1 (8B)', minRamGB: 8, desc: 'Bra på svenska' },
+    { id: 'codellama', name: 'CodeLlama (7B)', minRamGB: 8, desc: 'Metas kod-AI' },
+    { id: 'gemma-2', name: 'Gemma 2 (9B)', minRamGB: 8, desc: 'Googles open-weights' },
+    { id: 'phi4', name: 'Phi-4 (14B)', minRamGB: 14, desc: 'Bra på logik & matte' },
     { id: 'qwen2.5-coder:7b', name: 'Qwen 2.5 Coder (7B)', minRamGB: 8, desc: 'För kodning' },
+    { id: 'deepseek-r1:14b', name: 'DeepSeek R1 (14B)', minRamGB: 16, desc: 'Distilled reasoning' },
     { id: 'qwen2.5:32b', name: 'Qwen 2.5 (32B)', minRamGB: 24, desc: 'Tungviktsmodell' },
+    { id: 'deepseek-r1:32b', name: 'DeepSeek R1 (32B)', minRamGB: 24, desc: 'Tungvikts reasoning' },
     { id: 'llama3.3', name: 'Llama 3.3 (70B)', minRamGB: 48, desc: 'Enorm & kraftfull' },
 ];
 
@@ -291,20 +294,33 @@ const OllamaManager = ({ standalone = false }) => {
                 <div className="space-y-3">
                     <p className="text-xs uppercase tracking-wider text-mainframe-text/50">Installera ny modell</p>
                     <div className="flex gap-2">
-                        <select
-                            value={pullDropdown}
-                            onChange={(e) => setPullDropdown(e.target.value)}
-                            disabled={pulling}
-                            className={`bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text font-mono text-sm focus:border-mainframe-accent focus:outline-none transition-all appearance-none cursor-pointer ${pullDropdown === 'custom' ? 'w-1/3' : 'flex-1'}`}
-                        >
-                            <option value="" disabled>Välj rekommenderad modell...</option>
-                            {RECOMMENDED_MODELS.filter(m => !resources?.ram?.total_gb || resources.ram.total_gb >= m.minRamGB).map(m => (
-                                <option key={m.id} value={m.id}>
-                                    {m.name} – {m.desc} (Kräver {m.minRamGB}GB RAM)
-                                </option>
-                            ))}
-                            <option value="custom">Anpassad modell (skriv in namn...)</option>
-                        </select>
+                        {(() => {
+                            // Calculate total VRAM if GPUs exist, otherwise fallback to system RAM
+                            let totalAvailableHardwareGB = 0;
+                            if (resources?.gpu && resources.gpu.length > 0) {
+                                const totalVramMB = resources.gpu.reduce((acc, curr) => acc + curr.vram_total_mb, 0);
+                                totalAvailableHardwareGB = totalVramMB / 1024;
+                            } else if (resources?.ram?.total_gb) {
+                                totalAvailableHardwareGB = resources.ram.total_gb;
+                            }
+
+                            return (
+                                <select
+                                    value={pullDropdown}
+                                    onChange={(e) => setPullDropdown(e.target.value)}
+                                    disabled={pulling}
+                                    className={`bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text font-mono text-sm focus:border-mainframe-accent focus:outline-none transition-all appearance-none cursor-pointer ${pullDropdown === 'custom' ? 'w-1/3' : 'flex-1'}`}
+                                >
+                                    <option value="" disabled>Välj rekommenderad modell...</option>
+                                    {RECOMMENDED_MODELS.filter(m => !totalAvailableHardwareGB || totalAvailableHardwareGB >= m.minRamGB).map(m => (
+                                        <option key={m.id} value={m.id}>
+                                            {m.name} – {m.desc} (Kräver {m.minRamGB}GB)
+                                        </option>
+                                    ))}
+                                    <option value="custom">Anpassad modell (skriv in namn...)</option>
+                                </select>
+                            );
+                        })()}
 
                         {pullDropdown === 'custom' && (
                             <input
