@@ -3,18 +3,35 @@ import { Cpu, Trash2, Download, RefreshCw, X, CheckCircle, AlertCircle, Loader2,
 import { adminFetch } from '../utils/adminFetch';
 
 const RECOMMENDED_MODELS = [
+    // --- Små & Snabba (Run on almost anything) ---
+    { id: 'llama3.2:1b', name: 'Llama 3.2 (1B)', minRamGB: 2, desc: 'Extremt snabb, mobil-vänlig' },
     { id: 'llama3.2', name: 'Llama 3.2 (3B)', minRamGB: 4, desc: 'Snabb standardmodell' },
+    { id: 'qwen2.5:0.5b', name: 'Qwen 2.5 (0.5B)', minRamGB: 2, desc: 'Liten men naggande god' },
+    { id: 'gemma2:2b', name: 'Gemma 2 (2B)', minRamGB: 4, desc: 'Liten från Google' },
+
+    // --- Standard (Bäst balans) ---
+    { id: 'llama3.1:8b', name: 'Llama 3.1 (8B)', minRamGB: 8, desc: 'Bra på svenska, grym standard' },
     { id: 'qwen2.5', name: 'Qwen 2.5 (7B)', minRamGB: 8, desc: 'Stark all-around' },
     { id: 'mistral', name: 'Mistral (7B)', minRamGB: 8, desc: 'Klassisk & pålitlig' },
-    { id: 'llama3.1:8b', name: 'Llama 3.1 (8B)', minRamGB: 8, desc: 'Bra på svenska' },
-    { id: 'codellama', name: 'CodeLlama (7B)', minRamGB: 8, desc: 'Metas kod-AI' },
     { id: 'gemma-2', name: 'Gemma 2 (9B)', minRamGB: 8, desc: 'Googles open-weights' },
+
+    // --- Kodning (Specialister) ---
+    { id: 'qwen2.5-coder:7b', name: 'Qwen 2.5 Coder (7B)', minRamGB: 8, desc: 'Mindre kod-modell' },
+    { id: 'codellama', name: 'CodeLlama (7B)', minRamGB: 8, desc: 'Metas kod-AI' },
+    { id: 'deepseek-coder-v2', name: 'DeepSeek Coder V2 (16B)', minRamGB: 16, desc: 'Fantastisk kodare MoE' },
+
+    // --- Smarta & Logik (Reasoning) ---
+    { id: 'deepseek-r1:1.5b', name: 'DeepSeek R1 (1.5B)', minRamGB: 4, desc: 'Mini-reasoning' },
+    { id: 'deepseek-r1:8b', name: 'DeepSeek R1 (8B)', minRamGB: 8, desc: 'Snabb reasoning' },
+    { id: 'deepseek-r1:14b', name: 'DeepSeek R1 (14B)', minRamGB: 16, desc: 'Tung reasoning (Qwen)' },
     { id: 'phi4', name: 'Phi-4 (14B)', minRamGB: 14, desc: 'Bra på logik & matte' },
-    { id: 'qwen2.5-coder:7b', name: 'Qwen 2.5 Coder (7B)', minRamGB: 8, desc: 'För kodning' },
-    { id: 'deepseek-r1:14b', name: 'DeepSeek R1 (14B)', minRamGB: 16, desc: 'Distilled reasoning' },
+
+    // --- Tungviktare (Kräver mycket resurser) ---
     { id: 'qwen2.5:32b', name: 'Qwen 2.5 (32B)', minRamGB: 24, desc: 'Tungviktsmodell' },
     { id: 'deepseek-r1:32b', name: 'DeepSeek R1 (32B)', minRamGB: 24, desc: 'Tungvikts reasoning' },
-    { id: 'llama3.3', name: 'Llama 3.3 (70B)', minRamGB: 48, desc: 'Enorm & kraftfull' },
+    { id: 'mixtral', name: 'Mixtral (8x7B)', minRamGB: 32, desc: 'Kraftfull MoE från Mistral' },
+    { id: 'llama3.3', name: 'Llama 3.3 (70B)', minRamGB: 48, desc: 'Enorm & kraftfull standard' },
+    { id: 'deepseek-r1:70b', name: 'DeepSeek R1 (70B)', minRamGB: 48, desc: 'Gigantisk reasoning' },
 ];
 
 const formatSize = (bytes) => {
