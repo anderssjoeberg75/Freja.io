@@ -2,6 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Cpu, Trash2, Download, RefreshCw, X, CheckCircle, AlertCircle, Loader2, MemoryStick, Zap } from 'lucide-react';
 import { adminFetch } from '../utils/adminFetch';
 
+const RECOMMENDED_MODELS = [
+    { id: 'llama3.2', name: 'Llama 3.2 (3B)', minRamGB: 4, desc: 'Snabb standardmodell' },
+    { id: 'phi4', name: 'Phi-4 (14B)', minRamGB: 8, desc: 'Bra på logik & matte' },
+    { id: 'gemma-2', name: 'Gemma 2 (9B)', minRamGB: 8, desc: 'Googles open-weights' },
+    { id: 'qwen2.5', name: 'Qwen 2.5 (7B)', minRamGB: 8, desc: 'Stark all-around' },
+    { id: 'mistral', name: 'Mistral (7B)', minRamGB: 8, desc: 'Klassisk & pålitlig' },
+    { id: 'llama3.1:8b', name: 'Llama 3.1 (8B)', minRamGB: 8, desc: 'Bra på svenska' },
+    { id: 'qwen2.5-coder:7b', name: 'Qwen 2.5 Coder (7B)', minRamGB: 8, desc: 'För kodning' },
+    { id: 'qwen2.5:32b', name: 'Qwen 2.5 (32B)', minRamGB: 24, desc: 'Tungviktsmodell' },
+    { id: 'llama3.3', name: 'Llama 3.3 (70B)', minRamGB: 48, desc: 'Enorm & kraftfull' },
+];
+
 const formatSize = (bytes) => {
     if (!bytes) return '—';
     const gb = bytes / 1024 ** 3;
@@ -45,7 +57,8 @@ const OllamaManager = ({ standalone = false }) => {
     const [runningModels, setRunningModels] = useState([]);
 
     // Pull state
-    const [pullModel, setPullModel] = useState('');
+    const [pullDropdown, setPullDropdown] = useState('');
+    const [customPullModel, setCustomPullModel] = useState('');
     const [pulling, setPulling] = useState(false);
     const [pullStatus, setPullStatus] = useState(null);
     const pullReaderRef = useRef(null);
@@ -86,14 +99,15 @@ const OllamaManager = ({ standalone = false }) => {
     useEffect(() => { fetchAll(); }, []);
 
     const handlePull = async () => {
-        if (!pullModel.trim() || pulling) return;
+        const modelToPull = pullDropdown === 'custom' ? customPullModel : pullDropdown;
+        if (!modelToPull.trim() || pulling) return;
         setPulling(true);
         setPullStatus({ text: 'Ansluter...', percent: 0, done: false, error: null });
         try {
             const res = await adminFetch('/api/ollama/pull', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: pullModel.trim() }),
+                body: JSON.stringify({ model: modelToPull.trim() }),
             });
             const reader = res.body.getReader();
             pullReaderRef.current = reader;
@@ -116,7 +130,7 @@ const OllamaManager = ({ standalone = false }) => {
                 }
             }
             setPullStatus({ text: 'Klar! 🎉', percent: 100, done: true, error: null });
-            setPullModel('');
+            if (pullDropdown === 'custom') setCustomPullModel('');
             fetchAll();
         } catch (e) {
             setPullStatus({ text: e.message, percent: 0, done: false, error: true });
@@ -277,16 +291,39 @@ const OllamaManager = ({ standalone = false }) => {
                 <div className="space-y-3">
                     <p className="text-xs uppercase tracking-wider text-mainframe-text/50">Installera ny modell</p>
                     <div className="flex gap-2">
-                        <input type="text" value={pullModel} onChange={(e) => setPullModel(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handlePull()}
-                            placeholder="t.ex. llama3.2, phi4, gemma3:4b" disabled={pulling}
-                            className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text font-mono text-sm focus:border-mainframe-accent focus:outline-none transition-all placeholder-mainframe-dim/50" />
+                        <select
+                            value={pullDropdown}
+                            onChange={(e) => setPullDropdown(e.target.value)}
+                            disabled={pulling}
+                            className={`bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text font-mono text-sm focus:border-mainframe-accent focus:outline-none transition-all appearance-none cursor-pointer ${pullDropdown === 'custom' ? 'w-1/3' : 'flex-1'}`}
+                        >
+                            <option value="" disabled>Välj rekommenderad modell...</option>
+                            {RECOMMENDED_MODELS.filter(m => !resources?.ram?.total_gb || resources.ram.total_gb >= m.minRamGB).map(m => (
+                                <option key={m.id} value={m.id}>
+                                    {m.name} – {m.desc} (Kräver {m.minRamGB}GB RAM)
+                                </option>
+                            ))}
+                            <option value="custom">Anpassad modell (skriv in namn...)</option>
+                        </select>
+
+                        {pullDropdown === 'custom' && (
+                            <input
+                                type="text"
+                                value={customPullModel}
+                                onChange={(e) => setCustomPullModel(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handlePull()}
+                                placeholder="t.ex. llama3.2, phi4, gemma3:4b"
+                                disabled={pulling}
+                                className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text font-mono text-sm focus:border-mainframe-accent focus:outline-none transition-all placeholder-mainframe-dim/50"
+                            />
+                        )}
+
                         {pulling ? (
                             <button onClick={cancelPull} className="px-4 py-2.5 bg-red-900/20 border border-red-500/40 text-red-400 hover:bg-red-900/40 rounded transition-all flex items-center gap-2 text-sm">
                                 <X className="w-4 h-4" /> Avbryt
                             </button>
                         ) : (
-                            <button onClick={handlePull} disabled={!pullModel.trim()}
+                            <button onClick={handlePull} disabled={(!pullDropdown || (pullDropdown === 'custom' && !customPullModel.trim()))}
                                 className="px-4 py-2.5 bg-mainframe-accent/10 border border-mainframe-accent/30 text-mainframe-accent hover:bg-mainframe-accent/30 hover:border-mainframe-accent rounded transition-all flex items-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
                                 <Download className="w-4 h-4" /> Installera
                             </button>
