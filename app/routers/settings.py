@@ -91,6 +91,12 @@ async def update_setting(payload: dict):
                 return {"success": False, "message": f"Kunde inte spara {key} i databasen."}
             
         logger.info(f"Setting updated: {key} = ***") # Don't log values for security
+        
+        if key in ("GOOGLE_API_KEY", "OPENAI_API_KEY", "OLLAMA_URL"):
+            global _model_cache
+            _model_cache["timestamp"] = 0
+            logger.info("Invalidated model cache due to credentials update.")
+
         return {"success": True, "message": f"Inställningen '{key}' uppdaterades."}
     except Exception as e:
         logger.error(f"Error updating setting: {e}", exc_info=True)
@@ -183,12 +189,15 @@ async def get_models():
     except Exception as e:
         logger.warning(f"Could not fetch OpenAI models: {e}")
 
+    # Always include standard models so they are selectable even if keys are not yet configured
+    standard_models = [
+        "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-pro", 
+        "gpt-4o", "gpt-4o-mini", "o1", "o3-mini"
+    ]
+    models.extend(standard_models)
+
     # Sort and deduplicate
     models = sorted(list(set(models)), reverse=True)
-    
-    # Default fallback if empty
-    if not models:
-        models = ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"]
         
     # Update cache
     _model_cache = {

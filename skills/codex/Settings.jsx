@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal, Code, Cpu, Save, Loader2 } from 'lucide-react';
 import { adminFetch } from '../../client/src/utils/adminFetch';
+import { formatModelOption } from '../../client/src/utils/modelDescriptions';
 
 const CodexSettings = () => {
     const [settings, setSettings] = useState({});
@@ -22,8 +23,35 @@ const CodexSettings = () => {
             ]);
             const settingsData = await settingsRes.json();
             const modelsData = await modelsRes.json();
-            setSettings(settingsData || {});
-            setModels(modelsData.models || []);
+
+            const availableModels = modelsData.models || [];
+            setModels(availableModels);
+
+            let loadedSettings = settingsData || {};
+
+            // Auto-select the best coding model if none is configured
+            if (!loadedSettings.CODEX_MODEL) {
+                const CODING_MODEL_PRIORITY = [
+                    "o1", "o3-mini", "gemini-2.5-flash", "gemini-2.0-flash",
+                    "deepseek-coder-v2", "qwen2.5-coder:32b", "qwen2.5-coder",
+                    "gpt-4o", "codellama"
+                ];
+                let bestModel = "";
+                for (const preferred of CODING_MODEL_PRIORITY) {
+                    const match = availableModels.find(m => m.toLowerCase().startsWith(preferred));
+                    if (match) {
+                        bestModel = match;
+                        break;
+                    }
+                }
+                // Fallback to first if no matches
+                if (!bestModel && availableModels.length > 0) {
+                    bestModel = availableModels[0];
+                }
+                loadedSettings.CODEX_MODEL = bestModel;
+            }
+
+            setSettings(loadedSettings);
         } catch (err) {
             setMessage({ type: 'error', text: 'Failed to load data.' });
         } finally {
@@ -33,6 +61,30 @@ const CodexSettings = () => {
 
     const handleChange = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleModelChange = async (val) => {
+        handleChange('CODEX_MODEL', val);
+        setSaving(true);
+        setMessage(null);
+        try {
+            const res = await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: 'CODEX_MODEL', value: val })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setMessage({ type: 'success', text: `Codex model updated to ${val || 'system default'}.` });
+            } else {
+                setMessage({ type: 'error', text: 'Could not save model.' });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Error saving.' });
+        } finally {
+            setSaving(false);
+            setTimeout(() => setMessage(null), 3000);
+        }
     };
 
     const handleSave = async (key) => {
@@ -46,12 +98,12 @@ const CodexSettings = () => {
             });
             const data = await res.json();
             if (data.success) {
-                setMessage({ type: 'success', text: 'Sparat!' });
+                setMessage({ type: 'success', text: 'Saved!' });
             } else {
-                setMessage({ type: 'error', text: 'Kunde inte spara inställningen.' });
+                setMessage({ type: 'error', text: 'Could not save setting.' });
             }
         } catch (err) {
-            setMessage({ type: 'error', text: 'Ett fel uppstod.' });
+            setMessage({ type: 'error', text: 'An error occurred.' });
         } finally {
             setSaving(false);
             setTimeout(() => setMessage(null), 3000);
@@ -87,20 +139,20 @@ const CodexSettings = () => {
                     </div>
                 </div>
 
-                <div className="py-4 border-t border-b border-mainframe-border/30">
-                    <div className="grid gap-2 mb-4">
-                        <label className="text-sm font-bold uppercase tracking-wider text-mainframe-text/60">
+                <div className="py-2 border-t border-b border-mainframe-border/30">
+                    <div className="grid gap-2 my-4">
+                        <label className="text-sm font-medium text-mainframe-text/70 uppercase tracking-tight flex items-center gap-2">
                             Codex Model Override
                         </label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-96">
                             <select
                                 value={settings.CODEX_MODEL || ''}
                                 onChange={(e) => handleChange('CODEX_MODEL', e.target.value)}
-                                className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
+                                className="flex-1 min-w-0 truncate bg-black/40 border border-mainframe-border rounded px-4 py-2 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
                             >
-                                <option value="">Använd systemets standardmodell</option>
+                                <option value="">Use system default model</option>
                                 {models.map((opt) => (
-                                    <option key={opt} value={opt}>{opt}</option>
+                                    <option key={opt} value={opt}>{formatModelOption(opt)}</option>
                                 ))}
                             </select>
                             <button
@@ -111,8 +163,8 @@ const CodexSettings = () => {
                                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                             </button>
                         </div>
-                        <p className="text-xs text-mainframe-text/40 italic">
-                            Välj specifik modell för kodanalys. Använder annars `SELECTED_MODEL` från huvudinställningarna. Modeller hämtas från Ollama, Gemini och OpenAI.
+                        <p className="text-xs text-zinc-500 italic mt-1">
+                            Select a specific model for code analysis. Otherwise uses `SELECTED_MODEL` from main settings. Models are fetched from Ollama, Gemini, and OpenAI.
                         </p>
                     </div>
                 </div>

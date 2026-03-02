@@ -3,6 +3,7 @@ import { Save, Bot, Loader2, Activity, AlertTriangle, Download, ChevronRight } f
 import { getAvailableSkills, loadSkillSettings } from '../utils/skillRegistry';
 import { adminFetch, getAdminToken, setAdminToken } from '../utils/adminFetch';
 import SettingsField from './SettingsField';
+import { formatModelOption } from '../utils/modelDescriptions';
 
 const Settings = () => {
     const [settings, setSettings] = useState({});
@@ -68,7 +69,7 @@ const Settings = () => {
             setModels(modelsData.models || []);
         } catch (err) {
             console.error("Failed to fetch settings data:", err);
-            setMessage({ type: 'error', text: `Kunde inte ladda inställningar: ${err.message}` });
+            setMessage({ type: 'error', text: `Could not load settings: ${err.message}` });
         } finally {
             setLoading(false);
         }
@@ -89,7 +90,7 @@ const Settings = () => {
             });
             const data = await res.json();
             if (data.success) {
-                setMessage({ type: 'success', text: data.message || `Uppdaterade ${key} framgångsrikt!` });
+                setMessage({ type: 'success', text: data.message || `${key} updated successfully!` });
                 const isSecret = schema.some((item) => item.key === key && item.type === 'password');
                 if (isSecret) {
                     setSettings(prev => ({
@@ -99,10 +100,10 @@ const Settings = () => {
                     }));
                 }
             } else {
-                setMessage({ type: 'error', text: 'Kunde inte spara inställningen.' });
+                setMessage({ type: 'error', text: 'Could not save setting.' });
             }
         } catch (err) {
-            setMessage({ type: 'error', text: 'Fel vid sparning.' });
+            setMessage({ type: 'error', text: 'Error saving.' });
         } finally {
             setSaving(false);
             setTimeout(() => setMessage(null), 3000);
@@ -113,7 +114,7 @@ const Settings = () => {
         try {
             const res = await adminFetch('/api/system/backup_db');
             if (!res.ok) {
-                throw new Error("Kunde inte hämta backup.");
+                throw new Error("Could not fetch backup.");
             }
             const blob = await res.blob();
             const disposition = res.headers.get("content-disposition") || "";
@@ -128,21 +129,21 @@ const Settings = () => {
             link.remove();
             window.URL.revokeObjectURL(url);
         } catch (err) {
-            setMessage({ type: 'error', text: 'Backup misslyckades.' });
+            setMessage({ type: 'error', text: 'Backup failed.' });
         }
     };
 
     const handleTokenSave = () => {
         const cleaned = adminToken.trim();
         setAdminToken(cleaned);
-        setTokenMessage(cleaned ? "Admin-token sparad." : "Admin-token rensad.");
+        setTokenMessage(cleaned ? "Admin token saved." : "Admin token cleared.");
         fetchInitialData();
         setTimeout(() => setTokenMessage(null), 3000);
     };
 
     if (loading) return (
         <div className="flex items-center justify-center h-full text-mainframe-text">
-            <Loader2 className="animate-spin mr-2" /> Laddar konfiguration...
+            <Loader2 className="animate-spin mr-2" /> Loading configuration...
         </div>
     );
 
@@ -164,9 +165,11 @@ const Settings = () => {
                         onChange={(e) => handleChange(item.key, e.target.value)}
                         className="w-full bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
                     >
-                        <option value="" disabled>Välj modell...</option>
+                        <option value="" disabled>Choose model...</option>
                         {(item.options || models).map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
+                            <option key={opt} value={opt}>
+                                {item.key.includes('MODEL') ? formatModelOption(opt) : opt}
+                            </option>
                         ))}
                     </select>
                     {item.description && <p className="text-xs text-zinc-500 italic mt-1">{item.description}</p>}
@@ -205,7 +208,7 @@ const Settings = () => {
                         onClick={handleTokenSave}
                         className="px-4 py-2 bg-mainframe-accent/20 border border-mainframe-accent/50 text-mainframe-accent rounded hover:bg-mainframe-accent/30 text-sm"
                     >
-                        Spara token
+                        Save token
                     </button>
                 </div>
                 {tokenMessage && <p className="text-xs text-mainframe-text/60 mt-2">{tokenMessage}</p>}
@@ -290,8 +293,8 @@ const Settings = () => {
                     <div className="p-5 bg-yellow-900/10 border border-yellow-700/30 rounded-lg text-yellow-500/80 text-sm flex items-start gap-4">
                         <AlertTriangle className="w-6 h-6 shrink-0" />
                         <div>
-                            <strong className="block mb-1 text-yellow-500 uppercase tracking-tighter">Säkerhetsnotis</strong>
-                            <p>Känsliga nycklar lagras i Vault och returneras aldrig till webbläsaren. Administrations-API kräver nu en admin‑token.</p>
+                            <strong className="block mb-1 text-yellow-500 uppercase tracking-tighter">Security Notice</strong>
+                            <p>Sensitive keys are stored in the Vault and are never returned to the browser. The Admin API now requires an admin token.</p>
                         </div>
                     </div>
                 </div>

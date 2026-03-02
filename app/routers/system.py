@@ -148,19 +148,23 @@ async def backup_database():
 
 @router.get("/api/logs")
 async def get_system_logs(limit: int = 100):
-    """Returns the last N lines of the system log."""
-    from app.core.config import BASE_DIR
-    log_path = os.path.join(BASE_DIR, "logs", "daa.log")
-
-    if not os.path.exists(log_path):
-        return {"logs": []}
-
+    """Returns the last N lines of the system log from journalctl."""
+    import subprocess
     try:
-        with open(log_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            return {"logs": lines[-limit:]}
+        # Run journalctl to fetch the latest logs for freja.service
+        # --no-pager avoids pausing output, -n limits the lines, --output=cat removes syslog prefixes
+        result = subprocess.run(
+            ["journalctl", "-u", "freja.service", "-n", str(limit), "--no-pager", "--output=cat"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        # Split into lines and remove trailing empty lines
+        lines = result.stdout.strip().split("\n")
+        logs = [line for line in lines if line]
+        return {"logs": logs}
     except Exception as e:
-        logger.error(f"Error reading logs: {e}")
+        logger.error(f"Error reading journalctl logs: {e}")
         return {"error": str(e), "logs": []}
 
 

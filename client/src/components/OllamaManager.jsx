@@ -3,35 +3,35 @@ import { Cpu, Trash2, Download, RefreshCw, X, CheckCircle, AlertCircle, Loader2,
 import { adminFetch } from '../utils/adminFetch';
 
 const RECOMMENDED_MODELS = [
-    // --- Små & Snabba (Run on almost anything) ---
-    { id: 'llama3.2:1b', name: 'Llama 3.2 (1B)', minRamGB: 2, desc: 'Extremt snabb, mobil-vänlig' },
-    { id: 'llama3.2', name: 'Llama 3.2 (3B)', minRamGB: 4, desc: 'Snabb standardmodell' },
-    { id: 'qwen2.5:0.5b', name: 'Qwen 2.5 (0.5B)', minRamGB: 2, desc: 'Liten men naggande god' },
-    { id: 'gemma2:2b', name: 'Gemma 2 (2B)', minRamGB: 4, desc: 'Liten från Google' },
+    // --- Small & Fast (Run on almost anything) ---
+    { id: 'llama3.2:1b', name: 'Llama 3.2 (1B)', minRamGB: 2, desc: 'Extremely fast, mobile-friendly' },
+    { id: 'llama3.2', name: 'Llama 3.2 (3B)', minRamGB: 4, desc: 'Fast standard model' },
+    { id: 'qwen2.5:0.5b', name: 'Qwen 2.5 (0.5B)', minRamGB: 2, desc: 'Tiny but capable' },
+    { id: 'gemma2:2b', name: 'Gemma 2 (2B)', minRamGB: 4, desc: 'Small from Google' },
 
-    // --- Standard (Bäst balans) ---
-    { id: 'llama3.1:8b', name: 'Llama 3.1 (8B)', minRamGB: 8, desc: 'Bra på svenska, grym standard' },
-    { id: 'qwen2.5', name: 'Qwen 2.5 (7B)', minRamGB: 8, desc: 'Stark all-around' },
-    { id: 'mistral', name: 'Mistral (7B)', minRamGB: 8, desc: 'Klassisk & pålitlig' },
-    { id: 'gemma-2', name: 'Gemma 2 (9B)', minRamGB: 8, desc: 'Googles open-weights' },
+    // --- Standard (Best balance) ---
+    { id: 'llama3.1:8b', name: 'Llama 3.1 (8B)', minRamGB: 8, desc: 'Great standard model' },
+    { id: 'qwen2.5', name: 'Qwen 2.5 (7B)', minRamGB: 8, desc: 'Strong all-around' },
+    { id: 'mistral', name: 'Mistral (7B)', minRamGB: 8, desc: 'Classic & reliable' },
+    { id: 'gemma-2', name: 'Gemma 2 (9B)', minRamGB: 8, desc: "Google's open-weights" },
 
-    // --- Kodning (Specialister) ---
-    { id: 'qwen2.5-coder:7b', name: 'Qwen 2.5 Coder (7B)', minRamGB: 8, desc: 'Mindre kod-modell' },
-    { id: 'codellama', name: 'CodeLlama (7B)', minRamGB: 8, desc: 'Metas kod-AI' },
-    { id: 'deepseek-coder-v2', name: 'DeepSeek Coder V2 (16B)', minRamGB: 16, desc: 'Fantastisk kodare MoE' },
+    // --- Coding (Specialists) ---
+    { id: 'qwen2.5-coder:7b', name: 'Qwen 2.5 Coder (7B)', minRamGB: 8, desc: 'Smaller coding model' },
+    { id: 'codellama', name: 'CodeLlama (7B)', minRamGB: 8, desc: "Meta's coding AI" },
+    { id: 'deepseek-coder-v2', name: 'DeepSeek Coder V2 (16B)', minRamGB: 16, desc: 'Fantastic coder (MoE)' },
 
-    // --- Smarta & Logik (Reasoning) ---
+    // --- Smart & Logic (Reasoning) ---
     { id: 'deepseek-r1:1.5b', name: 'DeepSeek R1 (1.5B)', minRamGB: 4, desc: 'Mini-reasoning' },
-    { id: 'deepseek-r1:8b', name: 'DeepSeek R1 (8B)', minRamGB: 8, desc: 'Snabb reasoning' },
-    { id: 'deepseek-r1:14b', name: 'DeepSeek R1 (14B)', minRamGB: 16, desc: 'Tung reasoning (Qwen)' },
-    { id: 'phi4', name: 'Phi-4 (14B)', minRamGB: 14, desc: 'Bra på logik & matte' },
+    { id: 'deepseek-r1:8b', name: 'DeepSeek R1 (8B)', minRamGB: 8, desc: 'Fast reasoning' },
+    { id: 'deepseek-r1:14b', name: 'DeepSeek R1 (14B)', minRamGB: 16, desc: 'Heavy reasoning (Qwen)' },
+    { id: 'phi4', name: 'Phi-4 (14B)', minRamGB: 14, desc: 'Great at logic & math' },
 
-    // --- Tungviktare (Kräver mycket resurser) ---
-    { id: 'qwen2.5:32b', name: 'Qwen 2.5 (32B)', minRamGB: 24, desc: 'Tungviktsmodell' },
-    { id: 'deepseek-r1:32b', name: 'DeepSeek R1 (32B)', minRamGB: 24, desc: 'Tungvikts reasoning' },
-    { id: 'mixtral', name: 'Mixtral (8x7B)', minRamGB: 32, desc: 'Kraftfull MoE från Mistral' },
-    { id: 'llama3.3', name: 'Llama 3.3 (70B)', minRamGB: 48, desc: 'Enorm & kraftfull standard' },
-    { id: 'deepseek-r1:70b', name: 'DeepSeek R1 (70B)', minRamGB: 48, desc: 'Gigantisk reasoning' },
+    // --- Heavyweights (Requires a lot of resources) ---
+    { id: 'qwen2.5:32b', name: 'Qwen 2.5 (32B)', minRamGB: 24, desc: 'Heavyweight model' },
+    { id: 'deepseek-r1:32b', name: 'DeepSeek R1 (32B)', minRamGB: 24, desc: 'Heavyweight reasoning' },
+    { id: 'mixtral', name: 'Mixtral (8x7B)', minRamGB: 32, desc: 'Powerful MoE from Mistral' },
+    { id: 'llama3.3', name: 'Llama 3.3 (70B)', minRamGB: 48, desc: 'Huge & powerful standard' },
+    { id: 'deepseek-r1:70b', name: 'DeepSeek R1 (70B)', minRamGB: 48, desc: 'Gigantic reasoning' },
 ];
 
 const formatSize = (bytes) => {
@@ -97,7 +97,7 @@ const OllamaManager = ({ standalone = false }) => {
                 adminFetch('/api/ollama/resources'),
                 adminFetch('/api/ollama/ps'),
             ]);
-            if (!modelsRes.ok) throw new Error('Kunde inte hämta modeller');
+            if (!modelsRes.ok) throw new Error('Could not fetch models');
             const modelsData = await modelsRes.json();
             setModels(modelsData.models || []);
             if (settingsRes.ok) {
@@ -122,7 +122,7 @@ const OllamaManager = ({ standalone = false }) => {
         const modelToPull = pullDropdown === 'custom' ? customPullModel : pullDropdown;
         if (!modelToPull.trim() || pulling) return;
         setPulling(true);
-        setPullStatus({ text: 'Ansluter...', percent: 0, done: false, error: null });
+        setPullStatus({ text: 'Connecting...', percent: 0, done: false, error: null });
         try {
             const res = await adminFetch('/api/ollama/pull', {
                 method: 'POST',
@@ -149,7 +149,7 @@ const OllamaManager = ({ standalone = false }) => {
                     } catch { }
                 }
             }
-            setPullStatus({ text: 'Klar! 🎉', percent: 100, done: true, error: null });
+            setPullStatus({ text: 'Done! 🎉', percent: 100, done: true, error: null });
             if (pullDropdown === 'custom') setCustomPullModel('');
             fetchAll();
         } catch (e) {
@@ -173,7 +173,7 @@ const OllamaManager = ({ standalone = false }) => {
         try {
             const res = await adminFetch(`/api/ollama/models/${encodeURIComponent(confirmDelete)}`, { method: 'DELETE' });
             const data = await res.json();
-            if (!data.success) throw new Error(data.error || 'Radering misslyckades');
+            if (!data.success) throw new Error(data.error || 'Deletion failed');
             fetchAll();
         } catch (e) {
             setError(e.message);
@@ -191,7 +191,7 @@ const OllamaManager = ({ standalone = false }) => {
                 <div className="bg-mainframe-card p-5 rounded-lg border border-mainframe-border shadow-xl">
                     <div className="flex items-center gap-2 mb-4 pb-3 border-b border-mainframe-border/50">
                         <MemoryStick className="w-4 h-4 text-cyan-400" />
-                        <h3 className="font-orbitron text-sm tracking-wider text-mainframe-text/80">SYSTEMRESURSER</h3>
+                        <h3 className="font-orbitron text-sm tracking-wider text-mainframe-text/80">SYSTEM RESOURCES</h3>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -203,7 +203,7 @@ const OllamaManager = ({ standalone = false }) => {
                                     <span className="font-mono">{resources.ram.used_gb} / {resources.ram.total_gb} GB</span>
                                 </div>
                                 <ProgressBar value={resources.ram.used_gb} max={resources.ram.total_gb} color="bg-cyan-500" />
-                                <p className="text-[10px] text-mainframe-dim/60">{resources.ram.available_gb} GB tillgängligt</p>
+                                <p className="text-[10px] text-mainframe-dim/60">{resources.ram.available_gb} GB available</p>
                             </div>
                         )}
 
@@ -215,14 +215,14 @@ const OllamaManager = ({ standalone = false }) => {
                                     <span className="font-mono">{formatMB(g.vram_used_mb)} / {formatMB(g.vram_total_mb)}</span>
                                 </div>
                                 <ProgressBar value={g.vram_used_mb} max={g.vram_total_mb} color="bg-yellow-500" />
-                                <p className="text-[10px] text-mainframe-dim/60">GPU {g.utilization_pct}% · {formatMB(g.vram_free_mb)} VRAM fritt</p>
+                                <p className="text-[10px] text-mainframe-dim/60">GPU {g.utilization_pct}% · {formatMB(g.vram_free_mb)} VRAM free</p>
                             </div>
                         ))}
 
                         {/* No GPU */}
                         {resources.gpu && resources.gpu.length === 0 && (
                             <div className="flex items-center gap-2 text-xs text-mainframe-dim/60 italic">
-                                <Zap className="w-3 h-3" /> Ingen NVIDIA GPU hittades – Ollama körs på CPU
+                                <Zap className="w-3 h-3" /> No NVIDIA GPU found - Ollama running on CPU
                             </div>
                         )}
                     </div>
@@ -230,7 +230,7 @@ const OllamaManager = ({ standalone = false }) => {
                     {/* Currently loaded models */}
                     {runningModels.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-mainframe-border/30">
-                            <p className="text-[10px] uppercase tracking-wider text-mainframe-dim/60 mb-2">Laddade i minnet</p>
+                            <p className="text-[10px] uppercase tracking-wider text-mainframe-dim/60 mb-2">Loaded in memory</p>
                             <div className="space-y-1">
                                 {runningModels.map((m) => (
                                     <div key={m.name} className="flex items-center justify-between text-xs">
@@ -251,10 +251,10 @@ const OllamaManager = ({ standalone = false }) => {
                 <div className="flex items-center justify-between mb-6 pb-3 border-b border-mainframe-border/50">
                     <div className="flex items-center gap-3 text-xl text-mainframe-text/90">
                         <Cpu className="w-5 h-5 text-cyan-400" />
-                        <h2 className="font-orbitron tracking-wider">INSTALLERADE MODELLER</h2>
+                        <h2 className="font-orbitron tracking-wider">INSTALLED MODELS</h2>
                     </div>
                     <button onClick={fetchAll} disabled={loading}
-                        className="p-2 rounded hover:bg-mainframe-border/30 text-mainframe-text/50 hover:text-mainframe-text transition-colors" title="Uppdatera">
+                        className="p-2 rounded hover:bg-mainframe-border/30 text-mainframe-text/50 hover:text-mainframe-text transition-colors" title="Refresh">
                         <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                     </button>
                 </div>
@@ -269,7 +269,7 @@ const OllamaManager = ({ standalone = false }) => {
                     {loading ? (
                         <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-mainframe-dim" /></div>
                     ) : models.length === 0 ? (
-                        <p className="text-center text-mainframe-dim py-6 text-sm">Inga modeller installerade.</p>
+                        <p className="text-center text-mainframe-dim py-6 text-sm">No models installed.</p>
                     ) : (
                         models.map((m) => {
                             const isActive = activeModel && (
@@ -287,10 +287,10 @@ const OllamaManager = ({ standalone = false }) => {
                                         <div className="flex items-center gap-2 flex-wrap">
                                             <span className="font-mono text-sm text-mainframe-text truncate">{m.name}</span>
                                             {isActive && (
-                                                <span className="shrink-0 text-[10px] uppercase tracking-wider text-mainframe-accent bg-mainframe-accent/10 border border-mainframe-accent/30 px-1.5 py-0.5 rounded">● Aktiv</span>
+                                                <span className="shrink-0 text-[10px] uppercase tracking-wider text-mainframe-accent bg-mainframe-accent/10 border border-mainframe-accent/30 px-1.5 py-0.5 rounded">● Active</span>
                                             )}
                                             {isRunning && (
-                                                <span className="shrink-0 text-[10px] uppercase tracking-wider text-green-400 bg-green-400/10 border border-green-400/30 px-1.5 py-0.5 rounded">▶ Laddad</span>
+                                                <span className="shrink-0 text-[10px] uppercase tracking-wider text-green-400 bg-green-400/10 border border-green-400/30 px-1.5 py-0.5 rounded">▶ Loaded</span>
                                             )}
                                         </div>
                                         <span className="text-xs text-mainframe-dim">
@@ -298,7 +298,7 @@ const OllamaManager = ({ standalone = false }) => {
                                         </span>
                                     </div>
                                     <button onClick={() => setConfirmDelete(m.name)}
-                                        className="ml-4 p-2 rounded text-mainframe-dim hover:text-red-400 hover:bg-red-900/20 transition-all opacity-0 group-hover:opacity-100" title="Radera modell">
+                                        className="ml-4 p-2 rounded text-mainframe-dim hover:text-red-400 hover:bg-red-900/20 transition-all opacity-0 group-hover:opacity-100" title="Delete model">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -309,7 +309,7 @@ const OllamaManager = ({ standalone = false }) => {
 
                 {/* Pull / Install */}
                 <div className="space-y-3">
-                    <p className="text-xs uppercase tracking-wider text-mainframe-text/50">Installera ny modell</p>
+                    <p className="text-xs uppercase tracking-wider text-mainframe-text/50">Install new model</p>
                     <div className="flex gap-2">
                         {(() => {
                             // Calculate total VRAM if GPUs exist, otherwise fallback to system RAM
@@ -328,13 +328,13 @@ const OllamaManager = ({ standalone = false }) => {
                                     disabled={pulling}
                                     className={`bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text font-mono text-sm focus:border-mainframe-accent focus:outline-none transition-all appearance-none cursor-pointer ${pullDropdown === 'custom' ? 'w-1/3' : 'flex-1'}`}
                                 >
-                                    <option value="" disabled>Välj rekommenderad modell...</option>
+                                    <option value="" disabled>Choose recommended model...</option>
                                     {RECOMMENDED_MODELS.filter(m => !totalAvailableHardwareGB || totalAvailableHardwareGB >= m.minRamGB).map(m => (
                                         <option key={m.id} value={m.id}>
-                                            {m.name} – {m.desc} (Kräver {m.minRamGB}GB)
+                                            {m.name} – {m.desc} (Requires {m.minRamGB}GB)
                                         </option>
                                     ))}
-                                    <option value="custom">Anpassad modell (skriv in namn...)</option>
+                                    <option value="custom">Custom model (type name...)</option>
                                 </select>
                             );
                         })()}
@@ -345,7 +345,7 @@ const OllamaManager = ({ standalone = false }) => {
                                 value={customPullModel}
                                 onChange={(e) => setCustomPullModel(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handlePull()}
-                                placeholder="t.ex. llama3.2, phi4, gemma3:4b"
+                                placeholder="e.g. llama3.2, phi4, gemma3:4b"
                                 disabled={pulling}
                                 className="flex-1 bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text font-mono text-sm focus:border-mainframe-accent focus:outline-none transition-all placeholder-mainframe-dim/50"
                             />
@@ -353,12 +353,12 @@ const OllamaManager = ({ standalone = false }) => {
 
                         {pulling ? (
                             <button onClick={cancelPull} className="px-4 py-2.5 bg-red-900/20 border border-red-500/40 text-red-400 hover:bg-red-900/40 rounded transition-all flex items-center gap-2 text-sm">
-                                <X className="w-4 h-4" /> Avbryt
+                                <X className="w-4 h-4" /> Cancel
                             </button>
                         ) : (
                             <button onClick={handlePull} disabled={(!pullDropdown || (pullDropdown === 'custom' && !customPullModel.trim()))}
                                 className="px-4 py-2.5 bg-mainframe-accent/10 border border-mainframe-accent/30 text-mainframe-accent hover:bg-mainframe-accent/30 hover:border-mainframe-accent rounded transition-all flex items-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
-                                <Download className="w-4 h-4" /> Installera
+                                <Download className="w-4 h-4" /> Install
                             </button>
                         )}
                     </div>
@@ -390,21 +390,21 @@ const OllamaManager = ({ standalone = false }) => {
                     <div className="bg-mainframe-card border border-red-500/40 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
                         <div className="flex items-center gap-3 mb-4">
                             <Trash2 className="w-5 h-5 text-red-400" />
-                            <h3 className="font-orbitron text-mainframe-text">Radera modell</h3>
+                            <h3 className="font-orbitron text-mainframe-text">Delete model</h3>
                         </div>
                         <p className="text-sm text-mainframe-dim mb-6">
-                            Är du säker på att du vill radera <span className="font-mono text-mainframe-text">{confirmDelete}</span>?
-                            Modellen måste laddas ner igen om du vill använda den.
+                            Are you sure you want to delete <span className="font-mono text-mainframe-text">{confirmDelete}</span>?
+                            The model will have to be downloaded again if you want to use it.
                         </p>
                         <div className="flex gap-3 justify-end">
                             <button onClick={() => setConfirmDelete(null)}
                                 className="px-4 py-2 border border-mainframe-border rounded text-mainframe-dim hover:text-mainframe-text hover:border-mainframe-text/40 text-sm transition-all">
-                                Avbryt
+                                Cancel
                             </button>
                             <button onClick={handleDelete} disabled={deleting}
                                 className="px-4 py-2 bg-red-900/30 border border-red-500/50 text-red-300 hover:bg-red-900/50 rounded text-sm transition-all flex items-center gap-2 disabled:opacity-50">
                                 {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                                Radera
+                                Delete
                             </button>
                         </div>
                     </div>

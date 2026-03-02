@@ -19,7 +19,7 @@ const SettingsField = ({
     // we show the dots placeholder.
     const effectivePlaceholder = (isSecret && secretConfigured && !value)
         ? "••••••••••••••••"
-        : (placeholder || `Ange ${label}`);
+        : (placeholder || `Enter ${label}`);
 
     // We display an empty string if it's a stored secret that hasn't been re-typed
     const displayValue = (isSecret && secretConfigured && !value) ? '' : value;
@@ -31,7 +31,7 @@ const SettingsField = ({
                     {label}
                 </label>
                 {isSecret && secretConfigured && (
-                    <span className="text-[10px] uppercase tracking-wider text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded">● Satt</span>
+                    <span className="text-[10px] uppercase tracking-wider text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded">● Set</span>
                 )}
             </div>
             <div className="flex gap-2">

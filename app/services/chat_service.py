@@ -15,6 +15,7 @@ from app.core.prompts import get_system_prompt
 from app.self_improving.hooks import handle_user_prompt_submit
 from app.services.web_fallback_service import WebFallbackService, needs_web_fallback
 from skills.homeassistant import get_homeassistant_command_processor
+from app.services.llm_providers.ollama import generate_ollama_response
 # --- Native Tooling Imports ---
 from app.services.tool_registry import registry
 
