@@ -144,11 +144,11 @@ const CodexSettings = () => {
                         <label className="text-sm font-medium text-mainframe-text/70 uppercase tracking-tight flex items-center gap-2">
                             Codex Model Override
                         </label>
-                        <div className="flex gap-2 w-96">
+                        <div className="flex gap-2 w-full max-w-2xl">
                             <select
                                 value={settings.CODEX_MODEL || ''}
                                 onChange={(e) => handleChange('CODEX_MODEL', e.target.value)}
-                                className="flex-1 min-w-0 truncate bg-black/40 border border-mainframe-border rounded px-4 py-2 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
+                                className="flex-1 min-w-0 bg-black/40 border border-mainframe-border rounded px-4 py-2 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
                             >
                                 <option value="">Use system default model</option>
                                 {models.map((opt) => (

@@ -24,7 +24,11 @@ VIKTIGT — ARKITEKTURKONTEXT (ta hänsyn till detta i analysen):
 - Flagga INTE SQLite-hemlighetlagring som ett säkerhetsproblem — det är åtgärdat med Vault.
 - scripts/cleanup_db_secrets.py har raderats känsliga data från SQLite-databasen.
 
-Ge en detaljerad rapport i Markdown-format på SVENSKA.
+Strukturera ditt svar EXAKT enligt följande:
+1. Kort sammanfattning (Punktlista de viktigaste fynden).
+2. Separator exakt som: ---RAPPORT_START---
+3. Fullständig och detaljerad Markdown-rapport nedanför separatorn på SVENSKA.
+
 Använd relevanta emojis för att göra rapporten mer läsbar och trevlig, till exempel:
 ✅ för styrkor, ⚠️ för varningar, 🔴 för kritiska problem, 💡 för förbättringsförslag,
 🔒 för säkerhet, ⚡ för prestanda, 🧹 för kodkvalitet, 🏗️ för arkitektur, 🐛 för buggar.
@@ -118,8 +122,15 @@ def run_code_audit(preferred_model=None):
     
     final_prompt = f"{CODE_AUDIT_PROMPT}\n\nSOURCE CODE ({count} files):\n{full_code}"
 
-    # Lista modeller att testa (Prioritize updated/cheaper models)
-    test_models = ['gemini-2.0-flash', 'gemini-1.5-pro', 'gpt-4o', 'gpt-3.5-turbo']
+    # Lista modeller att testa
+    codex_model = os.environ.get("CODEX_MODEL", "gemini-2.0-flash")
+    test_models = [codex_model]
+    
+    # Om vald modell inte är gemini, lägg till gemini som fallback
+    if codex_model != 'gemini-2.0-flash':
+        test_models.extend(['gemini-2.0-flash', 'gemini-1.5-pro', 'gpt-4o', 'gpt-3.5-turbo'])
+    else:
+        test_models.extend(['gemini-1.5-pro', 'gpt-4o', 'gpt-3.5-turbo'])
 
     for model_name in test_models:
         try:
@@ -144,6 +155,29 @@ def run_code_audit(preferred_model=None):
                               {"role": "user", "content": f"KOD:\n{full_code}"}]
                 )
                 return process_and_save_response(res.choices[0].message.content, model_name)
+
+            # --- OLLAMA ---
+            elif "gemini" not in model_name.lower() and "gpt" not in model_name.lower():
+                import httpx
+                print(f"   - Testar Ollama: {model_name}")
+                ollama_url = os.environ.get("OLLAMA_URL", "http://host.docker.internal:11434")
+                base_url = ollama_url.rstrip("/")
+                payload = {
+                    "model": model_name,
+                    "messages": [
+                        {"role": "system", "content": CODE_AUDIT_PROMPT},
+                        {"role": "user", "content": f"KOD:\n{full_code}"}
+                    ],
+                    "stream": False,
+                    "options": {"num_ctx": 32000} # Behövs för stor kodmassa
+                }
+                with httpx.Client(timeout=300.0) as client:
+                    resp = client.post(f"{base_url}/api/chat", json=payload)
+                    if resp.status_code == 200:
+                        text = resp.json().get("message", {}).get("content", "")
+                        return process_and_save_response(text, f"Ollama {model_name}")
+                    else:
+                        print(f"   x HTTP Error: {resp.status_code} - {resp.text}")
 
         except Exception as e:
             # Just print the exception message without traceback so the loop continues

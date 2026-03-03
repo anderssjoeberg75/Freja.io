@@ -77,7 +77,7 @@ Strukturera svaret:
 
     # 3. Tool description (For LLM logic)
     "TOOL_DESC_AUDIT": """Analyserar projektets källkod för att hitta fel och förbättringar.
-Används när användaren ber om 'analysera koden', 'självanalys' eller 'systemanalys'.""",
+Används när användaren ber om 'analysera koden', 'självanalys', 'själv analys', 'self analysis' eller 'systemanalys'.""",
 
     # 4. Self-Evolution Prompt (Injected into System Prompt)
     "SELF_EVOLUTION_PROMPT": """

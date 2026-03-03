@@ -95,26 +95,32 @@ const WithingsSettings = () => {
                     value={settings.WITHINGS_CLIENT_ID}
                     onChange={(val) => handleChange('WITHINGS_CLIENT_ID', val)}
                     onSave={() => handleSave('WITHINGS_CLIENT_ID')}
+                    placeholder="e.g. 5a4b3c2d1..."
+                    description="Kopiera 'Client ID' från din Withings Developer App."
                     saving={saving}
                 />
 
                 {/* Client Secret */}
                 <SettingsField
-                    label="Client Secret"
+                    label="Client Secret (Consumer Secret)"
                     value={settings.WITHINGS_CLIENT_SECRET}
                     onChange={(val) => handleChange('WITHINGS_CLIENT_SECRET', val)}
                     onSave={() => handleSave('WITHINGS_CLIENT_SECRET')}
                     type="password"
                     secretConfigured={settings.__secrets && settings.__secrets.WITHINGS_CLIENT_SECRET}
+                    placeholder="Din Consumer Secret"
+                    description="Kopiera 'Consumer Secret' från din Withings Developer App."
                     saving={saving}
                 />
 
                 {/* Redirect URI */}
                 <SettingsField
-                    label="Redirect URI"
+                    label="Redirect URI (Callback URL)"
                     value={settings.WITHINGS_REDIRECT_URI}
                     onChange={(val) => handleChange('WITHINGS_REDIRECT_URI', val)}
                     onSave={() => handleSave('WITHINGS_REDIRECT_URI')}
+                    placeholder="http://DIN_IP:8000/api/integrations/withings/callback"
+                    description="MÅSTE matcha 'Callback URI' exakt i Withings (byt ut localhost mot din maskins IP ifall du kör Freja stående på annan maskin)."
                     saving={saving}
                 />
 
@@ -138,12 +144,15 @@ const WithingsSettings = () => {
                     <div className="bg-mainframe-card border-2 border-mainframe-accent rounded-xl p-8 max-w-2xl max-h-[85vh] overflow-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-2xl font-orbitron mb-6 text-mainframe-accent tracking-widest border-b border-mainframe-border pb-4">Withings Setup Guide</h2>
                         <div className="space-y-6 text-mainframe-text/90">
-                            <p>To connect Withings, you need to create a developer application.</p>
-                            <ol className="list-decimal pl-5 space-y-2">
-                                <li>Go to <a href="https://developer.withings.com/developer-dashboard/" target="_blank" className="text-mainframe-accent underline" rel="noreferrer">Developer Dashboard</a> to register an app.</li>
-                                <li>Set <b>Callback URL</b> to your server's domain/IP or localhost.</li>
-                                <li>Copy the <b>Client ID</b> and <b>Consumer Secret (Client Secret)</b> into the fields behind this window.</li>
-                                <li>Click <b>Connect Withings</b> to authorize.</li>
+                            <p>För att Freja ska kunna läsa din hälso- och vikt-data från Withings måste du skapa en utvecklarapp kopplad till ditt konto.</p>
+                            <ol className="list-decimal pl-5 space-y-3">
+                                <li>Gå till <a href="https://developer.withings.com/developer-dashboard/" target="_blank" className="text-mainframe-accent underline" rel="noreferrer">Developer Dashboard</a> och skapa ett app-konto / logga in.</li>
+                                <li>Välj att skapa en ny app. Typ: <b>Partner App</b>.</li>
+                                <li>När Withings frågar efter <b>Callback URL</b>, skriv in Frejas fullständiga callback-adress, till exempel: <br /><code className="bg-black/40 text-pink-300 px-2 py-1 rounded">http://192.168.1.50:8000/api/integrations/withings/callback</code> <br /><small className="text-mainframe-text/50">(Ersätt IP:t med Freja-serverns IP om du inte kör allt på localhost).</small></li>
+                                <li>När appen skapats, kopiera <b>Client ID</b> och lägg in det i inställningsfältet bakom den här rutan.</li>
+                                <li>Kopiera <b>Consumer Secret</b> och lägg in det i <b>Client Secret</b>-fältet.</li>
+                                <li>Kopiera samma <b>Callback URL</b> du angav på Withings och lägg i <b>Redirect URI</b>-fältet.</li>
+                                <li>Spara samtliga fält och klicka sedan på den stora <b>Connect Withings</b>-knappen för att logga in och godkänna behörigheter!</li>
                             </ol>
                         </div>
                         <button onClick={() => setShowHelp(false)} className="mt-10 w-full py-3 bg-mainframe-accent text-black rounded font-bold uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all">Got it</button>
