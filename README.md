@@ -175,6 +175,23 @@ sudo systemctl enable --now freja.service
 sudo systemctl enable --now freja-vault-unseal.service
 ```
 
+
+## Scheduler API (admin)
+
+The scheduler now supports both instruction tasks and named processes. All endpoints below require admin access.
+
+- `GET /api/scheduler/processes` – list available process handlers.
+- `GET /api/scheduler/tasks` – list all scheduled jobs.
+- `POST /api/scheduler/tasks/instruction` – schedule an instruction with body:
+  ```json
+  {"instruction": "Check backups", "cron": "0 7 * * *"}
+  ```
+- `POST /api/scheduler/tasks/process` – schedule a named process with body:
+  ```json
+  {"process_name": "log_instruction", "cron": "*/15 * * * *", "payload": {"message": "Heartbeat"}}
+  ```
+- `DELETE /api/scheduler/tasks/{job_id}` – delete an existing job.
+
 ## Running the project
 
 ### Option A: Start backend + frontend together (recommended for development)
@@ -212,6 +229,30 @@ cd ..
 ```
 
 Then run backend normally; FastAPI serves static files from `client/dist` if the build exists.
+
+
+## Docker (isolated runtime)
+
+A hardened container setup is included:
+
+- Non-root runtime user (`freja`)
+- Dropped Linux capabilities (`cap_drop: [ALL]`)
+- `no-new-privileges` enabled
+- Read-only root filesystem with writable `db/` and `logs/` mounts
+- `/tmp` mounted as `tmpfs`
+- Health check against `/health`
+
+Run with:
+
+```bash
+docker compose up --build -d
+```
+
+Stop with:
+
+```bash
+docker compose down
+```
 
 ## Health check
 
