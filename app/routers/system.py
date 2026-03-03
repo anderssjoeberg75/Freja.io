@@ -5,6 +5,7 @@ import sys
 import logging
 
 from fastapi import APIRouter, BackgroundTasks, Depends
+from pydantic import BaseModel, Field
 
 from app.core.dependencies import get_garmin, get_strava, get_code_executor
 from app.core.security import require_admin
@@ -12,6 +13,19 @@ from skills._core.skill_loader import discover_skill_manifests
 
 logger = logging.getLogger(__name__)
 router = APIRouter(dependencies=[Depends(require_admin)])
+
+
+
+class ScheduleInstructionRequest(BaseModel):
+    instruction: str = Field(..., min_length=1, description="Instruction to run on schedule")
+    cron: str = Field(..., min_length=9, description="Cron expression in crontab format")
+
+
+class ScheduleProcessRequest(BaseModel):
+    process_name: str = Field(..., min_length=1, description="Registered process name")
+    cron: str = Field(..., min_length=9, description="Cron expression in crontab format")
+    payload: dict = Field(default_factory=dict, description="Optional process payload")
+
 
 
 @router.post("/api/self_update")
@@ -166,6 +180,50 @@ async def get_system_logs(limit: int = 100):
     except Exception as e:
         logger.error(f"Error reading journalctl logs: {e}")
         return {"error": str(e), "logs": []}
+
+
+
+@router.get("/api/scheduler/processes")
+async def list_scheduler_processes():
+    """Return all scheduler process handlers that can be scheduled."""
+    from app.services.scheduler_service import scheduler_service
+
+    return {"processes": scheduler_service.list_registered_processes()}
+
+
+@router.get("/api/scheduler/tasks")
+async def list_scheduler_tasks():
+    """Return all currently scheduled jobs."""
+    from app.services.scheduler_service import scheduler_service
+
+    return {"tasks": scheduler_service.list_tasks()}
+
+
+@router.post("/api/scheduler/tasks/instruction")
+async def create_instruction_task(body: ScheduleInstructionRequest):
+    """Create or replace a scheduled instruction task."""
+    from app.services.scheduler_service import scheduler_service
+
+    job_id = scheduler_service.add_task(body.instruction, body.cron)
+    return {"success": True, "job_id": job_id}
+
+
+@router.post("/api/scheduler/tasks/process")
+async def create_process_task(body: ScheduleProcessRequest):
+    """Create or replace a scheduled named process."""
+    from app.services.scheduler_service import scheduler_service
+
+    job_id = scheduler_service.add_process_task(body.process_name, body.cron, body.payload)
+    return {"success": True, "job_id": job_id}
+
+
+@router.delete("/api/scheduler/tasks/{job_id}")
+async def delete_scheduler_task(job_id: str):
+    """Delete a scheduled job by ID."""
+    from app.services.scheduler_service import scheduler_service
+
+    scheduler_service.remove_task(job_id)
+    return {"success": True, "job_id": job_id}
 
 
 # ---------------------------------------------------------------------------
