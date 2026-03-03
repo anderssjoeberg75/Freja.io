@@ -194,7 +194,13 @@ async def audit_code_impl() -> str:
         except subprocess.CalledProcessError as e:
             print(f"[AUDIT] Varning: Git pull misslyckades. Analyserar lokala filer istället. Fel: {e.stderr.strip()}")
             
-        cmd = "python3 skills/codex/auditor.py"
+        # Fetch config safely
+        from app.core.database import get_db_settings_sync
+        settings_dict = get_db_settings_sync()
+        codex_model = settings_dict.get("CODEX_MODEL", "gemini-2.0-flash")
+        ollama_url = settings_dict.get("OLLAMA_URL", "http://host.docker.internal:11434")
+            
+        cmd = f"sh -c \"OLLAMA_URL='{ollama_url}' CODEX_MODEL='{codex_model}' python3 skills/codex/auditor.py\""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(None, executor.run_command, cmd)
         
@@ -220,21 +226,24 @@ async def audit_code_impl() -> str:
                 try:
                     from app.services.telegram_service import telegram_service
                     if telegram_service:
-                        if "✅" in output:
-                            clean_output = output.split("✅")[1]
-                            summary = clean_output.split("📂")[0].strip()
-                            msg = f"✅{summary}"
-                        else:
-                            msg = output[:2000]
-                        
-                        await telegram_service.send_message(msg)
-                        await telegram_service.send_document(host_path, caption="Självanalys Rapport")
+                        # Chat service sent a message, we only need to provide the document
+                        await telegram_service.send_document(host_path, caption=f"Självanalys Rapport ({codex_model})")
                 except Exception as e:
                     print(f"Telegram notification failed: {e}")
+                
+                # If we are in a telegram context, we should not return the full text to the chat_service.
+                # However, tools.py doesn't know the context directly here easily, so we still return
+                # the full file content, and rely on chat_service.py to TRUNCATE it for Telegram users.
+                try:
+                    with open(host_path, "r", encoding="utf-8") as f:
+                        file_content = f.read()
+                    return f"✅ Självanalysklar! Här är den fullständiga rapporten:\n\n{file_content}"
+                except Exception as e:
+                    return f"Kunde läsa filen men fick ett fel vid inläsning: {e}\n\nSammanfattning:\n{output}"
             else:
                 print(f"Error: generated file {host_path} not found on host (Bind mount issue?)")
 
-        return json.dumps(result, indent=2)
+        return output
         
     except Exception as e:
         return f"Error preparing audit script: {e}"
@@ -443,7 +452,7 @@ def register_tools(registry: ToolRegistry) -> None:
 
     registry.register(
         name="codex_audit_codebase", 
-        description="Analyzes the Freja codebase for bugs and improvements. Use this when the user asks for 'självanalys', 'self-analysis', or 'analyze code'. DO NOT search the web for this.",
+        description="Analyzes the Freja codebase for bugs and improvements. Use this when the user asks for 'självanalys', 'själv analys', 'self-analysis', 'self analysis', or 'analyze code'. DO NOT search the web for this.",
         args_schema=AuditCodeSchema,
     )(audit_code_impl)
     

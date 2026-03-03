@@ -63,12 +63,26 @@ class UnifiedChatService:
             return ha_result.response
 
         # 3. Keyword shortcut routing — bypass LLM tool selection for well-known commands
-        _AUDIT_KEYWORDS = {"självanalys", "self-analysis", "analysera koden", "granska koden", "systemanalys", "kodanalys"}
+        _AUDIT_KEYWORDS = {"självanalys", "själv analys", "self-analysis", "self analysis", "analysera koden", "granska koden", "systemanalys", "kodanalys"}
         if any(kw in user_msg.lower() for kw in _AUDIT_KEYWORDS):
             logger.info("[ChatService] Keyword shortcut: routing to codex_audit_codebase directly")
             try:
                 result = await registry.execute("codex_audit_codebase", {})
-                response = f"🔍 Självanalys klar!\n\n{result}"
+                
+                # Telegram-sessioner har numeriska ID (ex: 12345678, -100123...)
+                # Vi försöker konvertera till int för att vara 100% säkra på att det är en Telegram-användare.
+                is_telegram = False
+                try:
+                    int(str(session_id))
+                    is_telegram = True
+                except ValueError:
+                    is_telegram = False
+                
+                if is_telegram:
+                    response = "🔍 Självanalys klar! Rapporten har skickats som fil."
+                else:
+                    # Web UI behöver hela resultatet som text
+                    response = f"🔍 Självanalys klar!\n\n{result}"
             except Exception as e:
                 response = f"❌ Självanalysen misslyckades: {e}"
             await save_message(session_id, "user", user_msg)
