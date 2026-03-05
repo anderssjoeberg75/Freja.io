@@ -101,7 +101,7 @@ Din briefing SKA vara strukturerad med följande rubriker:
 (Beskriv dagens väderprognos kortfattat)
 
 **Återhämtningsanalys:**
-(Analysera Garmin-data: Body Battery, Sömnpoäng, Stress och Sömnkvalitet)
+(Analysera Garmin-data och Withingsdata: Vikt, Body Battery, Sömnpoäng, Stress och Sömnkvalitet)
 
 **Träningsanalys (7 dagar):**
 (Analysera Strava-data: Summera träningsbelastning och intensitet senaste veckan)

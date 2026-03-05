@@ -156,7 +156,8 @@ class ProactiveService:
             try:
                 garmin = get_garmin()
                 if garmin:
-                    health = garmin.get_health_report()
+                    loop = asyncio.get_event_loop()
+                    health = await loop.run_in_executor(None, garmin.get_health_report)
                     if isinstance(health, dict) and not health.get("error"):
                         context_parts.append(f"HEALTH (Garmin):\n{json.dumps(health, ensure_ascii=False)}")
                     elif isinstance(health, dict) and health.get("error"):
@@ -191,7 +192,8 @@ class ProactiveService:
             try:
                 withings = get_withings()
                 if withings:
-                    withings_health = withings.get_health_report()
+                    loop = asyncio.get_event_loop()
+                    withings_health = await loop.run_in_executor(None, withings.get_health_report)
                     if isinstance(withings_health, dict) and not withings_health.get("error"):
                         context_parts.append(
                             f"BODY COMPOSITION (Withings):\n{json.dumps(withings_health, ensure_ascii=False)}"
