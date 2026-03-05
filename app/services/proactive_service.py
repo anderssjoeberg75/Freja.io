@@ -193,15 +193,19 @@ class ProactiveService:
                 withings = get_withings()
                 if withings:
                     loop = asyncio.get_event_loop()
-                    withings_health = await loop.run_in_executor(None, withings.get_health_report)
-                    if isinstance(withings_health, dict) and not withings_health.get("error"):
-                        context_parts.append(
-                            f"BODY COMPOSITION (Withings):\n{json.dumps(withings_health, ensure_ascii=False)}"
+                    wd = await loop.run_in_executor(None, withings.get_health_report)
+                    if isinstance(wd, dict) and not wd.get("error"):
+                        w_text = (
+                            f"- Mättid: {wd.get('measurement_time', 'Okänt')}\n"
+                            f"- Vikt: {wd.get('weight_kg', 'Okänt')} kg\n"
+                            f"- Fettprocent: {wd.get('fat_percent', 'Okänt')} %\n"
+                            f"- Muskelmassa: {wd.get('muscle_mass_kg', 'Okänt')} kg\n"
+                            f"- Vattennivå: {wd.get('water_kg', 'Okänt')} kg\n"
+                            f"- Benmassa: {wd.get('bone_mass_kg', 'Okänt')} kg"
                         )
-                    elif isinstance(withings_health, dict) and withings_health.get("error"):
-                        context_parts.append(
-                            f"BODY COMPOSITION (Withings): {withings_health['error']}"
-                        )
+                        context_parts.append(f"BODY COMPOSITION (Withings):\n{w_text}")
+                    elif isinstance(wd, dict) and wd.get("error"):
+                        context_parts.append(f"BODY COMPOSITION (Withings): {wd['error']}")
                     else:
                         context_parts.append("BODY COMPOSITION (Withings): Could not fetch data.")
                 else:

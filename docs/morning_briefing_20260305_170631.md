@@ -1,0 +1,3 @@
+# 🌅 Morgon-Briefing 2026-03-05 17:06
+
+MOCK DUMMY REPORT
