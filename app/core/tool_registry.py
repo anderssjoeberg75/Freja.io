@@ -7,6 +7,7 @@ from app.core.config import settings
 # Import tool classes
 from skills.garmin.core import GarminCoach
 from skills.strava.core import StravaTool
+from skills.fitbit.core import FitbitTool
 from skills.deep_research.core import WebAgent
 
 class ToolRegistry:
@@ -33,7 +34,15 @@ class ToolRegistry:
             except Exception as e:
                 logger.error(f"Strava init failed: {e}")
 
-        # 3. Web Agent (Computer Use)
+        # 3. Fitbit
+        if settings.FITBIT_CLIENT_ID and settings.FITBIT_REFRESH_TOKEN:
+            try:
+                self.tools["fitbit"] = FitbitTool()
+                logger.info("Fitbit tool initialized")
+            except Exception as e:
+                logger.error(f"Fitbit init failed: {e}")
+
+        # 4. Web Agent (Computer Use)
         # Vi initierar denna om GEMINI_API_KEY finns, vilket web_core.py kollar internt
         try:
             self.tools["web_agent"] = WebAgent()
@@ -60,7 +69,8 @@ class ToolRegistry:
         # Cache durations (in seconds)
         durations = {
             "garmin": 900,  # 15 mins
-            "strava": 300   # 5 mins
+            "strava": 300,  # 5 mins
+            "fitbit": 600,  # 10 mins
         }
         duration = durations.get(tool_name, 300)
 
@@ -77,6 +87,8 @@ class ToolRegistry:
                 data = await asyncio.to_thread(tool.get_health_report)
             elif tool_name == "strava":
                 data = await tool.get_health_report(limit=1)
+            elif tool_name == "fitbit":
+                data = await tool.get_health_report(activities_limit=3)
             else:
                 data = None
 
@@ -128,6 +140,15 @@ class ToolRegistry:
             if data:
                 data_str = json.dumps(data, indent=2, ensure_ascii=False)
                 injection += f"\n\n[SENASTE TRÄNINGSPASS FRÅN STRAVA]:\n{data_str}\n\nINSTRUKTION: Använd denna data för att svara detaljerat om träningen."
+
+        # Fitbit Logic
+        fitbit_triggers = ["fitbit", "daily activity", "sleep score", "active zone", "resting heart rate"]
+        if any(t in text_lower for t in fitbit_triggers):
+            logger.info("Fitbit trigger matched")
+            data = await self.get_tool_data("fitbit")
+            if data:
+                data_str = json.dumps(data, indent=2, ensure_ascii=False)
+                injection += f"\n\n[FITBIT HEALTH SUMMARY]:\n{data_str}\n\nINSTRUCTION: Use Fitbit data when giving health and activity guidance."
 
         return injection
     

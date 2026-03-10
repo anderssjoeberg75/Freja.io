@@ -79,6 +79,11 @@ class Settings(BaseSettings):
     WITHINGS_REDIRECT_URI: Optional[str] = None
     WITHINGS_REFRESH_TOKEN: Optional[str] = None
 
+    FITBIT_CLIENT_ID: Optional[str] = None
+    FITBIT_CLIENT_SECRET: Optional[str] = None
+    FITBIT_REDIRECT_URI: Optional[str] = None
+    FITBIT_REFRESH_TOKEN: Optional[str] = None
+
     MQTT_BROKER_IP: str = "127.0.0.1"
     MQTT_PORT: int = 1883
     MQTT_TOPIC_BASE: str = "zigbee2mqtt"

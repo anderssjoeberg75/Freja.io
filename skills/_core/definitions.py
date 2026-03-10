@@ -42,6 +42,12 @@ class GetWithingsHealth(BaseModel):
     pass
 
 
+class GetFitbitHealth(BaseModel):
+    """Retrieve Fitbit health metrics and recent activities for the current user."""
+
+    activities_limit: int = Field(5, description="The maximum number of recent Fitbit activities to return. Defaults to 5.")
+
+
 class RoborockConfigure(BaseModel):
     """Configure Roborock integration credentials and optional default device."""
 

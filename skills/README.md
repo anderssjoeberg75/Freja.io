@@ -27,6 +27,7 @@ Freja decides when to call the underlying tool automatically.
 - `codex` – code execution, Git operations, and codebase auditing.
 - `cybersecurity` – authorization-gated defensive security assessment planning and reporting.
 - `garmin` – health snapshot from Garmin Connect.
+- `fitbit` – daily Fitbit activity, sleep, and heart-rate summaries.
 - `google_calendar` – list/create/update/delete calendar events.
 - `homeassistant` – smart-home control via Home Assistant API.
 - `pfsense` – firewall/system log analysis via pfrest.
