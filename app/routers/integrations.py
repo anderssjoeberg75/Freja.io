@@ -3,7 +3,7 @@ from app.core import config
 import logging
 
 # Skill helpers
-from app.core.dependencies import get_withings
+from app.core.dependencies import get_withings, get_fitbit
 from skills.strava import get_strava_command_processor
 from skills.homeassistant.homeassistant_skill import get_homeassistant_command_processor
 from app.core.security import require_admin
@@ -74,5 +74,21 @@ async def test_withings():
              return {"success": True, "message": "Configuration valid. Click 'Connect' to authenticate."}
         else:
              return {"success": False, "message": "Configuration missing."}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+@router.post("/api/integrations/fitbit/test")
+async def test_fitbit():
+    try:
+        fitbit = get_fitbit()
+        if not fitbit:
+            return {"success": False, "message": "Fitbit tool not initialized."}
+
+        if config.get_credential("FITBIT_REFRESH_TOKEN"):
+            return {"success": True, "message": "Fitbit configuration and refresh token found."}
+        if config.get_credential("FITBIT_CLIENT_ID"):
+            return {"success": True, "message": "Fitbit configuration is valid. Complete OAuth to add refresh token."}
+        return {"success": False, "message": "Fitbit configuration missing."}
     except Exception as e:
         return {"success": False, "message": str(e)}

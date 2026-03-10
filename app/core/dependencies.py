@@ -12,6 +12,7 @@ class DependencyManager:
         self._garmin_tool = None
         self._strava_tool = None
         self._withings_tool = None
+        self._fitbit_tool = None
         self._code_executor = None
         self._has_docker = False
 
@@ -75,6 +76,25 @@ class DependencyManager:
 
         return self._withings_tool
 
+
+    def get_fitbit_tool(self):
+        if self._fitbit_tool:
+            return self._fitbit_tool
+
+        fitbit_client_id = get_credential("FITBIT_CLIENT_ID")
+        fitbit_client_secret = get_credential("FITBIT_CLIENT_SECRET")
+
+        if fitbit_client_id and fitbit_client_secret:
+            try:
+                from skills.fitbit.core import FitbitTool
+
+                self._fitbit_tool = FitbitTool()
+                logger.info("Fitbit tool initialized (Dependency)")
+            except Exception as exc:
+                logger.error(f"Fitbit init failed: {exc}")
+
+        return self._fitbit_tool
+
     def get_code_executor(self):
         if self._code_executor:
             return self._code_executor
@@ -116,3 +136,7 @@ def get_withings():
 
 def get_code_executor():
     return _manager.get_code_executor()
+
+
+def get_fitbit():
+    return _manager.get_fitbit_tool()
