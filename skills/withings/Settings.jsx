@@ -61,7 +61,8 @@ const WithingsSettings = () => {
             setMessage({ type: 'error', text: 'Please enter Client ID and Redirect URI first.' });
             return;
         }
-        const url = `https://account.withings.com/oauth2_user/authorize2?response_type=code&client_id=${clientId}&state=freja&scope=user.metrics,user.activity&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        const cleanUri = redirectUri.trim();
+        const url = `https://account.withings.com/oauth2_user/authorize2?response_type=code&client_id=${clientId}&state=freja&scope=user.metrics,user.activity&redirect_uri=${cleanUri}`;
         window.open(url, '_blank');
     };
 

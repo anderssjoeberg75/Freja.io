@@ -17,11 +17,16 @@ class WithingsTool:
 
     def exchange_code(self, code, redirect_uri):
         url = "https://wbsapi.withings.net/v2/oauth2"
+        
+        # Always fetch fresh credentials in case they were updated in UI without restart
+        client_id = get_credential("WITHINGS_CLIENT_ID")
+        client_secret = get_credential("WITHINGS_CLIENT_SECRET")
+        
         payload = {
             "action": "requesttoken",
             "grant_type": "authorization_code",
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
+            "client_id": client_id,
+            "client_secret": client_secret,
             "code": code,
             "redirect_uri": redirect_uri,
         }
@@ -56,11 +61,16 @@ class WithingsTool:
             return
 
         url = "https://wbsapi.withings.net/v2/oauth2"
+        
+        # Always fetch fresh credentials
+        client_id = get_credential("WITHINGS_CLIENT_ID")
+        client_secret = get_credential("WITHINGS_CLIENT_SECRET")
+        
         payload = {
             "action": "requesttoken",
             "grant_type": "refresh_token",
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
+            "client_id": client_id,
+            "client_secret": client_secret,
             "refresh_token": self.refresh_token,
         }
 
