@@ -30,29 +30,20 @@ async def main():
     init_db()
     
     print("[-] Loading Settings from DB...")
-    db_settings = get_db_settings()
+    db_settings = await get_db_settings()
     print(f"DEBUG: Available keys: {list(db_settings.keys())}")
     
-    bot_token = db_settings.get("TELEGRAM_BOT_TOKEN")
-    chat_id_str = db_settings.get("TELEGRAM_CHAT_ID")
+    from app.core.config import get_credential
+    bot_token = get_credential("TELEGRAM_BOT_TOKEN")
+    chat_id_str = get_credential("TELEGRAM_CHAT_ID")
     
     print(f"DEBUG: Found token: {bool(bot_token)}, chat_id: {bool(chat_id_str)}")
 
     if not bot_token or not chat_id_str:
-        print("❌ Telegram not configured in database!")
-        # Fallback to env just in case
-        if not bot_token and app_settings.TELEGRAM_BOT_TOKEN:
-             bot_token = app_settings.TELEGRAM_BOT_TOKEN
-             print("DEBUG: Using env token")
-        if not chat_id_str and app_settings.TELEGRAM_CHAT_ID:
-             chat_id_str = app_settings.TELEGRAM_CHAT_ID
-             print("DEBUG: Using env chat_id")
-        
-        if not bot_token or not chat_id_str:
-            return
+        print("❌ Telegram not configured! Cannot send briefing.")
+        return
 
-    print("[-] Initializing Telegram Service (Mocked transport)...")
-    # minimal mock callback
+    print("[-] Initializing Telegram Service (Real)...")
     async def dummy_callback(msg):
         return "ack"
         
@@ -60,21 +51,23 @@ async def main():
     ts.bot_token = bot_token
     ts.chat_ids = [cid.strip() for cid in chat_id_str.split(",") if cid.strip()]
     
-    # We need to mock the bot instance because send_message uses self.application.bot.send_message
+    # Mock bot to prevent actual Telegram delivery during test
     ts.application = MagicMock()
-    ts.application.bot.send_message = MagicMock(side_effect=lambda chat_id, text, parse_mode=None: print(f"🚀 [MOCK SEND] To {chat_id}:\n{text}"))
+
+    async def mock_send_message(chat_id, text, parse_mode=None):
+        print(f"🚀 [MOCK SEND_MESSAGE] To {chat_id}:\n{text[:300]}...")
+
+    async def mock_send_document(chat_id, document, caption=None):
+        print(f"📎 [MOCK SEND_DOCUMENT] To {chat_id}: {caption}")
+
+    ts.application.bot.send_message = mock_send_message
+    ts.application.bot.send_document = mock_send_document
     
     print("[-] Initializing Proactive Service...")
     mock_sio = MagicMock()
     ps = ProactiveService(mock_sio)
     
-    print("[-] Triggering Morning Briefing...")
-    # Hook into the shared_chat_service to avoid needing a real LLM for this test if possible?
-    # actually send_morning_briefing calls shared_chat_service.run_proactive_task which calls the LLM.
-    # If we want a real briefing we need the real LLM service.
-    # app/services/chat_service.py -> shared_chat_service
-    # It should work if the key is in env or settings.
-    
+    print("[-] Triggering Morning Briefing (calling LLM)...")
     await ps.send_morning_briefing()
     print("[-] Done.")
 

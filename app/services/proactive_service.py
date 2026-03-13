@@ -204,26 +204,100 @@ class ProactiveService:
                 withings = get_withings()
                 if withings:
                     loop = asyncio.get_event_loop()
-                    withings_health = await loop.run_in_executor(None, withings.get_health_report)
-                    if isinstance(withings_health, dict) and not withings_health.get("error"):
-                        w_text = (
-                            f"- Benmassa: {withings_health.get('bone_mass_kg', 'Okänt')} kg\n"
-                            f"- Blodtryck: {withings_health.get('blood_pressure_systolic', 'N/A')}/{withings_health.get('blood_pressure_diastolic', 'N/A')} mmHg\n"
-                            f"- Puls vid mätning: {withings_health.get('heart_rate_at_measurement', 'N/A')} bpm\n"
-                            f"- Steg (Withings): {withings_health.get('steps_withings', 0)}\n"
-                            f"- Kalorier (Withings): {withings_health.get('total_calories', 0)} kcal"
+                    try:
+                        withings_health = await asyncio.wait_for(
+                            loop.run_in_executor(None, withings.get_health_report),
+                            timeout=20.0
                         )
-                        context_parts.append(f"BODY COMPOSITION (Withings):\n{w_text}")
+                    except asyncio.TimeoutError:
+                        logger.error("Withings API timed out after 20s - skipping")
+                        withings_health = {"error": "Timeout"}
+                    if isinstance(withings_health, dict) and not withings_health.get("error"):
+                        w_lines = []
+                        if withings_health.get("measurement_time"):
+                            w_lines.append(f"- Senaste mätning (tid): {withings_health['measurement_time']}")
+                        if withings_health.get("weight_kg") is not None:
+                            w_lines.append(f"- Vikt: {withings_health['weight_kg']} kg")
+                        if withings_health.get("fat_percent") is not None:
+                            w_lines.append(f"- Fettprocent: {withings_health['fat_percent']} %")
+                        if withings_health.get("muscle_mass_kg") is not None:
+                            w_lines.append(f"- Muskelmassa: {withings_health['muscle_mass_kg']} kg")
+                        if withings_health.get("bone_mass_kg") is not None:
+                            w_lines.append(f"- Benmassa: {withings_health['bone_mass_kg']} kg")
+                        if withings_health.get("water_kg") is not None:
+                            w_lines.append(f"- Vattennivå: {withings_health['water_kg']} kg")
+                        if withings_health.get("blood_pressure_systolic") is not None:
+                            sys_p = withings_health['blood_pressure_systolic']
+                            dia_p = withings_health.get('blood_pressure_diastolic', '?')
+                            w_lines.append(f"- Blodtryck: {sys_p}/{dia_p} mmHg")
+                        if withings_health.get("heart_rate_at_measurement") is not None:
+                            w_lines.append(f"- Hjärtfrekvens vid mätning: {withings_health['heart_rate_at_measurement']} bpm")
+                        if withings_health.get("steps_withings") is not None:
+                            w_lines.append(f"- Steg (Withings): {withings_health['steps_withings']}")
+                        if withings_health.get("total_calories") is not None:
+                            w_lines.append(f"- Kalorier (Withings): {withings_health['total_calories']} kcal")
+                        
+                        if w_lines:
+                            context_parts.append(f"BODY COMPOSITION (Withings):\n" + "\n".join(w_lines))
+                        else:
+                            context_parts.append("BODY COMPOSITION (Withings): Ingen ny data tillgänglig.")
                     elif isinstance(withings_health, dict) and withings_health.get("error"):
-                        context_parts.append(f"BODY COMPOSITION (Withings): {withings_health['error']}")
+                        context_parts.append(f"BODY COMPOSITION (Withings): Fel vid hämtning ({withings_health['error']})")
                     else:
-                        context_parts.append("BODY COMPOSITION (Withings): Could not fetch data.")
+                        context_parts.append("BODY COMPOSITION (Withings): Ingen data tillgänglig.")
                 else:
                     context_parts.append("BODY COMPOSITION (Withings): Service not initialized")
             except Exception as exc:
                 logger.error(f"Withings proactive error: {exc}")
 
+            try:
+                from app.core.dependencies import get_fitbit as _get_fitbit
+                fitbit = _get_fitbit()
+                if fitbit:
+                    fitbit_health = await fitbit.get_health_report()
+                    if isinstance(fitbit_health, dict) and not fitbit_health.get("error"):
+                        f_lines = []
+                        if fitbit_health.get("steps") is not None:
+                            f_lines.append(f"- Steg (Fitbit): {fitbit_health['steps']}")
+                        if fitbit_health.get("calories_out") is not None:
+                            f_lines.append(f"- Kalorier förbrända: {fitbit_health['calories_out']} kcal")
+                        if fitbit_health.get("resting_heart_rate") is not None:
+                            f_lines.append(f"- Vilopuls (Fitbit): {fitbit_health['resting_heart_rate']} bpm")
+                        if fitbit_health.get("sleep_total_minutes") is not None:
+                            h, m = divmod(fitbit_health['sleep_total_minutes'], 60)
+                            eff = fitbit_health.get('sleep_efficiency', '')
+                            f_lines.append(f"- Sömn (Fitbit): {h}h {m}min (Effektivitet: {eff}%)")
+                        if fitbit_health.get("recent_activities"):
+                            for act in fitbit_health["recent_activities"][:3]:
+                                n = act.get('activityName','?')
+                                d = act.get('duration','?')
+                                c = act.get('calories','?')
+                                f_lines.append(f"- Aktivitet: {n} ({d} min, {c} kcal)")
+                        if f_lines:
+                            context_parts.append("AKTIVITET & ÅTERHÄMTNING (Fitbit):\n" + "\n".join(f_lines))
+                        else:
+                            context_parts.append("AKTIVITET & ÅTERHÄMTNING (Fitbit): Ingen data finns i fitbit.")
+                    elif isinstance(fitbit_health, dict) and fitbit_health.get("error"):
+                         context_parts.append(f"AKTIVITET & ÅTERHÄMTNING (Fitbit): Fel vid hämtning ({fitbit_health['error']})")
+                    else:
+                        context_parts.append("AKTIVITET & ÅTERHÄMTNING (Fitbit): Ingen data finns i fitbit.")
+                else:
+                    context_parts.append("AKTIVITET & ÅTERHÄMTNING (Fitbit): Ingen data finns i fitbit (tjänst ej initierad).")
+            except Exception as exc:
+                logger.error(f"Fitbit proactive error: {exc}")
+                context_parts.append("AKTIVITET & ÅTERHÄMTNING (Fitbit): Ett oväntat fel uppstod.")
+
             context = "\n\n".join(context_parts)
+            
+            # DIAGNOSTIC: Save the context to a file for manual inspection
+            try:
+                with open("logs/last_context.txt", "w", encoding="utf-8") as f:
+                    f.write(context)
+            except Exception as e:
+                logger.error(f"Could not write last_context.txt: {e}")
+            logger.info("DEBUG: Full context for morning briefing gathered.")
+            logger.info(f"DEBUG: Context length: {len(context)} chars")
+            logger.debug(f"DEBUG: Context parts: {context_parts}")
 
             try:
                 tz_name = get_credential("TIMEZONE", settings.TIMEZONE) or settings.TIMEZONE

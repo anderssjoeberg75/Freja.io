@@ -32,7 +32,7 @@ class WithingsTool:
         }
 
         try:
-            response = requests.post(url, data=payload)
+            response = requests.post(url, data=payload, timeout=15)
             data = response.json()
 
             if data.get("status") == 0:
@@ -75,7 +75,7 @@ class WithingsTool:
         }
 
         try:
-            response = requests.post(url, data=payload)
+            response = requests.post(url, data=payload, timeout=15)
             data = response.json()
 
             if data.get("status") == 0:
@@ -93,6 +93,11 @@ class WithingsTool:
             print(f">> [WITHINGS] Connection error: {exc}")
 
     def get_health_report(self):
+        # Always fetch the latest refresh token in case it was saved after this singleton was created
+        latest = get_credential("WITHINGS_REFRESH_TOKEN")
+        if latest:
+            self.refresh_token = latest
+
         if not self.refresh_token:
             return {"error": "No Withings refresh token configured."}
 
@@ -114,7 +119,7 @@ class WithingsTool:
                 "enddateymd": today,
                 "data_fields": "steps,distance,elevation,soft,moderate,intense,active,calories,totalcalories,hr_average,hr_min,hr_max",
             }
-            act_response = requests.post(act_url, headers=headers, data=act_params)
+            act_response = requests.post(act_url, headers=headers, data=act_params, timeout=15)
             act_data = act_response.json()
 
             if (
@@ -132,7 +137,7 @@ class WithingsTool:
 
             meas_url = "https://wbsapi.withings.net/measure"
             meas_params = {"action": "getmeas", "category": 1, "limit": 1}
-            meas_response = requests.post(meas_url, headers=headers, data=meas_params)
+            meas_response = requests.post(meas_url, headers=headers, data=meas_params, timeout=15)
             meas_data = meas_response.json()
 
             if (
