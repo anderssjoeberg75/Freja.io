@@ -5,7 +5,6 @@ import pytz
 
 from app.core.config import settings
 from app.core.config import get_credential
-from app.core.database import get_db_settings, save_db_setting
 from app.core.logging import logger
 
 
@@ -84,6 +83,7 @@ class ProactiveService:
                     sent = await self.send_morning_briefing()
                     if sent:
                         last_briefing_date = today
+                        from app.core.database import save_db_setting
                         await save_db_setting("LAST_MORNING_BRIEFING_DATE", today.isoformat())
                     else:
                         logger.warning("Morning briefing attempt failed; will retry within window")
@@ -159,7 +159,18 @@ class ProactiveService:
                     loop = asyncio.get_event_loop()
                     health = await loop.run_in_executor(None, garmin.get_health_report)
                     if isinstance(health, dict) and not health.get("error"):
-                        context_parts.append(f"HEALTH (Garmin):\n{json.dumps(health, ensure_ascii=False)}")
+                        date_label = f"{health.get('date')} (Idag)" if health.get('is_today') else f"{health.get('date')} (Gårdagen)"
+                        g_parts = [
+                            f"- Datum: {date_label}",
+                            f"- Steg: {health.get('steps', 0)} (Mål: {health.get('step_goal', 'N/A')})",
+                            f"- Sömn: {health.get('sleep_hours', 'N/A')} (Poäng: {health.get('sleep_score', 'N/A')})",
+                            f"- Body Battery nu: {health.get('body_battery_now', 'N/A')}",
+                            f"- Vilopuls: {health.get('resting_heart_rate', 'N/A')}",
+                            f"- HRV Status: {health.get('hrv_status', 'N/A')}",
+                            f"- Stress (snitt): {health.get('stress_avg', 'N/A')}",
+                            f"- Kalorier: {health.get('total_calories', 0)} kcal"
+                        ]
+                        context_parts.append("HEALTH (Garmin):\n" + "\n".join(g_parts))
                     elif isinstance(health, dict) and health.get("error"):
                         context_parts.append(
                             f"HEALTH (Garmin): Could not fetch data ({health.get('error')})"
@@ -193,19 +204,18 @@ class ProactiveService:
                 withings = get_withings()
                 if withings:
                     loop = asyncio.get_event_loop()
-                    wd = await loop.run_in_executor(None, withings.get_health_report)
-                    if isinstance(wd, dict) and not wd.get("error"):
+                    withings_health = await loop.run_in_executor(None, withings.get_health_report)
+                    if isinstance(withings_health, dict) and not withings_health.get("error"):
                         w_text = (
-                            f"- Mättid: {wd.get('measurement_time', 'Okänt')}\n"
-                            f"- Vikt: {wd.get('weight_kg', 'Okänt')} kg\n"
-                            f"- Fettprocent: {wd.get('fat_percent', 'Okänt')} %\n"
-                            f"- Muskelmassa: {wd.get('muscle_mass_kg', 'Okänt')} kg\n"
-                            f"- Vattennivå: {wd.get('water_kg', 'Okänt')} kg\n"
-                            f"- Benmassa: {wd.get('bone_mass_kg', 'Okänt')} kg"
+                            f"- Benmassa: {withings_health.get('bone_mass_kg', 'Okänt')} kg\n"
+                            f"- Blodtryck: {withings_health.get('blood_pressure_systolic', 'N/A')}/{withings_health.get('blood_pressure_diastolic', 'N/A')} mmHg\n"
+                            f"- Puls vid mätning: {withings_health.get('heart_rate_at_measurement', 'N/A')} bpm\n"
+                            f"- Steg (Withings): {withings_health.get('steps_withings', 0)}\n"
+                            f"- Kalorier (Withings): {withings_health.get('total_calories', 0)} kcal"
                         )
                         context_parts.append(f"BODY COMPOSITION (Withings):\n{w_text}")
-                    elif isinstance(wd, dict) and wd.get("error"):
-                        context_parts.append(f"BODY COMPOSITION (Withings): {wd['error']}")
+                    elif isinstance(withings_health, dict) and withings_health.get("error"):
+                        context_parts.append(f"BODY COMPOSITION (Withings): {withings_health['error']}")
                     else:
                         context_parts.append("BODY COMPOSITION (Withings): Could not fetch data.")
                 else:
@@ -303,6 +313,7 @@ class ProactiveService:
     async def _load_last_briefing_date(self):
         """Load last successful morning briefing date from settings table."""
         try:
+            from app.core.database import get_db_settings
             db_settings = await get_db_settings()
             stored_date = (db_settings.get("LAST_MORNING_BRIEFING_DATE") or "").strip()
             if stored_date:

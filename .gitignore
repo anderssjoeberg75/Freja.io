@@ -47,3 +47,4 @@ db (Copy)/
 test_*.sqlite
 jobs.sqlite
 docs/code_audit_*.md
+docs/morning_briefing_*.md

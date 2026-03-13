@@ -22,7 +22,7 @@ class GarminCoach:
         except Exception as e:
              logger.warning(f"[GARMIN] Failed to initialize client: {e}")
 
-    def get_health_report(self):
+    def get_health_report(self, target_date=None):
         if not self.client or not self.client.is_authenticated:
             try:
                 if self.client:
@@ -33,7 +33,7 @@ class GarminCoach:
                 return {"error": f"Not logged in to Garmin. {e}"}
 
         try:
-            today = datetime.date.today()
+            today = target_date or datetime.date.today()
             logger.info(f"[GARMIN] Fetching ALL data for: {today}")
             
             # Fetch data using new extractors
@@ -46,20 +46,22 @@ class GarminCoach:
             # 3. Stress & Body Battery
             stress = self.client.get_stress(today)
             
-            # Body Battery details might need separate fetch if not fully in stress/daily
-            # The ported stress extractor's get_for_date returns StressData which has body_battery_charged/drained
-            # but specific low/high/now values are often in the daily summary or body battery specific report.
-            # Let's try to get more body battery details.
+            # 4. Body Battery
             bb_data = self.client.get_body_battery(today)
 
             if not daily:
-                 return {"error": "No data from Garmin today (sync your watch)."}
+                 # If no data and we haven't tried yesterday, try yesterday
+                 if not target_date:
+                     yesterday = today - datetime.timedelta(days=1)
+                     logger.info(f"[GARMIN] No data for today, falling back to yesterday: {yesterday}")
+                     return self.get_health_report(target_date=yesterday)
+                 return {"error": "No data from Garmin (sync your watch)."}
 
             # --- PROCESS DATA ---
             
             # Sleep Formatting
-            sleep_str = "0h"
-            rem_str = "0h"
+            sleep_str = "0h 0m"
+            rem_str = "0.0h"
             deep_str = "0h"
             light_str = "0h"
             awake_str = "0h"
@@ -68,11 +70,12 @@ class GarminCoach:
             end_time = "N/A"
             
             if sleep:
-                sleep_str = f"{int(sleep.total_sleep_hours)}h {int((sleep.total_sleep_hours % 1) * 60)}m"
-                rem_str = f"{sleep.rem_sleep_hours:.1f}h"
-                deep_str = f"{sleep.deep_sleep_hours:.1f}h"
-                light_str = f"{sleep.light_sleep_hours:.1f}h"
-                awake_str = f"{sleep.awake_sleep_hours:.1f}h"
+                total_hours = sleep.total_sleep_hours or 0
+                sleep_str = f"{int(total_hours)}h {int((total_hours % 1) * 60)}m"
+                rem_str = f"{sleep.rem_sleep_hours or 0:.1f}h"
+                deep_str = f"{sleep.deep_sleep_hours or 0:.1f}h"
+                light_str = f"{sleep.light_sleep_hours or 0:.1f}h"
+                awake_str = f"{sleep.awake_sleep_hours or 0:.1f}h"
                 sleep_score = sleep.overall_score if sleep.overall_score is not None else "N/A"
                 
                 # Sleep Times
@@ -90,7 +93,7 @@ class GarminCoach:
                  values = []
                  if 'bodyBatteryValuesArray' in bb_data and bb_data['bodyBatteryValuesArray']:
                      # Format: [[ts, value], ...]
-                     values = [pair[1] for pair in bb_data['bodyBatteryValuesArray'] if pair and len(pair) > 1]
+                     values = [pair[1] for pair in bb_data['bodyBatteryValuesArray'] if pair and len(pair) > 1 and pair[1] is not None]
                  
                  if values:
                      bb_now = values[-1]
@@ -112,6 +115,7 @@ class GarminCoach:
             # Compilation
             data = {
                 "date": str(today),
+                "is_today": today == datetime.date.today(),
                 "steps": daily.total_steps,
                 "step_goal": daily.daily_step_goal,
                 "distance_km": round((daily.total_distance_meters or 0) / 1000, 2),
@@ -142,6 +146,13 @@ class GarminCoach:
                 "intensive_minutes": (daily.moderate_intensity_minutes or 0) + ((daily.vigorous_intensity_minutes or 0) * 2),
                 "spo2_avg": daily.avg_spo2_value if daily.avg_spo2_value else "N/A",
             }
+
+            # Final Fallback check: If steps=0 and sleep=0, we might want yesterday's data anyway
+            # only if we are currently looking at today
+            if not target_date and data["steps"] == 0 and data["sleep_hours"] == "0h 0m":
+                 yesterday = today - datetime.timedelta(days=1)
+                 logger.info(f"[GARMIN] Today's data is empty, falling back to yesterday: {yesterday}")
+                 return self.get_health_report(target_date=yesterday)
             
             return data
 

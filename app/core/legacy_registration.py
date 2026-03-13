@@ -21,9 +21,6 @@ def register_all_tools():
     import skills.scheduler.tools
     skills.scheduler.tools.register_tools(registry)
 
-    import skills.github_sentinel
-    skills.github_sentinel.register_tools(registry)
-
     import skills._core.basic_tools # Force register Basic Tools
     
     # Register the user profile update tool manually

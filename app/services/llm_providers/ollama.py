@@ -248,13 +248,9 @@ def _build_tool_header(tools: List[Dict[str, Any]]) -> str:
         "  - 'garmin', 'hälsa', 'sömn', 'hjärtfrekvens', 'steg' → call: get_garmin_health (DO NOT use for code analysis/självanalys)\n"
         "  - 'väder', 'temperatur', 'regn' → call: get_weather\n"
         "  - 'hem', 'lampor', 'home assistant' → call: homeassistant_control or homeassistant_service\n"
-        "  - questions about documents, CV, personal letter, files, work history, or any uploaded content → call: query_knowledge_base with query=<exact user question>\n"
         "To call a tool respond with ONLY valid JSON (no other text, no markdown):\n"
         '{"name": "tool_name", "arguments": {"param": "value"}}\n'
-        "IMPORTANT: The 'query' argument for query_knowledge_base must ALWAYS be the user's actual question verbatim. NEVER leave it empty.\n"
-        "Example: user asks 'vad har jag jobbat med?' → respond with:\n"
-        '{"name": "query_knowledge_base", "arguments": {"query": "vad har jag jobbat med?"}}\n'
-        "Omit optional params you don't know. After [Result of tool ...] answer in Swedish.\n"
+        "Only output JSON when calling a tool, otherwise just answer normally.\n"
         "Available tools:\n"
         f"{tools_list}\n"
         "--- END TOOL INSTRUCTIONS ---\n\n"

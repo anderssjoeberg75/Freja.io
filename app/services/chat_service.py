@@ -9,7 +9,7 @@ from google import genai
 from google.genai import types
 
 from app.core.config import get_credential, settings
-from app.core.database import get_history, get_user_state, save_message, save_user_state
+from app.core.database import get_db_settings, get_history, get_user_state, save_message, save_user_state
 from app.core.dependencies import get_code_executor, get_garmin, get_strava, get_withings
 from app.core.prompts import get_system_prompt
 from app.self_improving.hooks import handle_user_prompt_submit
@@ -358,14 +358,33 @@ class UnifiedChatService:
              except Exception as exc:
                  logger.warning(f"Mem0 proactive search failed (continuing without memory): {exc}")
 
-        # 4. Construct History for LLM using proper SDK types
+        # 4. Route to appropriate backend
+        if not model_id.startswith("gemini"):
+            try:
+                # We pass the constructed history (mapped for Gemini) to the helper, 
+                # which will re-map it for Ollama.
+                # In proactive tasks, history is simplified.
+                final_text_response = await generate_ollama_response(
+                    model_id=model_id,
+                    system_prompt=full_system_block,
+                    history=[], 
+                    user_msg=prompt,
+                    image_data=None
+                )
+                await save_message(session_id, "assistant", final_text_response)
+                return final_text_response
+            except Exception as e:
+                logger.error(f"Ollama proactive routing error: {e}")
+                return f"Error: {str(e)}"
+
+        # 5. Construct History for Gemini
         gemini_history = [
             types.Content(role="user", parts=[types.Part(text=full_system_block)]),
             types.Content(role="model", parts=[types.Part(text="System ready.")]),
             types.Content(role="user", parts=[types.Part(text=prompt)]),
         ]
 
-        # 5. Generate
+        # 6. Call Gemini
         try:
             google_api_key = get_credential("GOOGLE_API_KEY")
             if not google_api_key:

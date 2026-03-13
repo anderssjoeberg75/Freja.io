@@ -36,10 +36,6 @@ async def lifespan(app: FastAPI):
     proactive = init_proactive_service(sio)
     await proactive.start()
 
-    # Start Document Watcher for RAG
-    from app.services.document_watcher import document_watcher
-    document_watcher.start()
-
     # Initialize Telegram with LLM callback
     from app.services.telegram_service import init_telegram_service
 
@@ -65,7 +61,6 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("Shutting down Mainframe Services...")
-    document_watcher.stop()
     await telegram.stop()
     await proactive.stop()
 
@@ -133,7 +128,7 @@ async def health_check():
     return {"status": "ok", "app": settings.APP_NAME}
 
 # Include API Routers
-from app.routers import chat, settings as settings_router, system, live, strava, withings, document_analysis
+from app.routers import chat, settings as settings_router, system, live, strava, withings
 
 app.include_router(chat.router)
 app.include_router(settings_router.router)
@@ -141,7 +136,6 @@ app.include_router(system.router)
 app.include_router(live.router)
 app.include_router(strava.router)
 app.include_router(withings.router)
-app.include_router(document_analysis.router)
 
 from app.routers import integrations
 app.include_router(integrations.router)

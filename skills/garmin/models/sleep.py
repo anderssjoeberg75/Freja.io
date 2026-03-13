@@ -22,35 +22,35 @@ class SleepData(BaseGarminModel):
         """Total sleep duration in seconds."""
         if not self.daily_sleep_dto:
             return 0
-        return self.daily_sleep_dto.get("sleepTimeSeconds", 0)
+        return self.daily_sleep_dto.get("sleepTimeSeconds") or 0
 
     @property
     def deep_sleep_seconds(self) -> int:
         """Deep sleep duration in seconds."""
         if not self.daily_sleep_dto:
             return 0
-        return self.daily_sleep_dto.get("deepSleepSeconds", 0)
+        return self.daily_sleep_dto.get("deepSleepSeconds") or 0
 
     @property
     def light_sleep_seconds(self) -> int:
         """Light sleep duration in seconds."""
         if not self.daily_sleep_dto:
             return 0
-        return self.daily_sleep_dto.get("lightSleepSeconds", 0)
+        return self.daily_sleep_dto.get("lightSleepSeconds") or 0
 
     @property
     def rem_sleep_seconds(self) -> int:
         """REM sleep duration in seconds."""
         if not self.daily_sleep_dto:
             return 0
-        return self.daily_sleep_dto.get("remSleepSeconds", 0)
+        return self.daily_sleep_dto.get("remSleepSeconds") or 0
 
     @property
     def awake_sleep_seconds(self) -> int:
         """Awake duration in seconds."""
         if not self.daily_sleep_dto:
             return 0
-        return self.daily_sleep_dto.get("awakeSleepSeconds", 0)
+        return self.daily_sleep_dto.get("awakeSleepSeconds") or 0
         
     @property
     def total_sleep_hours(self) -> float:
