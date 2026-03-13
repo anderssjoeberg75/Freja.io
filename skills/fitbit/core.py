@@ -68,6 +68,44 @@ class FitbitTool:
 
         return bool(self.access_token)
 
+    async def exchange_code(self, code: str, redirect_uri: str) -> tuple[bool, str]:
+        """Exchange OAuth 2.0 authorization code for access and refresh tokens."""
+        if not self.client_id or not self.client_secret:
+            return False, "Fitbit client ID or secret not configured."
+
+        basic_auth = base64.b64encode(f"{self.client_id}:{self.client_secret}".encode("utf-8")).decode("utf-8")
+        headers = {
+            "Authorization": f"Basic {basic_auth}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        payload = {
+            "clientId": self.client_id,
+            "grant_type": "authorization_code",
+            "redirect_uri": redirect_uri,
+            "code": code,
+        }
+
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post("https://api.fitbit.com/oauth2/token", data=payload, headers=headers)
+
+        if response.status_code == 200:
+            data = response.json()
+            self.access_token = data.get("access_token")
+            self.refresh_token = data.get("refresh_token")
+            expires_in = int(data.get("expires_in", 3600))
+            self.expires_at = time.time() + expires_in - 60
+
+            if self.refresh_token:
+                try:
+                    from app.core.vault import save_vault_secret
+                    save_vault_secret("FITBIT_REFRESH_TOKEN", self.refresh_token)
+                    return True, "Fitbit connected successfully."
+                except Exception as exc:
+                    return False, f"Connected, but failed to save token to Vault: {exc}"
+            return False, "Token exchange succeeded but no refresh token received."
+        else:
+            return False, f"Token exchange failed: {response.text}"
+
     async def _fetch_json(self, client: httpx.AsyncClient, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """Call a Fitbit API endpoint and return parsed JSON."""
         headers = {"Authorization": f"Bearer {self.access_token}"}
@@ -89,8 +127,8 @@ class FitbitTool:
 
         try:
             async with httpx.AsyncClient(timeout=30) as client:
-                daily_data = await self._fetch_json(client, "/1/user/-/activities/date/today.json")
-                sleep_data = await self._fetch_json(client, "/1.2/user/-/sleep/date/today.json")
+                daily_data = await self._fetch_json(client, f"/1/user/-/activities/date/{today}.json")
+                sleep_data = await self._fetch_json(client, f"/1.2/user/-/sleep/date/{today}.json")
                 activities_data = await self._fetch_json(
                     client,
                     "/1/user/-/activities/list.json",

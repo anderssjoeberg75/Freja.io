@@ -61,6 +61,21 @@ const FitbitSettings = () => {
         }
     };
 
+    const handleConnect = () => {
+        const clientId = settings.FITBIT_CLIENT_ID;
+        const redirectUri = settings.FITBIT_REDIRECT_URI;
+        if (!clientId || !redirectUri) {
+            setMessage({ type: 'error', text: 'Please enter Client ID and Redirect URI first.' });
+            return;
+        }
+
+        // Sometimes Fitbit's auth endpoint has issues if the redirect_uri is strictly URL encoded depending on the dev portal config.
+        // If encodeURIComponent fails, we try sending it directly or ensuring there is no trailing slash mismatch.
+        const cleanUri = redirectUri.trim();
+        const url = `https://www.fitbit.com/oauth2/authorize?response_type=code&client_id=${clientId}&scope=activity%20heartrate%20sleep%20profile%20weight&redirect_uri=${cleanUri}`;
+        window.open(url, '_blank');
+    };
+
     if (loading) return <div className="p-8"><Loader2 className="animate-spin" /></div>;
 
     return (
@@ -109,18 +124,29 @@ const FitbitSettings = () => {
                     saving={saving}
                 />
 
-                {/* Refresh Token */}
+                {/* Redirect URI */}
                 <SettingsField
-                    label="Initial Refresh Token"
-                    value={settings.FITBIT_REFRESH_TOKEN}
-                    onChange={(val) => handleChange('FITBIT_REFRESH_TOKEN', val)}
-                    onSave={() => handleSave('FITBIT_REFRESH_TOKEN')}
-                    type="password"
-                    secretConfigured={settings.__secrets && settings.__secrets.FITBIT_REFRESH_TOKEN}
-                    placeholder="Lång kod-sträng"
-                    description="Anges manuellt från OAuth 2.0-flödet för att aktivera uppkopplingen."
+                    label="Redirect URI (Callback URL)"
+                    value={settings.FITBIT_REDIRECT_URI}
+                    onChange={(val) => handleChange('FITBIT_REDIRECT_URI', val)}
+                    onSave={() => handleSave('FITBIT_REDIRECT_URI')}
+                    placeholder="http://DIN_IP:8000/api/integrations/fitbit/callback"
+                    description="MÅSTE matcha 'Callback URL' exakt i din Fitbit Developer App."
                     saving={saving}
                 />
+
+                <div className="pt-4 border-t border-mainframe-border/50">
+                    <button
+                        onClick={handleConnect}
+                        className="w-full py-3 bg-teal-500/10 border border-teal-500/50 text-teal-400 rounded hover:bg-teal-500/20 flex items-center justify-center gap-2 font-bold uppercase tracking-widest"
+                    >
+                        <Activity className="w-4 h-4" />
+                        Connect Fitbit
+                    </button>
+                    <p className="text-xs text-center mt-2 text-mainframe-text/40">
+                        Redirects to Fitbit login to authorize Freja.
+                    </p>
+                </div>
             </div>
 
             {/* Help Modal */}
@@ -129,18 +155,17 @@ const FitbitSettings = () => {
                     <div className="bg-mainframe-card border-2 border-mainframe-accent rounded-xl p-8 max-w-2xl max-h-[85vh] overflow-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <h2 className="text-2xl font-orbitron mb-6 text-mainframe-accent tracking-widest border-b border-mainframe-border pb-4">Fitbit Setup Guide</h2>
                         <div className="space-y-6 text-mainframe-text/90">
-                            <p>För att Freja ska kunna läsa din Fitbit-datakurva behöver du skapa en utvecklarapp kopplad till ditt konto. Då vi inte har en automatisk callback-lyssnare just nu görs setupen manuellt en gång.</p>
+                            <p>För att Freja ska kunna läsa din hälso- och aktivitetsdata från Fitbit måste du skapa en utvecklarapp kopplad till ditt konto.</p>
                             <ol className="list-decimal pl-5 space-y-3">
-                                <li>Gå till <a href="https://dev.fitbit.com/apps/new" target="_blank" className="text-mainframe-accent underline" rel="noreferrer">dev.fitbit.com</a> och registrera en ny app. Typ: <b>Personal</b>.</li>
-                                <li>Ange <code className="bg-black/40 text-teal-300 px-1 rounded">http://localhost:8000</code> (eller valfri URL du äger) som <b>Callback URL</b>.</li>
-                                <li>När appen är skapad, kopiera in <b>Client ID</b> och <b>Client Secret</b> i inställningarna till vänster (spara).</li>
-                                <li>Klicka sedan på <b>"OAuth 2.0 tutorial page"</b> längst ner på din Fitbit-appsida för att generera en token.</li>
-                                <li>Scrolla ner till Step 2 (Authorization) och klicka på länken. Fyll i vad som helst som inte godkänns, och var väldigt vaksam på URL:en du skickas tillbaka till.</li>
-                                <li>Du kommer skickas till `localhost:8000/?code=...`. Ta <b>koden</b> från adressfältet och stoppa in den i "Step 3".</li>
-                                <li>Svaret du får ut från "Step 3" innehåller en <code className="bg-black/40 text-teal-300 px-1 rounded">refresh_token</code>.</li>
-                                <li>Kopiera värdet för refresh_token och klistra in det i fältet <b>Initial Refresh Token</b> här på Freja.</li>
+                                <li>Gå till <a href="https://dev.fitbit.com/apps/new" target="_blank" className="text-mainframe-accent underline" rel="noreferrer">dev.fitbit.com</a> och registrera en ny app.</li>
+                                <li>Sätt OAuth 2.0 Application Type till <b>Web</b> eller <b>Server</b> (inte Personal).</li>
+                                <li>När Fitbit frågar efter <b>Callback URL</b>, skriv in Frejas fullständiga callback-adress, till exempel: <br /><code className="bg-black/40 text-teal-300 px-2 py-1 rounded">http://192.168.1.50:8000/api/integrations/fitbit/callback</code> <br /><small className="text-mainframe-text/50">(Ersätt IP:t med Freja-serverns IP).</small></li>
+                                <li>När appen skapats, kopiera <b>OAuth 2.0 Client ID</b> och lägg in det i fältet här.</li>
+                                <li>Kopiera <b>Client Secret</b> och lägg in det i fältet.</li>
+                                <li>Kopiera samma <b>Callback URL</b> du angav på Fitbit och lägg i <b>Redirect URI</b>-fältet här.</li>
+                                <li>Spara samtliga tre fält och klicka sedan på den stora <b>Connect Fitbit</b>-knappen för att logga in och godkänna behörigheter!</li>
                             </ol>
-                            <p className="text-xs text-mainframe-text/50 mt-4">När du lagt in refresh-tokenen kommer Freja själv att förnya den framöver när den går ut. Detta behöver bara göras en enda gång (eller ifall Freja har varit avstängd i flera månader).</p>
+                            <p className="text-xs text-mainframe-text/50 mt-4">När du godkänt skickas en kod till Freja som automatiskt byts in mot en åtkomstnyckel som sparas tryggt i systemet.</p>
                         </div>
                         <button onClick={() => setShowHelp(false)} className="mt-10 w-full py-3 bg-mainframe-accent text-black rounded font-bold uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all">Got it</button>
                     </div>
