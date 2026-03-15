@@ -163,10 +163,7 @@ class GarminCoach:
     def get_advanced_report(self, target_date=None) -> dict:
         """
         Fetch all advanced metrics for a given date.
-        Includes: Training Readiness, Training Status, Race Predictions,
-        VO2 Max, Endurance Score, Hill Score, Fitness Age, HRV,
-        Hydration, SpO2, Respiration, and Personal Records.
-        Returns a dict with all available data (None for unavailable metrics).
+        Formats the raw API data into simpler, LLM-friendly dicts.
         """
         if not self.client or not self.client.is_authenticated:
             try:
@@ -182,80 +179,136 @@ class GarminCoach:
 
         report = {"date": str(today)}
 
-        # Training
+        # Training Readiness
         try:
-            report["training_readiness"] = self.client.get_training_readiness(today)
+            tr_raw = self.client.get_training_readiness(today)
+            if tr_raw:
+                report["training_readiness"] = {
+                    "score": tr_raw.get("trainingReadinessScore"),
+                    "level": tr_raw.get("trainingReadinessText", {}).get("text")
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] training_readiness failed: {e}")
-            report["training_readiness"] = None
 
+        # Training Status
         try:
-            report["training_status"] = self.client.get_training_status(today)
+            ts_raw = self.client.get_training_status(today)
+            if ts_raw:
+                report["training_status"] = {
+                    "status": ts_raw.get("trainingStatus"),
+                    "weekly_load": ts_raw.get("weeklyTrainingLoad"),
+                    "acwr_percent": ts_raw.get("acwrPercent")
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] training_status failed: {e}")
-            report["training_status"] = None
 
+        # Race Predictions
         try:
-            report["race_predictions"] = self.client.get_race_predictions(today)
+            rp_raw = self.client.get_race_predictions(today)
+            if rp_raw:
+                report["race_predictions"] = {
+                    "5k_seconds": rp_raw.get("time5K"),
+                    "10k_seconds": rp_raw.get("time10K"),
+                    "half_marathon_seconds": rp_raw.get("timeHalfMarathon"),
+                    "marathon_seconds": rp_raw.get("timeMarathon")
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] race_predictions failed: {e}")
-            report["race_predictions"] = None
 
-        # Performance scores
+        # VO2 Max
         try:
-            report["vo2_max"] = self.client.get_vo2_max(today)
+            vo2_raw = self.client.get_vo2_max(today)
+            if vo2_raw and isinstance(vo2_raw, list) and len(vo2_raw) > 0:
+                vo2_data = vo2_raw[0]
+                report["vo2_max"] = {
+                    "running": vo2_data.get("vo2MaxCategory", {}).get("generic", {}).get("vo2Max"),
+                    "cycling": vo2_data.get("vo2MaxCategory", {}).get("cycling", {}).get("vo2Max")
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] vo2_max failed: {e}")
-            report["vo2_max"] = None
 
+        # Endurance Score
         try:
-            report["endurance_score"] = self.client.get_endurance_score(today)
+            end_raw = self.client.get_endurance_score(today)
+            if end_raw:
+                report["endurance_score"] = end_raw.get("overallScore")
         except Exception as e:
             logger.warning(f"[GARMIN] endurance_score failed: {e}")
-            report["endurance_score"] = None
 
+        # Hill Score
         try:
-            report["hill_score"] = self.client.get_hill_score(today)
+            hill_raw = self.client.get_hill_score(today)
+            if hill_raw:
+                report["hill_score"] = {
+                    "overall": hill_raw.get("overallScore"),
+                    "strength": hill_raw.get("strengthScore"),
+                    "endurance": hill_raw.get("enduranceScore")
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] hill_score failed: {e}")
-            report["hill_score"] = None
 
+        # Fitness Age
         try:
-            report["fitness_age"] = self.client.get_fitness_age(today)
+            fa_raw = self.client.get_fitness_age(today)
+            if fa_raw:
+                report["fitness_age"] = {
+                    "fitness_age": fa_raw.get("fitnessAge"),
+                    "chronological_age": fa_raw.get("chronologicalAge"),
+                    "achievable_fitness_age": fa_raw.get("achievableFitnessAge")
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] fitness_age failed: {e}")
-            report["fitness_age"] = None
 
-        # Health
+        # HRV
         try:
-            report["hrv"] = self.client.get_hrv_data(today)
+            hrv_raw = self.client.get_hrv_data(today)
+            if hrv_raw:
+                report["hrv"] = {
+                    "last_night_ms": hrv_raw.get("lastNightAvg"),
+                    "weekly_avg_ms": hrv_raw.get("weeklyAvg"),
+                    "status": hrv_raw.get("status")
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] hrv_data failed: {e}")
-            report["hrv"] = None
 
+        # Hydration
         try:
-            report["hydration"] = self.client.get_hydration(today)
+            hyd_raw = self.client.get_hydration(today)
+            if hyd_raw:
+                report["hydration"] = {
+                    "ml_consumed": hyd_raw.get("valueInML"),
+                    "ml_goal": hyd_raw.get("goalInML")
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] hydration failed: {e}")
-            report["hydration"] = None
 
+        # SpO2
         try:
-            report["spo2"] = self.client.get_spo2(today)
+            spo2_raw = self.client.get_spo2(today)
+            if spo2_raw:
+                report["spo2"] = {"data_present": True}  # Often complex list, simplify for LLM
         except Exception as e:
             logger.warning(f"[GARMIN] spo2 failed: {e}")
-            report["spo2"] = None
 
+        # Respiration (This was the problematic one)
         try:
-            report["respiration"] = self.client.get_respiration(today)
+            resp_raw = self.client.get_respiration(today)
+            if resp_raw and isinstance(resp_raw, dict) and "respirationAveragesValuesArray" in resp_raw:
+                # Calculate average respiration manually or simply note its existence
+                arrays = resp_raw["respirationAveragesValuesArray"]
+                if arrays:
+                    total_avg = sum(item[1] for item in arrays if len(item) > 1 and item[1]) / len(arrays)
+                    report["respiration"] = f"Genomsnittlig andningsfrekvens: {total_avg:.1f} andetag/minut"
         except Exception as e:
             logger.warning(f"[GARMIN] respiration failed: {e}")
-            report["respiration"] = None
 
+        # Personal Records
         try:
-            report["personal_records"] = self.client.get_personal_records()
+            pr_raw = self.client.get_personal_records()
+            if pr_raw:
+                 report["personal_records_count"] = len(pr_raw) if isinstance(pr_raw, list) else 1
         except Exception as e:
             logger.warning(f"[GARMIN] personal_records failed: {e}")
-            report["personal_records"] = None
 
         logger.info(f"[GARMIN] Advanced report complete for {today}")
         return report
