@@ -43,6 +43,15 @@ def register_tools(registry: ToolRegistry) -> None:
 
         try:
             data = await loop.run_in_executor(None, garmin.get_health_report)
+            
+            # Fetch advanced metrics and merge them into the data dict
+            try:
+                adv_data = await loop.run_in_executor(None, garmin.get_advanced_report)
+                if isinstance(adv_data, dict) and not adv_data.get("error"):
+                    data["advanced_metrics"] = adv_data
+            except Exception as adv_e:
+                data["advanced_metrics_error"] = str(adv_e)
+
             return json.dumps(data, indent=2, ensure_ascii=False)
         except Exception as exc:
             return f"Failed to fetch Garmin data: {exc}"
