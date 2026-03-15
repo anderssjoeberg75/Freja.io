@@ -46,8 +46,6 @@ find_*.py
 db (Copy)/
 test_*.sqlite
 jobs.sqlite
-docs/code_audit_*.md
-docs/morning_briefing_*.md
 # Temp test scripts
 test_*.py
 _test_*.py
@@ -59,4 +57,3 @@ find_*.py
 db (Copy)/
 test_*.sqlite
 jobs.sqlite
-docs/code_audit_*.md
