@@ -199,41 +199,49 @@ class ProactiveService:
 
                             ts = adv.get("training_status")
                             if ts:
-                                adv_parts.append(f"- Träningsstatus: {ts.get('trainingStatus', 'N/A')}, Veckobelastning: {ts.get('weeklyTrainingLoad', 'N/A')}, ACWR: {ts.get('acwrPercent', 'N/A')}%")
+                                adv_parts.append(f"- Träningsstatus: {ts.get('status', 'N/A')}, Veckobelastning: {ts.get('weekly_load', 'N/A')}, ACWR: {ts.get('acwr_percent', 'N/A')}%")
 
                             vo2 = adv.get("vo2_max")
                             if vo2:
-                                vo2_str = f"Löpning: {vo2.get('vo2max_running', 'N/A')}"
-                                if vo2.get("vo2max_cycling"):
-                                    vo2_str += f", Cykling: {vo2.get('vo2max_cycling')}"
+                                vo2_str = f"Löpning: {vo2.get('running', 'N/A')}"
+                                if vo2.get("cycling"):
+                                    vo2_str += f", Cykling: {vo2.get('cycling')}"
                                 adv_parts.append(f"- VO2 Max: {vo2_str}")
 
                             end = adv.get("endurance_score")
                             if end:
-                                adv_parts.append(f"- Uthållighetspoäng: {end.get('overallScore', 'N/A')}")
+                                adv_parts.append(f"- Uthållighetspoäng: {end}")
 
                             hill = adv.get("hill_score")
                             if hill:
-                                adv_parts.append(f"- Backpoäng: Totalt {hill.get('overallScore', 'N/A')}, Styrka {hill.get('strengthScore', 'N/A')}, Uthållighet {hill.get('enduranceScore', 'N/A')}")
+                                adv_parts.append(f"- Backpoäng: Totalt {hill.get('overall', 'N/A')}, Styrka {hill.get('strength', 'N/A')}, Uthållighet {hill.get('endurance', 'N/A')}")
 
                             hrv = adv.get("hrv")
                             if hrv:
-                                weekly_avg = hrv.get("weeklyAvg")
-                                last_night = hrv.get("lastNight")
-                                hrv_status_detail = hrv.get("hrvStatusType", "N/A")
+                                weekly_avg = hrv.get("weekly_avg_ms")
+                                last_night = hrv.get("last_night_ms")
+                                hrv_status_detail = hrv.get("status", "N/A")
                                 adv_parts.append(f"- HRV: Förra natten {last_night} ms, Veckosnitt {weekly_avg} ms, Status {hrv_status_detail}")
 
                             fa = adv.get("fitness_age")
                             if fa:
-                                adv_parts.append(f"- Konditionsålder: {fa.get('fitnessAge', 'N/A')} år (Kronologisk: {fa.get('chronologicalAge', 'N/A')} år, Möjlig: {fa.get('achievableFitnessAge', 'N/A')} år)")
+                                adv_parts.append(f"- Konditionsålder: {fa.get('fitness_age', 'N/A')} år (Kronologisk: {fa.get('chronological_age', 'N/A')} år, Möjlig: {fa.get('achievable_fitness_age', 'N/A')} år)")
 
                             rp = adv.get("race_predictions")
                             if rp:
-                                adv_parts.append(f"- Tävlingsprognoser: 5K {rp.get('time5K','N/A')}s, 10K {rp.get('time10K','N/A')}s, Halvmara {rp.get('timeHalfMarathon','N/A')}s")
+                                adv_parts.append(f"- Tävlingsprognoser: 5K {rp.get('5k_seconds','N/A')}s, 10K {rp.get('10k_seconds','N/A')}s, Halvmara {rp.get('half_marathon_seconds','N/A')}s, Mara {rp.get('marathon_seconds','N/A')}s")
 
                             hyd = adv.get("hydration")
                             if hyd:
-                                adv_parts.append(f"- Hydrering: {hyd.get('valueInML', 'N/A')} ml (Mål: {hyd.get('goalInML', 'N/A')} ml)")
+                                adv_parts.append(f"- Hydrering: {hyd.get('ml_consumed', 'N/A')} ml (Mål: {hyd.get('ml_goal', 'N/A')} ml)")
+                                
+                            resp = adv.get("respiration")
+                            if resp:
+                                adv_parts.append(f"- Andning: {resp}")
+                            
+                            spo2 = adv.get("spo2")
+                            if spo2:
+                                adv_parts.append(f"- SpO2: {spo2.get('data_present', False)}")
 
                             if adv_parts:
                                 context_parts.append("ADVANCED GARMIN METRICS:\n" + "\n".join(adv_parts))

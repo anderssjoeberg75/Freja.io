@@ -142,15 +142,28 @@ class ToolRegistry:
                         
                         adv_str = f"\n   - 🔋 Träningsberedskap: {tr.get('score', 'N/A')} ({tr.get('level', 'N/A')})"
                         if ts:
-                            adv_str += f"\n   - 📈 Träningsstatus: {ts.get('trainingStatus', 'N/A')} (Belastning: {ts.get('weeklyTrainingLoad', 'N/A')})"
+                            adv_str += f"\n   - 📈 Träningsstatus: {ts.get('status', 'N/A')} (Belastning: {ts.get('weekly_load', 'N/A')})"
                         
                         hrv = adv.get("hrv", {})
                         if hrv:
-                            adv_str += f"\n   - 🫀 HRV Värden: Inatt {hrv.get('lastNight', 'N/A')} ms, Veckosnitt {hrv.get('weeklyAvg', 'N/A')} ms"
+                            adv_str += f"\n   - 🫀 HRV Värden: Inatt {hrv.get('last_night_ms', 'N/A')} ms, Veckosnitt {hrv.get('weekly_avg_ms', 'N/A')} ms"
                             
                         rp = adv.get("race_predictions", {})
                         if rp:
-                            adv_str += f"\n   - 🏃 Tävlingsprognos 5K: {rp.get('time5K', 'N/A')} s"
+                            adv_str += f"\n   - 🏃 Tävlingsprognos 5K: {rp.get('5k_seconds', 'N/A')} s"
+                            
+                        vo2 = adv.get("vo2_max")
+                        if vo2:
+                            adv_str += f"\n   - 🏃 VO2 Max: {vo2.get('running', 'N/A')}"
+                        end = adv.get("endurance_score")
+                        if end:
+                            adv_str += f"\n   - 🏃 Uthållighetspoäng: {end}"
+                        resp = adv.get("respiration")
+                        if resp:
+                            adv_str += f"\n   - 🫁 Andning: {resp}"
+                        spo2 = adv.get("spo2")
+                        if spo2:
+                            adv_str += f"\n   - 🩸 SpO2: Mätt {spo2.get('data_present', False)}"
                             
                         injection += f"\n[AVANCERAD GARMIN DATA]:\n{adv_str}"
                 except Exception as e:
