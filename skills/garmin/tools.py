@@ -18,7 +18,7 @@ def register_tools(registry: ToolRegistry) -> None:
         name="get_garmin_health",
         description=(
             "Hämtar daglig Garmin-hälsodata för användaren (INTE träningspass). Anropa detta verktyg AUTOMATISKT när användaren "
-            "frågar om sin hälsa, sömn, steg, energi, Body Battery, stress eller puls. "
+            "frågar om sin hälsa, sömn, steg, energi, Body Battery, stress, puls eller ber dig 'analysera', 'analysera min garmin data'. "
             "Returnerar: steg, sömnkvalitet, Body Battery, vilopuls, stressnivå, HRV-status mm. "
             "OBS: Använd INTE detta verktyg för att analysera specifika träningspass (använd Strava för det)."
         ),

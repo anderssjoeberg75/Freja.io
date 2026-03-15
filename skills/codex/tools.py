@@ -452,7 +452,7 @@ def register_tools(registry: ToolRegistry) -> None:
 
     registry.register(
         name="codex_audit_codebase", 
-        description="Analyzes the Freja codebase for bugs and improvements. Use this when the user asks for 'självanalys', 'själv analys', 'self-analysis', 'self analysis', or 'analyze code'. DO NOT search the web for this.",
+        description="Analyzes the Freja python codebase for bugs and vulnerabilities. Use this when the user asks for 'självanalys', 'själv analys' of the AI, 'self-analysis', or 'analyze code'. DO NOT use this tool if the user asks to analyze their health, Garmin, strava or workout data.",
         args_schema=AuditCodeSchema,
     )(audit_code_impl)
     
