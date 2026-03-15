@@ -52,6 +52,18 @@ def register_tools(registry: ToolRegistry) -> None:
             except Exception as adv_e:
                 data["advanced_metrics_error"] = str(adv_e)
 
-            return json.dumps(data, indent=2, ensure_ascii=False)
+            result_string = json.dumps(data, indent=2, ensure_ascii=False)
+            
+            # Explicit instruction for the LLM to prevent it from just defining the JSON structure
+            llm_instruction = (
+                "\n\n[SYSTEM INSTRUCTION]: The above is the user's health data from Garmin. "
+                "You MUST act as an expert health coach and analyze the actual VALUES "
+                "(like sleep, stress, body battery, HRV, etc.) to give the user personalized advice and insights. "
+                "DO NOT explain what the JSON keys mean. DO NOT say 'This is a JSON object'. "
+                "Answer directly in a natural, coaching tone in Swedish."
+            )
+            
+            return result_string + llm_instruction
+            
         except Exception as exc:
             return f"Failed to fetch Garmin data: {exc}"
