@@ -58,7 +58,7 @@ def _extract_tool_call(content: str) -> Optional[Dict[str, Any]]:
     patterns = [
         r"```(?:json)?\s*(\{.*?\})\s*```",
         r"(\[\s*\{.*?\}\s*\])",
-        r'(\{[^{}]*?"name"\s*:.*?(?:"arguments"|"parameters")\s*:.*?\})',
+        r'(\{[^{}]*?"name"\s*:.*?(?:"arguments"|"parameters"|"params")\s*:.*?\})',
         r'(\{"tool_call"\s*:\s*\{.*?\}\s*\})',
         # {"function": "name", "args": {...}} variant
         r'(\{[^{}]*?"function"\s*:.*?"args"\s*:.*?\})',
@@ -82,7 +82,7 @@ def _extract_tool_call(content: str) -> Optional[Dict[str, Any]]:
         if "tool_call" in parsed and isinstance(parsed["tool_call"], dict):
             parsed = parsed["tool_call"]
 
-        # Normalise {"function": ..., "args": ...} → {"name": ..., "arguments": ...}
+        # Normalise variants → {"name": ..., "arguments": ...}
         if "function" in parsed and "name" not in parsed:
             parsed["name"] = parsed.pop("function")
         if "args" in parsed and "arguments" not in parsed:
@@ -90,6 +90,9 @@ def _extract_tool_call(content: str) -> Optional[Dict[str, Any]]:
 
         if "parameters" in parsed and "arguments" not in parsed:
             parsed["arguments"] = parsed.pop("parameters")
+            
+        if "params" in parsed and "arguments" not in parsed:
+            parsed["arguments"] = parsed.pop("params")
 
         if "name" in parsed and "arguments" in parsed:
             return parsed
