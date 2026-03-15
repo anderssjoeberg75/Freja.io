@@ -59,6 +59,7 @@ def register_tools(registry: ToolRegistry) -> None:
                 "\n\n[SYSTEM INSTRUCTION]: The above is the user's health data from Garmin. "
                 "You MUST act as an expert health coach and analyze the actual VALUES "
                 "(like sleep, stress, body battery, HRV, etc.) to give the user personalized advice and insights. "
+                "CRITICAL INSTRUCTION: You MUST specifically mention and analyze any 'advanced_metrics' that are present, such as VO2 Max, Respiration (Andning), Endurance Score (Uthållighetspoäng), or Training Status. Do not ignore them. "
                 "DO NOT explain what the JSON keys mean. DO NOT say 'This is a JSON object'. "
                 "Answer directly in a natural, coaching tone in Swedish."
             )
