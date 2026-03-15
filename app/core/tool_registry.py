@@ -121,6 +121,7 @@ class ToolRegistry:
         if any(t in text_lower for t in garmin_triggers):
             logger.info("Garmin trigger matched")
             data = await self.get_tool_data("garmin")
+            tool = self.tools.get("garmin")
             if data:
                 data_block = (
                     f"   - 💤 Sömn: {data.get('sleep_hours')} timmar\n"
@@ -131,6 +132,29 @@ class ToolRegistry:
                     f"   - 😴 Sömn poäng: {data.get('sleep_score', 'N/A')}\n"
                 )
                 injection += f"\n\n[HÄLSODATA FRÅN GARMIN IDAG]:\n{data_block}\n\nINSTRUKTION: Analysera ovanstående data. Ge konkreta råd baserat på värdena."
+
+            if tool:
+                try:
+                    adv = await asyncio.to_thread(tool.get_advanced_report)
+                    if adv and not adv.get("error"):
+                        tr = adv.get("training_readiness", {})
+                        ts = adv.get("training_status", {})
+                        
+                        adv_str = f"\n   - 🔋 Träningsberedskap: {tr.get('score', 'N/A')} ({tr.get('level', 'N/A')})"
+                        if ts:
+                            adv_str += f"\n   - 📈 Träningsstatus: {ts.get('trainingStatus', 'N/A')} (Belastning: {ts.get('weeklyTrainingLoad', 'N/A')})"
+                        
+                        hrv = adv.get("hrv", {})
+                        if hrv:
+                            adv_str += f"\n   - 🫀 HRV Värden: Inatt {hrv.get('lastNight', 'N/A')} ms, Veckosnitt {hrv.get('weeklyAvg', 'N/A')} ms"
+                            
+                        rp = adv.get("race_predictions", {})
+                        if rp:
+                            adv_str += f"\n   - 🏃 Tävlingsprognos 5K: {rp.get('time5K', 'N/A')} s"
+                            
+                        injection += f"\n[AVANCERAD GARMIN DATA]:\n{adv_str}"
+                except Exception as e:
+                    logger.error(f"Failed to fetch advanced garmin data in tool registry: {e}")
 
         # Strava Logic
         strava_triggers = ["strava", "löpning", "cykling", "pass", "träning", "aktivitet", "tränade"]
