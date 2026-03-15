@@ -10,6 +10,7 @@ from .extractors import (
     DailyExtractor,
     SleepExtractor,
     StressExtractor,
+    AdvancedExtractor,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ class GarminClient:
         self._sleep = SleepExtractor(self.auth)
         self._stress = StressExtractor(self.auth)
         self._daily = DailyExtractor(self.auth)
+        self._advanced = AdvancedExtractor(self.auth)
 
     @classmethod
     def from_credentials(
@@ -94,3 +96,98 @@ class GarminClient:
         """Get body battery data for a date (defaults to today)."""
         target_date = target_date or date.today()
         return self._stress.get_body_battery(target_date)
+
+    # --- Advanced / New Metrics ---
+
+    def get_training_readiness(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get Training Readiness score for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_training_readiness(target_date)
+
+    def get_training_status(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get Training Status (load, fitness trend, ACWR) for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_training_status(target_date)
+
+    def get_race_predictions(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get Race Predictions (5K, 10K, Half Marathon, Marathon) for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_race_predictions(target_date)
+
+    def get_vo2_max(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get VO2 Max values (running + cycling) for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_vo2_max(target_date)
+
+    def get_endurance_score(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get Endurance Score for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_endurance_score(target_date)
+
+    def get_hill_score(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get Hill Score (strength + endurance) for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_hill_score(target_date)
+
+    def get_fitness_age(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get Fitness Age data for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_fitness_age(target_date)
+
+    def get_hrv_data(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get overnight HRV data for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_hrv_data(target_date)
+
+    def get_hydration(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get daily hydration (water intake + sweat loss) for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_hydration(target_date)
+
+    def get_spo2(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get daily SpO2 (blood oxygen) data for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_spo2(target_date)
+
+    def get_respiration(
+        self,
+        target_date: date | datetime | str | None = None,
+    ):
+        """Get daily respiration (breathing rate) data for a date."""
+        target_date = target_date or date.today()
+        return self._advanced.get_respiration(target_date)
+
+    def get_personal_records(self):
+        """Get all personal records from Garmin Connect profile."""
+        return self._advanced.get_personal_records()
+

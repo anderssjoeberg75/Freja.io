@@ -186,10 +186,65 @@ class ProactiveService:
                         )
                     else:
                         context_parts.append("HEALTH (Garmin): Could not fetch data.")
+
+                    # --- ADVANCED METRICS ---
+                    try:
+                        adv = await loop.run_in_executor(None, garmin.get_advanced_report)
+                        if isinstance(adv, dict) and not adv.get("error"):
+                            adv_parts = []
+
+                            tr = adv.get("training_readiness")
+                            if tr:
+                                adv_parts.append(f"- Träningsberedskap (Training Readiness): Poäng {tr.get('score', 'N/A')}, Nivå {tr.get('level', 'N/A')}")
+
+                            ts = adv.get("training_status")
+                            if ts:
+                                adv_parts.append(f"- Träningsstatus: {ts.get('trainingStatus', 'N/A')}, Veckobelastning: {ts.get('weeklyTrainingLoad', 'N/A')}, ACWR: {ts.get('acwrPercent', 'N/A')}%")
+
+                            vo2 = adv.get("vo2_max")
+                            if vo2:
+                                vo2_str = f"Löpning: {vo2.get('vo2max_running', 'N/A')}"
+                                if vo2.get("vo2max_cycling"):
+                                    vo2_str += f", Cykling: {vo2.get('vo2max_cycling')}"
+                                adv_parts.append(f"- VO2 Max: {vo2_str}")
+
+                            end = adv.get("endurance_score")
+                            if end:
+                                adv_parts.append(f"- Uthållighetspoäng: {end.get('overallScore', 'N/A')}")
+
+                            hill = adv.get("hill_score")
+                            if hill:
+                                adv_parts.append(f"- Backpoäng: Totalt {hill.get('overallScore', 'N/A')}, Styrka {hill.get('strengthScore', 'N/A')}, Uthållighet {hill.get('enduranceScore', 'N/A')}")
+
+                            hrv = adv.get("hrv")
+                            if hrv:
+                                weekly_avg = hrv.get("weeklyAvg")
+                                last_night = hrv.get("lastNight")
+                                hrv_status_detail = hrv.get("hrvStatusType", "N/A")
+                                adv_parts.append(f"- HRV: Förra natten {last_night} ms, Veckosnitt {weekly_avg} ms, Status {hrv_status_detail}")
+
+                            fa = adv.get("fitness_age")
+                            if fa:
+                                adv_parts.append(f"- Konditionsålder: {fa.get('fitnessAge', 'N/A')} år (Kronologisk: {fa.get('chronologicalAge', 'N/A')} år, Möjlig: {fa.get('achievableFitnessAge', 'N/A')} år)")
+
+                            rp = adv.get("race_predictions")
+                            if rp:
+                                adv_parts.append(f"- Tävlingsprognoser: 5K {rp.get('time5K','N/A')}s, 10K {rp.get('time10K','N/A')}s, Halvmara {rp.get('timeHalfMarathon','N/A')}s")
+
+                            hyd = adv.get("hydration")
+                            if hyd:
+                                adv_parts.append(f"- Hydrering: {hyd.get('valueInML', 'N/A')} ml (Mål: {hyd.get('goalInML', 'N/A')} ml)")
+
+                            if adv_parts:
+                                context_parts.append("ADVANCED GARMIN METRICS:\n" + "\n".join(adv_parts))
+                    except Exception as exc:
+                        logger.warning(f"Advanced Garmin metrics failed (non-critical): {exc}")
+
                 else:
                     context_parts.append("HEALTH (Garmin): Service not initialized")
             except Exception as exc:
                 logger.error(f"Garmin proactive error: {exc}")
+
 
             try:
                 strava = get_strava()

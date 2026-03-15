@@ -159,3 +159,104 @@ class GarminCoach:
         except Exception as e:
             logger.error(f"[GARMIN] Fetch Error: {e}")
             return {"error": f"System error: {e}"}
+
+    def get_advanced_report(self, target_date=None) -> dict:
+        """
+        Fetch all advanced metrics for a given date.
+        Includes: Training Readiness, Training Status, Race Predictions,
+        VO2 Max, Endurance Score, Hill Score, Fitness Age, HRV,
+        Hydration, SpO2, Respiration, and Personal Records.
+        Returns a dict with all available data (None for unavailable metrics).
+        """
+        if not self.client or not self.client.is_authenticated:
+            try:
+                if self.client:
+                    self.client.login()
+                else:
+                    self.client = GarminClient.from_credentials()
+            except Exception as e:
+                return {"error": f"Not logged in to Garmin. {e}"}
+
+        today = target_date or datetime.date.today()
+        logger.info(f"[GARMIN] Fetching advanced metrics for: {today}")
+
+        report = {"date": str(today)}
+
+        # Training
+        try:
+            report["training_readiness"] = self.client.get_training_readiness(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] training_readiness failed: {e}")
+            report["training_readiness"] = None
+
+        try:
+            report["training_status"] = self.client.get_training_status(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] training_status failed: {e}")
+            report["training_status"] = None
+
+        try:
+            report["race_predictions"] = self.client.get_race_predictions(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] race_predictions failed: {e}")
+            report["race_predictions"] = None
+
+        # Performance scores
+        try:
+            report["vo2_max"] = self.client.get_vo2_max(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] vo2_max failed: {e}")
+            report["vo2_max"] = None
+
+        try:
+            report["endurance_score"] = self.client.get_endurance_score(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] endurance_score failed: {e}")
+            report["endurance_score"] = None
+
+        try:
+            report["hill_score"] = self.client.get_hill_score(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] hill_score failed: {e}")
+            report["hill_score"] = None
+
+        try:
+            report["fitness_age"] = self.client.get_fitness_age(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] fitness_age failed: {e}")
+            report["fitness_age"] = None
+
+        # Health
+        try:
+            report["hrv"] = self.client.get_hrv_data(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] hrv_data failed: {e}")
+            report["hrv"] = None
+
+        try:
+            report["hydration"] = self.client.get_hydration(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] hydration failed: {e}")
+            report["hydration"] = None
+
+        try:
+            report["spo2"] = self.client.get_spo2(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] spo2 failed: {e}")
+            report["spo2"] = None
+
+        try:
+            report["respiration"] = self.client.get_respiration(today)
+        except Exception as e:
+            logger.warning(f"[GARMIN] respiration failed: {e}")
+            report["respiration"] = None
+
+        try:
+            report["personal_records"] = self.client.get_personal_records()
+        except Exception as e:
+            logger.warning(f"[GARMIN] personal_records failed: {e}")
+            report["personal_records"] = None
+
+        logger.info(f"[GARMIN] Advanced report complete for {today}")
+        return report
+

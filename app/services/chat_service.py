@@ -334,7 +334,17 @@ class UnifiedChatService:
             "USER PROFILE MEMORY:\n"
             f"{user_state_context}\n"
         )
-        full_system_block = f"{system_prompt}\n\n{state_instructions}"
+        
+        # Override the global TTS rules for written reports
+        format_override = (
+            "\n\n--- FORMATTING OVERRIDE ---\n"
+            "This is a written report, NOT for Text-to-Speech. "
+            "IGNORE the formatting rule for TTS! "
+            "Write numbers normally with decimals (e.g. '96,7 kg' not '96 komma 7 kg'). "
+            "Do NOT spell out numbers or symbols as words."
+        )
+        
+        full_system_block = f"{system_prompt}\n\n{state_instructions}\n{format_override}"
 
         # 3. MEM0 (Context Retrieval only)
         # We might want to find relevant memories for "Morning Briefing" or "Goals"
