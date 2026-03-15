@@ -301,9 +301,12 @@ class GarminCoach:
                     report["respiration"] = f"Genomsnittlig andningsfrekvens: {total_avg:.1f} andetag/minut"
                 else:
                     # Still dump out the dict structure so it doesn't fail, but keep it small
-                    report["respiration"] = "Andningsdata tillgänglig men snittvärdet saknas."
+                    report["respiration"] = "Andningsdata tillgänglig men snittvärdet saknas i Garmins data"
+            else:
+                report["respiration"] = None
         except Exception as e:
             logger.warning(f"[GARMIN] respiration failed: {e}")
+            report["respiration"] = None
 
         # Personal Records
         try:
