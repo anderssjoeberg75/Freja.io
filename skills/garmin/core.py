@@ -293,12 +293,15 @@ class GarminCoach:
         # Respiration (This was the problematic one)
         try:
             resp_raw = self.client.get_respiration(today)
-            if resp_raw and isinstance(resp_raw, dict) and "respirationAveragesValuesArray" in resp_raw:
-                # Calculate average respiration manually or simply note its existence
-                arrays = resp_raw["respirationAveragesValuesArray"]
+            if resp_raw and isinstance(resp_raw, dict):
+                arrays = resp_raw.get("respirationAveragesArray") or resp_raw.get("respirationAveragesValuesArray")
                 if arrays:
+                    # Array format: [timestamp, average_value, high_value, low_value]
                     total_avg = sum(item[1] for item in arrays if len(item) > 1 and item[1]) / len(arrays)
                     report["respiration"] = f"Genomsnittlig andningsfrekvens: {total_avg:.1f} andetag/minut"
+                else:
+                    # Still dump out the dict structure so it doesn't fail, but keep it small
+                    report["respiration"] = "Andningsdata tillgänglig men snittvärdet saknas."
         except Exception as e:
             logger.warning(f"[GARMIN] respiration failed: {e}")
 
