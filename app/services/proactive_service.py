@@ -135,8 +135,8 @@ class ProactiveService:
         try:
             import json
 
-            from app.core.database import get_db_prompts
-            from app.core.dependencies import get_garmin, get_strava, get_withings
+            from app.core.database import get_db_prompts, save_metric
+            from app.core.dependencies import get_garmin, get_strava, get_withings, get_fitbit, get_tibber
             from app.services.chat_service import shared_chat_service
             from app.services.telegram_service import telegram_service
             from skills.weather.core import get_weather
@@ -171,6 +171,15 @@ class ProactiveService:
                             f"- Kalorier: {health.get('total_calories', 0)} kcal"
                         ]
                         context_parts.append("HEALTH (Garmin):\n" + "\n".join(g_parts))
+                        
+                        # PERSISTENCE
+                        try:
+                            for key in ['steps', 'sleep_hours', 'body_battery_now', 'resting_heart_rate', 'stress_avg', 'total_calories']:
+                                val = health.get(key)
+                                if val is not None:
+                                    await save_metric("garmin", key, float(val), metadata={"date": health.get('date')})
+                        except Exception as e:
+                            logger.error(f"Failed to persist Garmin metrics: {e}")
                     elif isinstance(health, dict) and health.get("error"):
                         context_parts.append(
                             f"HEALTH (Garmin): Could not fetch data ({health.get('error')})"
@@ -239,6 +248,15 @@ class ProactiveService:
                         
                         if w_lines:
                             context_parts.append(f"BODY COMPOSITION (Withings):\n" + "\n".join(w_lines))
+                            
+                            # PERSISTENCE
+                            try:
+                                for key in ['weight_kg', 'fat_percent', 'muscle_mass_kg', 'bone_mass_kg', 'water_kg', 'blood_pressure_systolic', 'blood_pressure_diastolic', 'heart_rate_at_measurement']:
+                                    val = withings_health.get(key)
+                                    if val is not None:
+                                        await save_metric("withings", key, float(val), metadata={"measurement_time": withings_health.get('measurement_time')})
+                            except Exception as e:
+                                logger.error(f"Failed to persist Withings metrics: {e}")
                         else:
                             context_parts.append("BODY COMPOSITION (Withings): Ingen ny data tillgänglig.")
                     elif isinstance(withings_health, dict) and withings_health.get("error"):
@@ -251,8 +269,7 @@ class ProactiveService:
                 logger.error(f"Withings proactive error: {exc}")
 
             try:
-                from app.core.dependencies import get_fitbit as _get_fitbit
-                fitbit = _get_fitbit()
+                fitbit = get_fitbit()
                 if fitbit:
                     fitbit_health = await fitbit.get_health_report()
                     if isinstance(fitbit_health, dict) and not fitbit_health.get("error"):
@@ -275,6 +292,15 @@ class ProactiveService:
                                 f_lines.append(f"- Aktivitet: {n} ({d} min, {c} kcal)")
                         if f_lines:
                             context_parts.append("AKTIVITET & ÅTERHÄMTNING (Fitbit):\n" + "\n".join(f_lines))
+                            
+                            # PERSISTENCE
+                            try:
+                                for key in ['steps', 'calories_out', 'resting_heart_rate', 'sleep_total_minutes']:
+                                    val = fitbit_health.get(key)
+                                    if val is not None:
+                                        await save_metric("fitbit", key, float(val))
+                            except Exception as e:
+                                logger.error(f"Failed to persist Fitbit metrics: {e}")
                         else:
                             context_parts.append("AKTIVITET & ÅTERHÄMTNING (Fitbit): Ingen data finns i fitbit.")
                     elif isinstance(fitbit_health, dict) and fitbit_health.get("error"):
@@ -286,6 +312,30 @@ class ProactiveService:
             except Exception as exc:
                 logger.error(f"Fitbit proactive error: {exc}")
                 context_parts.append("AKTIVITET & ÅTERHÄMTNING (Fitbit): Ett oväntat fel uppstod.")
+
+            try:
+                tibber = get_tibber()
+                if tibber:
+                    energy_data = await asyncio.to_thread(tibber.get_energy_data_sync, days=1)
+                    if energy_data and not energy_data.get("error"):
+                        e_lines = [
+                            f"- Förbrukning: {energy_data.get('total_kwh', 0):.2f} kWh",
+                            f"- Kostnad: {energy_data.get('total_cost', 0):.2f} kr"
+                        ]
+                        context_parts.append("ENERGI (Tibber):\n" + "\n".join(e_lines))
+                        
+                        # PERSISTENCE
+                        try:
+                            if energy_data.get('total_kwh') is not None:
+                                await save_metric("tibber", "energy_kwh", float(energy_data['total_kwh']))
+                            if energy_data.get('total_cost') is not None:
+                                await save_metric("tibber", "energy_cost", float(energy_data['total_cost']))
+                        except Exception as e:
+                            logger.error(f"Failed to persist Tibber metrics: {e}")
+                    else:
+                        context_parts.append("ENERGI (Tibber): Ingen data tillgänglig.")
+            except Exception as exc:
+                logger.error(f"Tibber proactive error: {exc}")
 
             context = "\n\n".join(context_parts)
             
@@ -339,6 +389,13 @@ class ProactiveService:
                             f.write(f"# 🌅 Morgon-Briefing {datetime.datetime.now(tz).strftime('%Y-%m-%d %H:%M')}\n\n")
                             f.write(full_response)
                         logger.info(f"Morning briefing report saved to {report_path}")
+                        
+                        # SAVE TO LONG TERM MEMORY (Mem0)
+                        try:
+                            summary_for_mem0 = f"Morgonbriefing ({datetime.datetime.now(tz).date()}): {full_response[:500]}..."
+                            await shared_chat_service.add_to_long_term_memory(summary_for_mem0)
+                        except Exception as mem_exc:
+                            logger.warning(f"Could not save briefing to Mem0: {mem_exc}")
                     except Exception as exc:
                         logger.warning(f"Could not save briefing report: {exc}")
                         report_path = None

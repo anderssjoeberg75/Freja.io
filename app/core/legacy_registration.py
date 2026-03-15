@@ -21,6 +21,9 @@ def register_all_tools():
     import skills.scheduler.tools
     skills.scheduler.tools.register_tools(registry)
 
+    from skills.analytics import register_analytics_tools
+    register_analytics_tools()
+
     import skills._core.basic_tools # Force register Basic Tools
     
     # Register the user profile update tool manually

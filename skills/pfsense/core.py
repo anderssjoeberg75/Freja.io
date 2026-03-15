@@ -51,7 +51,7 @@ def _parse_timestamp(value: str | None) -> datetime | None:
 
 
 def _classify_log_entry(entry: dict[str, Any]) -> str:
-    for field in ("process", "program", "subsystem", "source", "service"):
+    for field in ("process", "program", "subsystem", "source", "service", "proc"):
         value = entry.get(field)
         if isinstance(value, str) and value.strip():
             return value.strip().lower()
@@ -158,6 +158,42 @@ def _format_report(summary: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _login(config: PfSenseConfig) -> str:
+    """Login to official pfSense API and get JWT token."""
+    import base64
+    
+    if ":" not in config.api_key:
+        raise ValueError("PFSENSE_API_KEY must be in 'admin:password' format for official API.")
+        
+    user, password = config.api_key.split(":", 1)
+    
+    # Official API requires base64 encoded credentials in the JSON body
+    payload = {
+        "username": base64.b64encode(user.strip().encode()).decode(),
+        "password": base64.b64encode(password.strip().encode()).decode()
+    }
+    
+    # Try common locations for the login endpoint
+    for prefix in ("/api/v1", ""):
+        try:
+            url = f"{config.base_url}{prefix}/login"
+            response = requests.post(
+                url, 
+                json=payload, 
+                verify=config.verify_tls, 
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                token = data.get("access_token")
+                if token:
+                    return token
+        except Exception:
+            continue
+            
+    raise RuntimeError(f"Failed to login to official pfSense API at {config.base_url}")
+
+
 def _fetch_logs_sync(limit: int) -> list[dict[str, Any]]:
     config = _get_config()
     if not config.base_url or not config.api_key:
@@ -165,6 +201,24 @@ def _fetch_logs_sync(limit: int) -> list[dict[str, Any]]:
             "Missing pfSense API configuration. Set PFSENSE_API_URL and PFSENSE_API_KEY."
         )
 
+    # 1. Official API flow (JWT)
+    try:
+        token = _login(config)
+        session = requests.Session()
+        session.headers.update({"Authorization": f"Bearer {token}", "Accept": "application/json"})
+        
+        # Official endpoint: /system/logs/{filename}
+        # We try with and without /api/v1 prefix
+        for prefix in ("/api/v1", ""):
+            endpoint = f"{config.base_url}{prefix}/system/logs/system"
+            response = session.get(endpoint, params={"limit": limit}, timeout=20, verify=config.verify_tls)
+            if response.status_code == 200:
+                return _extract_log_entries(response.json())
+    except Exception as e:
+        # Fallback to legacy/pfrest flow if official fails
+        pass
+
+    # 2. Legacy/pfrest API flow (Bearer token direct or Basic Auth if Bearer fails)
     session = requests.Session()
     session.headers.update(
         {
@@ -180,13 +234,14 @@ def _fetch_logs_sync(limit: int) -> list[dict[str, Any]]:
     ]
 
     for endpoint in endpoints:
-        response = session.get(endpoint, params={"limit": limit}, timeout=20, verify=config.verify_tls)
-        if response.status_code == 404:
+        try:
+            response = session.get(endpoint, params={"limit": limit}, timeout=20, verify=config.verify_tls)
+            if response.status_code == 200:
+                return _extract_log_entries(response.json())
+        except Exception:
             continue
-        response.raise_for_status()
-        return _extract_log_entries(response.json())
 
-    raise RuntimeError("Could not find a working pfSense system log endpoint in pfrest.")
+    raise RuntimeError("Could not find a working pfSense system log endpoint (Official or pfrest).")
 
 
 async def analyze_pfsense_logs(limit: int = 200, lookback_minutes: int = 60) -> str:

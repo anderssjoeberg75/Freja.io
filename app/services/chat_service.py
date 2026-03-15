@@ -415,21 +415,33 @@ class UnifiedChatService:
             logger.error(f"Proactive gen error: {e}")
             return f"Error generating briefing: {e}"
 
-    # Regex manual profile extraction was removed in favor of tool calling.
-
-    def _build_user_state_context(self, user_state: Dict[str, str]) -> str:
-        if not user_state:
+    def _build_user_state_context(self, state: Dict[str, Any]) -> str:
+        """Format the user state dictionary into a descriptive string."""
+        if not state:
             return "No known user profile values in memory yet."
-
+        
         lines = []
-        if user_state.get("age"):
-            lines.append(f"- age: {user_state['age']}")
-        if user_state.get("max_hr"):
-            lines.append(f"- max_hr: {user_state['max_hr']}")
-        if user_state.get("weight"):
-            lines.append(f"- weight_kg: {user_state['weight']}")
+        for key, value in state.items():
+            lines.append(f"- {key}: {value}")
+        return "\n".join(lines)
 
-        return "\n".join(lines) if lines else "No known user profile values in memory yet."
+    async def add_to_long_term_memory(self, content: str, user_id: Optional[str] = None):
+        """Manually add a fact or summary to Mem0."""
+        mem0_key = get_credential("MEM0_API_KEY")
+        if not mem0_key or len(mem0_key) <= 5:
+            return
+            
+        if not user_id:
+            user_id = get_credential("USER_NAME") or settings.USER_NAME or settings.USER_ID
+            
+        try:
+            from mem0 import AsyncMemoryClient
+            client = AsyncMemoryClient(api_key=mem0_key)
+            # Mem0 add can take a string directly
+            await client.add(content, user_id=user_id)
+            logger.info(f"Manually saved content to Mem0 for {user_id}")
+        except Exception as e:
+            logger.warning(f"Failed to manually save to Mem0: {e}")
 
 
 # Singleton instance

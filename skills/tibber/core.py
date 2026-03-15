@@ -261,9 +261,51 @@ def _fetch_energy_analysis_sync(days: int) -> str:
     return _format_report(consumption_rows, price_rows, days=days)
 
 
+class TibberTool:
+    """Wrapper class for Tibber API interactions."""
+    
+    async def get_energy_analysis(self, days: int = 7) -> str:
+        return await get_tibber_energy_analysis(days)
+
+    def get_energy_data_sync(self, days: int = 1) -> dict:
+        """Fetch raw energy data for persistence."""
+        from_utc = datetime.now(tz=timezone.utc) - timedelta(days=days)
+        
+        # We need a simpler query for raw data
+        query = """
+        query FetchRawConsumption($last: Int!) {
+          viewer {
+            homes {
+              consumption(resolution: HOURLY, last: $last) {
+                nodes {
+                  from
+                  cost
+                  consumption
+                }
+              }
+            }
+          }
+        }
+        """
+        data = _run_query_sync(query, variables={"last": days * 24})
+        rows = _extract_consumption_nodes(data, from_utc=from_utc)
+        
+        if not rows:
+            return {}
+            
+        total_kwh = sum(r["consumption"] for r in rows)
+        total_cost = sum(r["cost"] for r in rows)
+        
+        return {
+            "total_kwh": total_kwh,
+            "total_cost": total_cost,
+            "entries_count": len(rows),
+            "date": rows[0]["from"].strftime("%Y-%m-%d") if rows else None
+        }
+
 async def get_tibber_energy_analysis(days: int = 7) -> str:
     """Fetch Tibber energy data and produce a concise analysis report."""
     return await asyncio.to_thread(_fetch_energy_analysis_sync, days)
 
 
-__all__ = ["get_tibber_energy_analysis", "TibberConfigError"]
+__all__ = ["get_tibber_energy_analysis", "TibberConfigError", "TibberTool"]

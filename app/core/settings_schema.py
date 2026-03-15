@@ -22,4 +22,10 @@ SETTINGS_SCHEMA: List[SettingItem] = [
         description="Model used for core logic and analysis"
     ),
     SettingItem(key="OLLAMA_URL", label="Ollama URL", type="text", section="Intelligence", description="e.g. http://127.0.0.1:11434"),
+    
+    # Fitbit (Dynamically loaded by UI, but schema needed for backend validation)
+    SettingItem(key="FITBIT_CLIENT_ID", label="Fitbit Client ID", type="text", section="Health"),
+    SettingItem(key="FITBIT_CLIENT_SECRET", label="Fitbit Client Secret", type="password", section="Health"),
+    SettingItem(key="FITBIT_REDIRECT_URI", label="Fitbit Redirect URI", type="text", section="Health"),
+    SettingItem(key="FITBIT_REFRESH_TOKEN", label="Fitbit Refresh Token", type="password", section="Health"),
 ]

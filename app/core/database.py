@@ -164,6 +164,16 @@ def init_db():
             c.execute('''CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)''')
             c.execute('''CREATE TABLE IF NOT EXISTS prompts (key TEXT PRIMARY KEY, value TEXT)''')
             c.execute('''CREATE TABLE IF NOT EXISTS user_state (session_id TEXT, key TEXT, value TEXT, PRIMARY KEY (session_id, key))''')
+            c.execute('''CREATE TABLE IF NOT EXISTS metrics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source TEXT,
+                metric_name TEXT,
+                value REAL,
+                unit TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                metadata TEXT
+            )''')
+            c.execute('''CREATE INDEX IF NOT EXISTS idx_metrics_name_ts ON metrics(metric_name, timestamp)''')
             
             for key, val in DEFAULT_PROMPTS.items():
                 c.execute("INSERT OR IGNORE INTO prompts (key, value) VALUES (?, ?)", (key, val))
@@ -281,3 +291,42 @@ async def save_user_state(session_id: str, state: dict):
     except Exception as e:
         logger.error(f"[DB] Failed to save user state for session {session_id}: {e}")
         return False
+
+
+async def save_metric(source: str, metric_name: str, value: float, unit: str = None, metadata: dict = None):
+    """Persist a single metric data point."""
+    try:
+        import json
+        async with get_db_connection() as conn:
+            await conn.execute(
+                "INSERT INTO metrics (source, metric_name, value, unit, metadata) VALUES (?, ?, ?, ?, ?)",
+                (source, metric_name, value, unit, json.dumps(metadata) if metadata else None),
+            )
+            await conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"[DB] Failed to save metric {metric_name}: {e}")
+        return False
+
+
+async def get_metrics(metric_name: str, limit: int = 30, days: int = None):
+    """Retrieve historical metrics."""
+    try:
+        async with get_db_connection() as conn:
+            conn.row_factory = aiosqlite.Row
+            query = "SELECT * FROM metrics WHERE metric_name = ?"
+            params = [metric_name]
+            
+            if days:
+                query += " AND timestamp >= datetime('now', ?)"
+                params.append(f"-{days} days")
+                
+            query += " ORDER BY timestamp DESC LIMIT ?"
+            params.append(limit)
+            
+            async with conn.execute(query, params) as cursor:
+                rows = await cursor.fetchall()
+                return [dict(r) for r in rows]
+    except Exception as e:
+        logger.error(f"[DB] Failed to get metrics {metric_name}: {e}")
+        return []
