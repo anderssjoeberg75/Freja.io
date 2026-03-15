@@ -48,3 +48,15 @@ test_*.sqlite
 jobs.sqlite
 docs/code_audit_*.md
 docs/morning_briefing_*.md
+# Temp test scripts
+test_*.py
+_test_*.py
+check_*.py
+script_*.py
+find_*.py
+
+# DB logs/backups
+db (Copy)/
+test_*.sqlite
+jobs.sqlite
+docs/code_audit_*.md
