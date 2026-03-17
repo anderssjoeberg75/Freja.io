@@ -34,6 +34,7 @@ Freja decides when to call the underlying tool automatically.
 - `strava` – Strava activity retrieval and analytics flow.
 - `tibber` – electricity usage and cost analysis.
 - `weather` – weather forecasts.
+- `wordpress` – publish or draft blog posts via WordPress REST API.
 - `withings` – body composition and health metrics.
 
 ## Adding a new skill
