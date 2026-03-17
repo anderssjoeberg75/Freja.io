@@ -163,20 +163,27 @@ class ProactiveService:
                         g_parts = [
                             f"- Datum: {date_label}",
                             f"- Steg: {health.get('steps', 0)} (Mål: {health.get('step_goal', 'N/A')})",
+                            f"- Distans: {health.get('distance_km', 'N/A')} km",
                             f"- Sömn: {health.get('sleep_hours', 'N/A')} (Poäng: {health.get('sleep_score', 'N/A')})",
+                            f"- Sömnstadier: REM {health.get('rem_sleep', 'N/A')}, Djup {health.get('deep_sleep', 'N/A')}, Lätt {health.get('light_sleep', 'N/A')}, Vaken {health.get('awake_time', 'N/A')}",
                             f"- Body Battery nu: {health.get('body_battery_now', 'N/A')}",
+                            f"- Body Battery spann: {health.get('body_battery_low', 'N/A')} → {health.get('body_battery_high', 'N/A')} (Delta: {health.get('body_battery_delta', 'N/A')})",
                             f"- Vilopuls: {health.get('resting_heart_rate', 'N/A')}",
+                            f"- Puls (min/snitts/max): {health.get('min_heart_rate', 'N/A')}/{health.get('avg_heart_rate', 'N/A')}/{health.get('max_heart_rate', 'N/A')}",
                             f"- HRV Status: {health.get('hrv_status', 'N/A')}",
-                            f"- Stress (snitt): {health.get('stress_avg', 'N/A')}",
-                            f"- Kalorier: {health.get('total_calories', 0)} kcal"
+                            f"- Stress (snitt/max): {health.get('stress_avg', 'N/A')}/{health.get('stress_max', 'N/A')}",
+                            f"- Intensiva minuter: {health.get('intensive_minutes', 0)} (Måttlig: {health.get('moderate_minutes', 0)}, Hög: {health.get('vigorous_minutes', 0)})",
+                            f"- Trappor: {health.get('floors_ascended', 0)} (Mål: {health.get('floors_goal', 'N/A')})",
+                            f"- SpO2 (snitt/lägst/senast): {health.get('spo2_avg', 'N/A')}/{health.get('spo2_low', 'N/A')}/{health.get('spo2_latest', 'N/A')}",
+                            f"- Kalorier: {health.get('total_calories', 0)} kcal",
                         ]
                         context_parts.append("HEALTH (Garmin):\n" + "\n".join(g_parts))
                         
                         # PERSISTENCE
                         try:
-                            for key in ['steps', 'sleep_hours', 'body_battery_now', 'resting_heart_rate', 'stress_avg', 'total_calories']:
+                            for key in ['steps', 'body_battery_now', 'resting_heart_rate', 'stress_avg', 'stress_max', 'total_calories', 'distance_km', 'intensive_minutes']:
                                 val = health.get(key)
-                                if val is not None:
+                                if isinstance(val, (int, float)):
                                     await save_metric("garmin", key, float(val), metadata={"date": health.get('date')})
                         except Exception as e:
                             logger.error(f"Failed to persist Garmin metrics: {e}")
@@ -237,11 +244,11 @@ class ProactiveService:
                                 
                             resp = adv.get("respiration")
                             if resp:
-                                adv_parts.append(f"- Andning: {resp}")
+                                adv_parts.append(f"- Andning (snitt/hög/låg/samples): {resp.get('avg_bpm', 'N/A')}/{resp.get('high_bpm', 'N/A')}/{resp.get('low_bpm', 'N/A')}/{resp.get('samples', 0)}")
                             
                             spo2 = adv.get("spo2")
                             if spo2:
-                                adv_parts.append(f"- SpO2: {spo2.get('data_present', False)}")
+                                adv_parts.append(f"- SpO2 (snitt/låg/hög): {spo2.get('avg', 'N/A')}/{spo2.get('low', 'N/A')}/{spo2.get('high', 'N/A')} (samples: {spo2.get('samples', 0)})")
 
                             if adv_parts:
                                 context_parts.append("ADVANCED GARMIN METRICS:\n" + "\n".join(adv_parts))

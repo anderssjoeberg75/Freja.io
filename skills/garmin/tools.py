@@ -58,8 +58,10 @@ def register_tools(registry: ToolRegistry) -> None:
             llm_instruction = (
                 "\n\n[SYSTEM INSTRUCTION]: The above is the user's health data from Garmin. "
                 "You MUST act as an expert health coach and analyze the actual VALUES "
-                "(like sleep, stress, body battery, HRV, etc.) to give the user personalized advice and insights. "
+                "(like sleep, stress, body battery, HRV, heart rate, SpO2, respiration, readiness, and training load) "
+                "to give the user personalized advice and insights. "
                 "CRITICAL INSTRUCTION: You MUST specifically mention and analyze any 'advanced_metrics' that are present, such as VO2 Max, Respiration (Andning), Endurance Score (Uthållighetspoäng), or Training Status. Do not ignore them. "
+                "You MUST include BOTH health recommendations and training recommendations for today and the next workout. "
                 "DO NOT explain what the JSON keys mean. DO NOT say 'This is a JSON object'. "
                 "Answer directly in a natural, coaching tone in Swedish."
             )
