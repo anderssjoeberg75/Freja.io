@@ -6,6 +6,18 @@ from skills.garmin.client import GarminClient
 # Configure logger
 logger = logging.getLogger(__name__)
 
+
+def _seconds_to_hhmmss(total_seconds):
+    if total_seconds is None:
+        return None
+    try:
+        total_seconds = int(total_seconds)
+    except (TypeError, ValueError):
+        return None
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
 class GarminCoach:
     def __init__(self):
         self.client = None
@@ -122,14 +134,24 @@ class GarminCoach:
                 
                 # Heart & Stress
                 "resting_heart_rate": daily.resting_heart_rate if daily.resting_heart_rate else "N/A",
+                "avg_heart_rate": daily.avg_heart_rate if daily.avg_heart_rate else "N/A",
+                "min_heart_rate": daily.min_heart_rate if daily.min_heart_rate else "N/A",
+                "max_heart_rate": daily.max_heart_rate if daily.max_heart_rate else "N/A",
                 "stress_avg": daily.avg_stress_level if daily.avg_stress_level else "N/A",
                 "stress_max": daily.max_stress_level if daily.max_stress_level else "N/A",
+                "stress_duration_minutes": round((daily.stress_duration or 0) / 60),
+                "rest_stress_duration_minutes": round((daily.rest_stress_duration or 0) / 60),
                 "hrv_status": hrv_status,
                 
                 # Energy (Body Battery)
                 "body_battery_now": bb_now,
                 "body_battery_high": bb_high,
                 "body_battery_low": bb_low,
+                "body_battery_delta": (
+                    (bb_high - bb_low)
+                    if isinstance(bb_high, (int, float)) and isinstance(bb_low, (int, float))
+                    else "N/A"
+                ),
                 
                 # Sleep
                 "sleep_hours": sleep_str,
@@ -144,7 +166,17 @@ class GarminCoach:
                 # Calories & Activity
                 "total_calories": daily.total_kilocalories,
                 "intensive_minutes": (daily.moderate_intensity_minutes or 0) + ((daily.vigorous_intensity_minutes or 0) * 2),
+                "moderate_minutes": daily.moderate_intensity_minutes or 0,
+                "vigorous_minutes": daily.vigorous_intensity_minutes or 0,
+                "floors_ascended": daily.floors_ascended,
+                "floors_goal": daily.floors_ascended_goal,
+                "active_minutes": round((daily.active_seconds or 0) / 60),
+                "highly_active_minutes": round((daily.highly_active_seconds or 0) / 60),
+                "sedentary_minutes": round((daily.sedentary_seconds or 0) / 60),
+                "sleeping_minutes": round((daily.sleeping_seconds or 0) / 60),
                 "spo2_avg": daily.avg_spo2_value if daily.avg_spo2_value else "N/A",
+                "spo2_low": daily.lowest_spo2_value if daily.lowest_spo2_value else "N/A",
+                "spo2_latest": daily.latest_spo2_value if daily.latest_spo2_value else "N/A",
             }
 
             # Final Fallback check: If steps=0 and sleep=0, we might want yesterday's data anyway
@@ -208,9 +240,13 @@ class GarminCoach:
             if rp_raw:
                 report["race_predictions"] = {
                     "5k_seconds": rp_raw.get("time5K"),
+                    "5k_formatted": _seconds_to_hhmmss(rp_raw.get("time5K")),
                     "10k_seconds": rp_raw.get("time10K"),
+                    "10k_formatted": _seconds_to_hhmmss(rp_raw.get("time10K")),
                     "half_marathon_seconds": rp_raw.get("timeHalfMarathon"),
-                    "marathon_seconds": rp_raw.get("timeMarathon")
+                    "half_marathon_formatted": _seconds_to_hhmmss(rp_raw.get("timeHalfMarathon")),
+                    "marathon_seconds": rp_raw.get("timeMarathon"),
+                    "marathon_formatted": _seconds_to_hhmmss(rp_raw.get("timeMarathon")),
                 }
         except Exception as e:
             logger.warning(f"[GARMIN] race_predictions failed: {e}")
@@ -218,11 +254,10 @@ class GarminCoach:
         # VO2 Max
         try:
             vo2_raw = self.client.get_vo2_max(today)
-            if vo2_raw and isinstance(vo2_raw, list) and len(vo2_raw) > 0:
-                vo2_data = vo2_raw[0]
+            if vo2_raw and isinstance(vo2_raw, dict):
                 report["vo2_max"] = {
-                    "running": vo2_data.get("vo2MaxCategory", {}).get("generic", {}).get("vo2Max"),
-                    "cycling": vo2_data.get("vo2MaxCategory", {}).get("cycling", {}).get("vo2Max")
+                    "running": vo2_raw.get("vo2max_running"),
+                    "cycling": vo2_raw.get("vo2max_cycling")
                 }
         except Exception as e:
             logger.warning(f"[GARMIN] vo2_max failed: {e}")
@@ -285,8 +320,24 @@ class GarminCoach:
         # SpO2
         try:
             spo2_raw = self.client.get_spo2(today)
-            if spo2_raw:
-                report["spo2"] = {"data_present": True}  # Often complex list, simplify for LLM
+            if spo2_raw and isinstance(spo2_raw, dict):
+                values = spo2_raw.get("spo2Values") or spo2_raw.get("spO2Readings") or []
+                numeric_values = []
+                for item in values:
+                    if isinstance(item, list) and len(item) > 1 and isinstance(item[1], (int, float)):
+                        numeric_values.append(item[1])
+                    elif isinstance(item, dict):
+                        val = item.get("value") or item.get("spo2")
+                        if isinstance(val, (int, float)):
+                            numeric_values.append(val)
+
+                report["spo2"] = {
+                    "data_present": bool(values),
+                    "avg": round(sum(numeric_values) / len(numeric_values), 1) if numeric_values else None,
+                    "low": min(numeric_values) if numeric_values else None,
+                    "high": max(numeric_values) if numeric_values else None,
+                    "samples": len(numeric_values),
+                }
         except Exception as e:
             logger.warning(f"[GARMIN] spo2 failed: {e}")
 
@@ -297,11 +348,21 @@ class GarminCoach:
                 arrays = resp_raw.get("respirationAveragesArray") or resp_raw.get("respirationAveragesValuesArray")
                 if arrays:
                     # Array format: [timestamp, average_value, high_value, low_value]
-                    total_avg = sum(item[1] for item in arrays if len(item) > 1 and item[1]) / len(arrays)
-                    report["respiration"] = f"Genomsnittlig andningsfrekvens: {total_avg:.1f} andetag/minut"
+                    valid_rows = [item for item in arrays if isinstance(item, list) and len(item) > 1 and item[1] is not None]
+                    if valid_rows:
+                        avg_values = [row[1] for row in valid_rows if isinstance(row[1], (int, float))]
+                        high_values = [row[2] for row in valid_rows if len(row) > 2 and isinstance(row[2], (int, float))]
+                        low_values = [row[3] for row in valid_rows if len(row) > 3 and isinstance(row[3], (int, float))]
+                        report["respiration"] = {
+                            "avg_bpm": round(sum(avg_values) / len(avg_values), 1) if avg_values else None,
+                            "high_bpm": max(high_values) if high_values else None,
+                            "low_bpm": min(low_values) if low_values else None,
+                            "samples": len(valid_rows),
+                        }
+                    else:
+                        report["respiration"] = None
                 else:
-                    # Still dump out the dict structure so it doesn't fail, but keep it small
-                    report["respiration"] = "Andningsdata tillgänglig men snittvärdet saknas i Garmins data"
+                    report["respiration"] = None
             else:
                 report["respiration"] = None
         except Exception as e:
@@ -318,4 +379,3 @@ class GarminCoach:
 
         logger.info(f"[GARMIN] Advanced report complete for {today}")
         return report
-
