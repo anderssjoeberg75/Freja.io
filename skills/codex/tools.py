@@ -1,12 +1,153 @@
 import asyncio
 import json
 import httpx
+import re
+import hashlib
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
 
 from app.core import dependencies
 from app.services.tool_registry import ToolRegistry
 from skills.codex.git_core import GitTool
+
+
+def _extract_audit_findings(report_text: str) -> list[str]:
+    """Extract actionable findings from the self-analysis report."""
+    findings: list[str] = []
+    report_section = report_text.split("---RAPPORT_START---", 1)[-1]
+
+    for line in report_section.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(("-", "*")) and any(marker in stripped for marker in ("🔴", "⚠️", "🐛", "🔒", "⚡")):
+            findings.append(stripped.lstrip("-* "))
+            continue
+        if stripped.startswith(("##", "###")) and any(marker in stripped for marker in ("🔴", "⚠️", "🐛", "🔒", "⚡")):
+            findings.append(stripped.lstrip("# "))
+
+    unique_findings: list[str] = []
+    seen: set[str] = set()
+    for finding in findings:
+        normalized = _normalize_finding(finding)
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            unique_findings.append(finding)
+    return unique_findings
+
+
+def _normalize_finding(text: str) -> str:
+    normalized = re.sub(r"\s+", " ", text.lower()).strip()
+    normalized = re.sub(r"[^a-z0-9åäö ]", "", normalized)
+    return normalized
+
+
+def _fingerprint_finding(finding: str) -> str:
+    return hashlib.sha1(_normalize_finding(finding).encode("utf-8")).hexdigest()[:12]
+
+
+def _owner_repo_from_url(repo_url: str) -> str:
+    repo = repo_url.strip().replace(".git", "")
+    if "github.com/" in repo:
+        repo = repo.split("github.com/", 1)[1]
+    if repo.startswith("/"):
+        repo = repo[1:]
+    return repo
+
+
+async def _sync_findings_to_github_issues(report_text: str, create_issues: bool = True) -> dict:
+    """Compare audit findings against GitHub issues and create new issues for missing findings."""
+    from app.core.config import get_credential, settings
+
+    findings = _extract_audit_findings(report_text)
+    if not findings:
+        return {"status": "no_findings", "new_findings": [], "created_issues": [], "existing_matches": 0}
+
+    github_token = get_credential("GITHUB_TOKEN") or getattr(settings, "GITHUB_TOKEN", None)
+    repo_url = get_credential("GITHUB_REPO") or getattr(settings, "GITHUB_REPO", None)
+    if not github_token or not repo_url:
+        return {"status": "missing_config", "new_findings": findings, "created_issues": [], "existing_matches": 0}
+
+    owner_repo = _owner_repo_from_url(repo_url)
+    headers = {
+        "Authorization": f"token {github_token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    issues_url = f"https://api.github.com/repos/{owner_repo}/issues"
+
+    existing_signatures: set[str] = set()
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        page = 1
+        while True:
+            response = await client.get(
+                issues_url,
+                headers=headers,
+                params={"state": "all", "per_page": 100, "page": page},
+            )
+            if response.status_code != 200:
+                return {
+                    "status": "github_error",
+                    "new_findings": findings,
+                    "created_issues": [],
+                    "existing_matches": 0,
+                    "error": response.text,
+                }
+
+            batch = response.json()
+            if not batch:
+                break
+
+            for issue in batch:
+                if "pull_request" in issue:
+                    continue
+                title = issue.get("title", "")
+                body = issue.get("body", "")
+                existing_signatures.add(_normalize_finding(title))
+                existing_signatures.add(_normalize_finding(body))
+                marker = re.search(r"freja-audit-fingerprint:\s*([a-f0-9]{12})", body or "", re.IGNORECASE)
+                if marker:
+                    existing_signatures.add(marker.group(1).lower())
+
+            if len(batch) < 100:
+                break
+            page += 1
+
+        new_findings: list[str] = []
+        created_issues: list[dict] = []
+        for finding in findings:
+            normalized = _normalize_finding(finding)
+            fingerprint = _fingerprint_finding(finding)
+            if normalized in existing_signatures or fingerprint in existing_signatures:
+                continue
+            new_findings.append(finding)
+
+            if not create_issues:
+                continue
+
+            issue_title = f"Codex self-analysis: {finding[:90]}"
+            issue_body = (
+                "This issue was created automatically from the Codex self-analysis workflow.\n\n"
+                f"Finding:\n- {finding}\n\n"
+                f"<!-- freja-audit-fingerprint: {fingerprint} -->"
+            )
+            create_response = await client.post(
+                issues_url,
+                headers=headers,
+                json={"title": issue_title, "body": issue_body, "labels": ["self-analysis", "codex"]},
+            )
+            if create_response.status_code == 201:
+                payload = create_response.json()
+                created_issues.append({"title": payload.get("title"), "url": payload.get("html_url")})
+                existing_signatures.add(normalized)
+                existing_signatures.add(fingerprint)
+
+    return {
+        "status": "ok",
+        "new_findings": new_findings,
+        "created_issues": created_issues,
+        "existing_matches": len(findings) - len(new_findings),
+    }
 
 
 # --- Tool Schemas ---
@@ -172,79 +313,93 @@ async def git_operation_impl(action: str, argument: Optional[str] = None) -> str
     return f"Unknown action: {action}"
 
 async def audit_code_impl() -> str:
-    """Triggers self-analysis inside Docker."""
+    """Trigger self-analysis, sync findings to GitHub issues, and only surface missing findings."""
     executor = dependencies.get_code_executor()
     if not executor:
         return "Error: Docker environment not available for code audit. Please install Docker."
 
     try:
         import subprocess
-        
-        # Uppdatera från GitHub innan analysen så att vi alltid analyserar senaste filerna
+        import os
+
         try:
-            print("[AUDIT] Drar senaste koden från GitHub innan analys...")
+            print("[AUDIT] Pulling latest code from GitHub before analysis...")
             pull_result = subprocess.run(
                 ["git", "pull"],
                 cwd=executor.project_root,
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
-            print(f"[AUDIT] Git pull lyckades: {pull_result.stdout.strip()}")
+            print(f"[AUDIT] Git pull succeeded: {pull_result.stdout.strip()}")
         except subprocess.CalledProcessError as e:
-            print(f"[AUDIT] Varning: Git pull misslyckades. Analyserar lokala filer istället. Fel: {e.stderr.strip()}")
-            
-        # Fetch config safely
+            print(f"[AUDIT] Warning: git pull failed. Continuing with local files. Error: {e.stderr.strip()}")
+
         from app.core.database import get_db_settings_sync
+
         settings_dict = get_db_settings_sync()
         codex_model = settings_dict.get("CODEX_MODEL", "gemini-2.0-flash")
         ollama_url = settings_dict.get("OLLAMA_URL", "http://host.docker.internal:11434")
-            
+
         cmd = f"sh -c \"OLLAMA_URL='{ollama_url}' CODEX_MODEL='{codex_model}' python3 skills/codex/auditor.py\""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(None, executor.run_command, cmd)
-        
-        # --- Notification Logic ---
         output = result.get("output", "")
-        import re
-        import os
-        
-        # Extract filename from output: "saved to: /workspace/docs/code_audit_...md*"
-        match = re.search(r"saved to: (.*?)\*", output)
-        if match:
-            docker_path = match.group(1).strip()
-            
-            # Handle both Docker paths (/workspace/...) and direct host paths
-            if "/workspace/" in docker_path:
-                rel_path = docker_path.replace("/workspace/", "")
-                host_path = os.path.abspath(rel_path)
-            else:
-                host_path = os.path.abspath(docker_path)
-                
-            # Verify file exists on host
-            if os.path.exists(host_path):
-                try:
-                    from app.services.telegram_service import telegram_service
-                    if telegram_service:
-                        # Chat service sent a message, we only need to provide the document
-                        await telegram_service.send_document(host_path, caption=f"Självanalys Rapport ({codex_model})")
-                except Exception as e:
-                    print(f"Telegram notification failed: {e}")
-                
-                # If we are in a telegram context, we should not return the full text to the chat_service.
-                # However, tools.py doesn't know the context directly here easily, so we still return
-                # the full file content, and rely on chat_service.py to TRUNCATE it for Telegram users.
-                try:
-                    with open(host_path, "r", encoding="utf-8") as f:
-                        file_content = f.read()
-                    return f"✅ Självanalysklar! Här är den fullständiga rapporten:\n\n{file_content}"
-                except Exception as e:
-                    return f"Kunde läsa filen men fick ett fel vid inläsning: {e}\n\nSammanfattning:\n{output}"
-            else:
-                print(f"Error: generated file {host_path} not found on host (Bind mount issue?)")
 
-        return output
-        
+        match = re.search(r"saved to: (.*?)\*", output)
+        if not match:
+            return output
+
+        docker_path = match.group(1).strip()
+        if "/workspace/" in docker_path:
+            host_path = os.path.abspath(docker_path.replace("/workspace/", ""))
+        else:
+            host_path = os.path.abspath(docker_path)
+
+        if not os.path.exists(host_path):
+            print(f"Error: generated file {host_path} not found on host (bind mount issue?)")
+            return output
+
+        try:
+            from app.services.telegram_service import telegram_service
+
+            if telegram_service:
+                await telegram_service.send_document(host_path, caption=f"Self-analysis report ({codex_model})")
+        except Exception as e:
+            print(f"Telegram notification failed: {e}")
+
+        with open(host_path, "r", encoding="utf-8") as f:
+            file_content = f.read()
+
+        issue_sync = await _sync_findings_to_github_issues(file_content, create_issues=True)
+        if issue_sync["status"] == "missing_config":
+            return (
+                "✅ Self-analysis complete, but GitHub issue sync is missing configuration.\n"
+                "Set GITHUB_TOKEN and GITHUB_REPO to create and filter issues.\n\n"
+                f"New findings (unfiltered):\n" + "\n".join(f"- {x}" for x in issue_sync["new_findings"])
+            )
+
+        if issue_sync["status"] == "github_error":
+            return (
+                "⚠️ Self-analysis complete, but failed to read/create GitHub issues.\n"
+                f"GitHub response: {issue_sync.get('error', 'unknown error')}\n\n"
+                f"Findings from analysis:\n" + "\n".join(f"- {x}" for x in issue_sync["new_findings"])
+            )
+
+        new_findings = issue_sync.get("new_findings", [])
+        created_issues = issue_sync.get("created_issues", [])
+        if not new_findings:
+            return "✅ Self-analysis complete. All current findings already exist as GitHub issues."
+
+        created_lines = "\n".join(f"- {item['title']}: {item['url']}" for item in created_issues)
+        findings_lines = "\n".join(f"- {finding}" for finding in new_findings)
+        return (
+            "✅ Self-analysis complete. Only new findings (missing from GitHub issues):\n"
+            f"{findings_lines}\n\n"
+            "Created issues:\n"
+            f"{created_lines if created_lines else '- No new issues were created.'}"
+        )
+
     except Exception as e:
         return f"Error preparing audit script: {e}"
 
