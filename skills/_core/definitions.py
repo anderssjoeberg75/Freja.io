@@ -90,3 +90,20 @@ class GetTibberEnergyAnalysis(BaseModel):
     """Analyze Tibber hourly energy consumption and electricity prices."""
 
     days: int = Field(7, description="Number of days to analyze (1-30).")
+
+
+class PublishWordPressArticle(BaseModel):
+    """Publish or draft an article to WordPress via REST API."""
+
+    title: str = Field(..., description="Post title.")
+    content: str = Field(..., description="Post body content (HTML or Markdown).")
+    status: str = Field("draft", description="Post status: draft, publish, future, pending, or private.")
+    excerpt: Optional[str] = Field(None, description="Optional post excerpt.")
+    slug: Optional[str] = Field(None, description="Optional URL slug.")
+    categories: Optional[List[int]] = Field(None, description="Optional WordPress category term IDs.")
+    tags: Optional[List[int]] = Field(None, description="Optional WordPress tag term IDs.")
+    featured_media: Optional[int] = Field(None, description="Optional featured media attachment ID.")
+    publish_date_gmt: Optional[str] = Field(
+        None,
+        description="Optional GMT publish date in ISO format (used for scheduled/future posts).",
+    )
