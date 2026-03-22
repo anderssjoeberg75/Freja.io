@@ -116,9 +116,11 @@ class TelegramVoiceHandler:
             "-i",
             str(source_path),
             "-ar",
-            "16000",
+            "48000",
             "-ac",
-            "1",
+            "2",
+            "-b:a",
+            "96k",
             str(output_path),
         ]
 

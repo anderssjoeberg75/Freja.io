@@ -73,7 +73,14 @@ async def update_setting(payload: dict):
         
         if not key:
             return {"success": False, "message": "Missing key"}
+            
+        from app.core.settings_schema import SETTINGS_SCHEMA
+        from app.core.database import DEFAULT_SETTINGS
         
+        valid_keys = set([item.key for item in SETTINGS_SCHEMA] + DEFAULT_SETTINGS)
+        if key not in valid_keys and not is_secret_key(key):
+            return {"success": False, "message": f"Ogiltig inställningsnyckel: {key}"}
+            
         # Check if setting is a password type to route it to Vault
         is_secret = is_secret_key(key)
         if is_secret:

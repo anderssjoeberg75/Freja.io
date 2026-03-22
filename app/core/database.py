@@ -132,7 +132,8 @@ def get_db_connection_sync():
 def get_db_settings_sync():
     """Synchronous version for when we absolutely must read synchronously (settings init)."""
     try:
-        with get_db_connection_sync() as conn:
+        import contextlib
+        with contextlib.closing(get_db_connection_sync()) as conn:
             c = conn.cursor()
             c.execute("SELECT key, value FROM settings")
             return {row["key"]: row["value"] for row in c.fetchall()}
@@ -161,8 +162,10 @@ def init_db():
         # Since this happens only once at startup, sync is fine to ensure fast setup
         # before accepting connections, but we'll do the standard migrations here.
         import sqlite3
-        with sqlite3.connect(DB_PATH, timeout=10.0) as conn:
-            c = conn.cursor()
+        import contextlib
+        with contextlib.closing(sqlite3.connect(DB_PATH, timeout=10.0)) as conn:
+            with conn:
+                c = conn.cursor()
             c.execute('''CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT, role TEXT, content TEXT, image TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
             c.execute('''CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)''')
             c.execute('''CREATE TABLE IF NOT EXISTS prompts (key TEXT PRIMARY KEY, value TEXT)''')

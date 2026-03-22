@@ -191,6 +191,7 @@ async def audit_and_fix_impl(base_branch: str = "main", pr_title: str = "Auto-fi
         fix_results.append(f"{file_path}: {fix_result}")
 
     # 4. Kör tester (pytest)
+    await loop.run_in_executor(None, executor.run_command, "pip install -q pytest flake8 pytest-asyncio")
     test_result = await loop.run_in_executor(None, executor.run_command, "pytest --maxfail=1 --disable-warnings")
     if test_result.get("exit_code", 1) != 0:
         return f"❌ Tester misslyckades efter fix: {test_result.get('output','')}"
