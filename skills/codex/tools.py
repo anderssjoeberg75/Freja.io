@@ -351,8 +351,9 @@ async def audit_code_impl() -> str:
             return output
 
         docker_path = match.group(1).strip()
-        if "/workspace/" in docker_path:
-            host_path = os.path.abspath(docker_path.replace("/workspace/", ""))
+        if docker_path.startswith("/workspace/"):
+            rel_path = docker_path[len("/workspace/"):]
+            host_path = os.path.join(os.getcwd(), rel_path)
         else:
             host_path = os.path.abspath(docker_path)
 

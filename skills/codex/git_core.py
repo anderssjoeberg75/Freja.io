@@ -8,7 +8,7 @@ class GitTool:
     Manages Git operations for the project.
     Allows cloning, branching, committing, and pushing code.
     """
-    def __init__(self, repo_path: str = "/workspace"):
+    def __init__(self, repo_path: str = "."):
         self.repo_path = repo_path
 
     def _run_git(self, args: List[str]) -> Tuple[bool, str]:
