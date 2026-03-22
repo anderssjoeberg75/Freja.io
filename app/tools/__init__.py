@@ -1,3 +1,5 @@
+"""Tools module."""
+
 # Import tools
 try:
     from .code_auditor import run_code_audit

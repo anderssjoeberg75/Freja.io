@@ -1,3 +1,5 @@
+"""Analytics module."""
+
 from pydantic import BaseModel, Field
 from typing import Optional
 from app.services.tool_registry import registry
