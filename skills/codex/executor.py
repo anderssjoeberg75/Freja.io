@@ -140,6 +140,8 @@ class CodeExecutor:
                     # We don't override input command unless we want to debug
                     volumes=volumes, 
                     network_mode="bridge",
+                    network_disabled=True,
+                    cap_drop=["ALL"],
                     environment=env_vars,
                     restart_policy={"Name": "on-failure"},
                 )

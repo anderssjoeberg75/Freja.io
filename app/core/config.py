@@ -126,6 +126,8 @@ def is_secret_key(key: str) -> bool:
         pass
 
     upper_key = (key or "").upper()
+    if upper_key == "ADMIN_API_TOKEN":
+        return True
     return any(hint in upper_key for hint in _SECRET_KEY_HINTS)
 
 def get_credential(key: str, fallback=None) -> str:

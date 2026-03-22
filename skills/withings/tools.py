@@ -22,14 +22,13 @@ def register_tools(registry: ToolRegistry) -> None:
     async def get_withings_health_impl() -> str:
         async with _withings_lock:
             # Initialize Withings dependency
-            loop = asyncio.get_event_loop()
-            withings = await loop.run_in_executor(None, dependencies.get_withings)
+            withings = await asyncio.to_thread(dependencies.get_withings)
 
             if not withings:
                 return "Withings service is not configured or unavailable. Check client ID and refresh token."
 
             try:
-                data = await loop.run_in_executor(None, withings.get_health_report)
+                data = await asyncio.to_thread(withings.get_health_report)
                 if isinstance(data, str):
                     return data
                 return json.dumps(data, indent=2, ensure_ascii=False)

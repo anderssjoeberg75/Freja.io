@@ -27,24 +27,32 @@ def get_vault_client():
     if isinstance(vault_verify, str):
         vault_verify = vault_verify.lower() in ("true", "1", "yes", "on")
             
-    try:
-        logger.debug(f"[Vault] Attempting connection to {vault_url} with token (len {len(vault_token)}) and verify={vault_verify}")
-        client = hvac.Client(url=vault_url, token=vault_token, verify=vault_verify)
-        if not vault_verify:
-            # Suppress urllib3 insecure request warnings for local development
-            import urllib3
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        
-        if client.is_authenticated():
-            logger.debug("[Vault] Client successfully authenticated.")
-            _vault_client = client
-            return client
-        else:
-            logger.warning("[Vault] Client connection established but authentication failed.")
-    except hvac.exceptions.Unauthorized:
-        logger.error("[Vault] Unauthorized - check your VAULT_TOKEN")
-    except Exception as e:
-        logger.error(f"[Vault] Connection failed: {e}")
+    import time
+    for attempt in range(3):
+        try:
+            logger.debug(f"[Vault] Attempting connection to {vault_url} with token (len {len(vault_token)}) and verify={vault_verify} (Attempt {attempt+1}/3)")
+            client = hvac.Client(url=vault_url, token=vault_token, verify=vault_verify)
+            if not vault_verify:
+                # Suppress urllib3 insecure request warnings for local development
+                import urllib3
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            
+            if client.is_authenticated():
+                logger.debug("[Vault] Client successfully authenticated.")
+                _vault_client = client
+                return client
+            else:
+                logger.warning("[Vault] Client connection established but authentication failed.")
+                break
+        except hvac.exceptions.Unauthorized:
+            logger.error("[Vault] Unauthorized - check your VAULT_TOKEN")
+            break
+        except Exception as e:
+            logger.error(f"[Vault] Connection failed: {e}")
+            if attempt < 2:
+                time.sleep(1)
+            else:
+                logger.error("[Vault] All connection attempts exhausted.")
     
     return None
 

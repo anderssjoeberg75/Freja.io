@@ -333,7 +333,7 @@ async def audit_code_impl() -> str:
             )
             print(f"[AUDIT] Git pull succeeded: {pull_result.stdout.strip()}")
         except subprocess.CalledProcessError as e:
-            print(f"[AUDIT] Warning: git pull failed. Continuing with local files. Error: {e.stderr.strip()}")
+            return f"Audit avbröts: git pull misslyckades med fel:\n{e.stderr.strip()}"
 
         from app.core.database import get_db_settings_sync
 
