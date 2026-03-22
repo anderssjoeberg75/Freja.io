@@ -109,8 +109,7 @@ async def ip_middleware(request: Request, call_next):
         return JSONResponse(status_code=e.status_code, content={"error": e.detail})
     except Exception as e:
         logger.error(f"IP Middleware error: {e}")
-        # In case of unexpected error, we default to allow to prevent lockout
-        # but log the incident.
+        return JSONResponse(status_code=500, content={"error": "Internal security fault"})
     
     response = await call_next(request)
     return response
