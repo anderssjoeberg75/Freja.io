@@ -8,6 +8,7 @@ from app.core import dependencies
 from app.services.tool_registry import ToolRegistry
 from skills._core.definitions import GetWithingsHealth
 
+_withings_lock = asyncio.Lock()
 
 # Section: Registry Hook
 def register_tools(registry: ToolRegistry) -> None:
@@ -19,17 +20,18 @@ def register_tools(registry: ToolRegistry) -> None:
         args_schema=GetWithingsHealth,
     )
     async def get_withings_health_impl() -> str:
-        # Initialize Withings dependency
-        loop = asyncio.get_event_loop()
-        withings = await loop.run_in_executor(None, dependencies.get_withings)
+        async with _withings_lock:
+            # Initialize Withings dependency
+            loop = asyncio.get_event_loop()
+            withings = await loop.run_in_executor(None, dependencies.get_withings)
 
-        if not withings:
-            return "Withings service is not configured or unavailable. Check client ID and refresh token."
+            if not withings:
+                return "Withings service is not configured or unavailable. Check client ID and refresh token."
 
-        try:
-            data = await loop.run_in_executor(None, withings.get_health_report)
-            if isinstance(data, str):
-                return data
-            return json.dumps(data, indent=2, ensure_ascii=False)
-        except Exception as exc:
-            return f"Failed to fetch Withings data: {exc}"
+            try:
+                data = await loop.run_in_executor(None, withings.get_health_report)
+                if isinstance(data, str):
+                    return data
+                return json.dumps(data, indent=2, ensure_ascii=False)
+            except Exception as exc:
+                return f"Failed to fetch Withings data: {exc}"

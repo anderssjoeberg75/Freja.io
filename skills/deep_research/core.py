@@ -192,7 +192,10 @@ class WebAgent:
                         logger.info(f"[WebAgent] Received response for turn {turn+1}.")
                     except Exception as e:
                         logger.error(f"[WebAgent] API Error: {e}")
-                        return f"Fel vid anrop till Gemini: {e}"
+                        logger.warning("[WebAgent] Intercepting network crash. Attempting to resume session in 2s...")
+                        await asyncio.sleep(2)
+                        current_message_parts = [types.Part(text=f"Ett internt nätverksfel uppstod under senaste försöket: {e}. Vänligen kontrollera ditt tillstånd och försök igen om möjligt.")]
+                        continue
 
                     if not response.candidates:
                         break
