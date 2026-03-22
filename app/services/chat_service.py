@@ -89,6 +89,27 @@ class UnifiedChatService:
             await save_message(session_id, "assistant", response)
             return response
 
+        # 3.5. Keyword shortcut for fixing github issues
+        _FIX_ISSUE_MATCH = re.search(r"fixa issue[s]?(?:\s+(.*))?", user_msg.lower())
+        if _FIX_ISSUE_MATCH:
+            logger.info("[ChatService] Keyword shortcut: routing to codex_fix_github_issues directly")
+            target = _FIX_ISSUE_MATCH.group(1).strip() if _FIX_ISSUE_MATCH.group(1) else ""
+            try:
+                response = await registry.execute("codex_fix_github_issues", {"target": target})
+            except Exception as e:
+                response = f"❌ Misslyckades med att fixa issues: {e}"
+            await save_message(session_id, "user", user_msg)
+            await save_message(session_id, "assistant", response)
+            return response
+
+        # 3.6 WordPress Skill specific LLM Override
+        wp_keywords = {"wordpress", "blogg", "tema", "plugin", "wp-cli", "designa", "layout"}
+        if any(kw in user_msg.lower() for kw in wp_keywords):
+            wp_model = get_credential("WORDPRESS_LLM_MODEL")
+            if wp_model:
+                logger.info(f"[ChatService] WordPress keyword detected: overriding model to {wp_model}")
+                model_id = wp_model
+
         # 4. Logic Hook (Self-improving)
         handle_user_prompt_submit(user_msg, project_root=".")
 

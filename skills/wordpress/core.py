@@ -17,9 +17,10 @@ class WordPressPublishError(RuntimeError):
 
 
 def _get_config() -> tuple[str, str, str]:
-    base_url = os.getenv("WORDPRESS_BASE_URL", "").strip().rstrip("/")
-    username = os.getenv("WORDPRESS_USERNAME", "").strip()
-    app_password = os.getenv("WORDPRESS_APP_PASSWORD", "").strip()
+    from app.core.config import get_credential
+    base_url = get_credential("WORDPRESS_BASE_URL", "").strip().rstrip("/")
+    username = get_credential("WORDPRESS_USERNAME", "").strip()
+    app_password = get_credential("WORDPRESS_APP_PASSWORD", "").strip()
 
     if not base_url:
         raise WordPressConfigError("Missing WORDPRESS_BASE_URL.")
@@ -69,7 +70,8 @@ async def publish_wordpress_article(
     *,
     title: str,
     content: str,
-    status: str = "draft",
+    post_id: int | None = None,
+    status: str = "publish",
     excerpt: str | None = None,
     slug: str | None = None,
     categories: list[int] | None = None,
@@ -98,6 +100,8 @@ async def publish_wordpress_article(
     )
 
     endpoint = f"{base_url}/wp-json/wp/v2/posts"
+    if post_id is not None:
+        endpoint = f"{endpoint}/{post_id}"
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(endpoint, auth=(username, app_password), json=payload)
@@ -121,3 +125,55 @@ async def publish_wordpress_article(
         f"- status: {post_status}\n"
         f"- link: {post_link}"
     )
+
+
+async def manage_wordpress_site(command: str) -> str:
+    """Execute a wp-cli command over SSH."""
+    import asyncio
+    import shlex
+    from app.core.config import get_credential
+    
+    ssh_target = get_credential("WORDPRESS_SSH_TARGET", "").strip()
+    doc_root = get_credential("WORDPRESS_DOC_ROOT", "").strip()
+    
+    if not ssh_target:
+        raise WordPressConfigError("Missing WORDPRESS_SSH_TARGET setting.")
+    if not doc_root:
+        raise WordPressConfigError("Missing WORDPRESS_DOC_ROOT setting.")
+        
+    # Support chained commands e.g. "theme install oceanwp && theme activate oceanwp"
+    command_parts = [cmd.strip() for cmd in command.split("&&")]
+    wp_commands = []
+    for cmd in command_parts:
+        if cmd.startswith("wp "):
+            cmd = cmd[3:].strip()
+        wp_commands.append(f"wp --path={shlex.quote(doc_root)} {cmd} --allow-root")
+    
+    final_command = " && ".join(wp_commands)
+
+    ssh_cmd = [
+        "ssh",
+        "-o", "BatchMode=yes",
+        "-o", "StrictHostKeyChecking=no",
+        ssh_target,
+        final_command
+    ]
+    
+    process = await asyncio.create_subprocess_exec(
+        *ssh_cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    
+    stdout, stderr = await process.communicate()
+    
+    output = []
+    if stdout:
+        output.append(stdout.decode().strip())
+    if stderr:
+        output.append(f"ERROR/WARNING: {stderr.decode().strip()}")
+        
+    if process.returncode != 0:
+        raise WordPressPublishError(f"WP-CLI execution failed: {' | '.join(output)}")
+        
+    return "\n".join(output) or "Command executed successfully with no output."

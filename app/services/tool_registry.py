@@ -100,7 +100,10 @@ class ToolRegistry:
                 cleaned = {}
                 for k, v in s.items():
                     # Forbidden fields in Gemini Schema
-                    if k in ("title", "default", "$defs", "additionalProperties", "anyOf"):
+                    if k in ("default", "$defs", "additionalProperties", "anyOf"):
+                        continue
+                    
+                    if k == "title" and isinstance(v, str):
                         continue
                     
                     if k == "type" and isinstance(v, str):

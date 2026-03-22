@@ -57,11 +57,10 @@ def _extract_tool_call(content: str) -> Optional[Dict[str, Any]]:
 
     patterns = [
         r"```(?:json)?\s*(\{.*?\})\s*```",
-        r"(\[\s*\{.*?\}\s*\])",
-        r'(\{[^{}]*?"name"\s*:.*?(?:"arguments"|"parameters"|"params")\s*:.*?\})',
-        r'(\{"tool_call"\s*:\s*\{.*?\}\s*\})',
-        # {"function": "name", "args": {...}} variant
-        r'(\{[^{}]*?"function"\s*:.*?"args"\s*:.*?\})',
+        r"(\[\s*\{.*\}\s*\])",
+        # Extract everything from the first { up to the last } greedily
+        # if it looks like it contains a function or command signature
+        r'(\{.*"(?:name|command|function|tool_call)"\s*:.*\})',
     ]
 
     for pat in patterns:
@@ -96,6 +95,9 @@ def _extract_tool_call(content: str) -> Optional[Dict[str, Any]]:
 
         if "name" in parsed and "arguments" in parsed:
             return parsed
+
+        if "command" in parsed and "name" not in parsed:
+            return {"name": "manage_wordpress_site", "arguments": parsed}
 
     return None
 
@@ -132,6 +134,11 @@ def _resolve_tool_name(name: str) -> str:
         r_words = set(re.split(r"[_\-]", r.lower()))
         if name_words and name_words.issubset(r_words):
             return r
+
+    # 5. Semantic fallback for hallucinated WordPress management tools
+    if any(keyword in name_lower for keyword in ["wp", "wordpress", "theme", "plugin", "design"]):
+        if "publish" not in name_lower and "article" not in name_lower and "post" not in name_lower:
+            return "manage_wordpress_site"
 
     # No match — return as-is (will produce a clear "Tool not found" error)
     return name
@@ -251,6 +258,7 @@ def _build_tool_header(tools: List[Dict[str, Any]]) -> str:
         "  - 'garmin', 'hälsa', 'sömn', 'hjärtfrekvens', 'steg' → call: get_garmin_health (DO NOT use for code analysis/självanalys)\n"
         "  - 'väder', 'temperatur', 'regn' → call: get_weather\n"
         "  - 'hem', 'lampor', 'home assistant' → call: homeassistant_control or homeassistant_service\n"
+        "  - 'designa', 'tema', 'wordpress', 'uppdatera plugins' → call: manage_wordpress_site (use wp-cli commands like 'theme install' or 'plugin update')\n"
         "To call a tool respond with ONLY valid JSON (no other text, no markdown):\n"
         '{"name": "tool_name", "arguments": {"param": "value"}}\n'
         "Only output JSON when calling a tool, otherwise just answer normally.\n"
@@ -320,6 +328,7 @@ async def generate_ollama_response(
 
     max_turns = 6
     final_text_response = ""
+    executed_calls_history = set()
 
     try:
         async with httpx.AsyncClient(timeout=300.0) as client:
@@ -407,6 +416,26 @@ async def generate_ollama_response(
                                 fargs["query"] = user_msg
                                 logger.info(f"[Ollama] Injected user_msg as query for {fname}")
 
+                        if fname == "manage_wordpress_site" and isinstance(fargs, dict) and "command" not in fargs:
+                            flat_args = str(fargs).lower()
+                            if "theme" in flat_args or "design" in flat_args:
+                                theme_name = fargs.get("args", {}).get("new_theme") or fargs.get("theme") or "astra"
+                                fargs["command"] = f"theme install {theme_name} --activate"
+                                logger.info(f"[Ollama] Heuristically translated broken theme args into WP-CLI: {fargs['command']}")
+                            elif "plugin" in flat_args or "uppdatera" in flat_args:
+                                fargs["command"] = "plugin update --all"
+                                logger.info(f"[Ollama] Heuristically translated broken plugin args into WP-CLI: {fargs['command']}")
+
+                        call_sig = f"{fname}:{json.dumps(fargs, sort_keys=True)}"
+                        if call_sig in executed_calls_history:
+                            logger.warning(f"[Ollama] Broken tool loop detected for {fname}. Forcing exit.")
+                            messages.append({
+                                "role": "user",
+                                "content": "[SYSTEM HINT]: You just tried to call the exact same tool with the exact same arguments twice in a row. Stop calling tools and give your final answer to the user in Swedish now."
+                            })
+                            continue
+                        executed_calls_history.add(call_sig)
+
                         logger.info(f"[Ollama] Executing tool: {fname}({fargs})")
                         result_text = await registry.execute(fname, fargs)
                         result_str = str(result_text)
@@ -443,6 +472,21 @@ async def generate_ollama_response(
 
             if not final_text_response:
                 final_text_response = "Error: Maximum tool turns exceeded or no response."
+
+            # Cleanup: some local models wrap their final text in JSON due to prompt bleed
+            if final_text_response.strip().startswith("{") and final_text_response.strip().endswith("}"):
+                try:
+                    import json
+                    parsed_final = json.loads(final_text_response)
+                    if isinstance(parsed_final, dict):
+                        if "answer" in parsed_final:
+                            final_text_response = str(parsed_final["answer"])
+                        elif "response" in parsed_final:
+                            final_text_response = str(parsed_final["response"])
+                        elif "message" in parsed_final:
+                            final_text_response = str(parsed_final["message"])
+                except Exception:
+                    pass
 
             return str(final_text_response)
 
