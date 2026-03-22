@@ -11,7 +11,7 @@ GLOBAL_CONTEXT = {}
 
 @app.route('/execute', methods=['POST'])
 def execute_code():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     code = data.get('code', '')
     
     if not code:

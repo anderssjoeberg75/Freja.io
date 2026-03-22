@@ -24,14 +24,8 @@ class HomeAssistantCommandProcessor:
 
     def _build_client(self) -> HomeAssistantClient:
         """Validate configuration and return a ready API client."""
-        ha_url = (
-            get_credential("HA_URL")
-            or get_credential("HA_BASE_URL")
-            or settings.HA_URL
-            or os.getenv("HAURL")
-            or ""
-        ).strip()
-        ha_token = (get_credential("HA_TOKEN") or settings.HA_TOKEN or os.getenv("HATOKEN") or "").strip()
+        ha_url = (get_credential("HA_URL") or get_credential("HA_BASE_URL") or "").strip()
+        ha_token = (get_credential("HA_TOKEN") or "").strip()
 
         if not ha_url or not ha_token:
             raise HomeAssistantClientError(

@@ -183,6 +183,7 @@ class WebAgent:
                 types.Part.from_bytes(data=initial_screenshot, mime_type="image/png")
             ]
 
+            consecutive_errors = 0
             # Loopa i max 15 steg
             try:
                 for turn in range(15):
@@ -190,8 +191,13 @@ class WebAgent:
                         logger.info(f"[WebAgent] Sending message for turn {turn+1}...")
                         response = await chat.send_message(current_message_parts)
                         logger.info(f"[WebAgent] Received response for turn {turn+1}.")
+                        consecutive_errors = 0
                     except Exception as e:
+                        consecutive_errors += 1
                         logger.error(f"[WebAgent] API Error: {e}")
+                        if consecutive_errors >= 3:
+                            logger.error("[WebAgent] 3 consecutive API errors. Aborting WebAgent session to prevent infinite loop.")
+                            break
                         logger.warning("[WebAgent] Intercepting network crash. Attempting to resume session in 2s...")
                         await asyncio.sleep(2)
                         current_message_parts = [types.Part(text=f"Ett internt nätverksfel uppstod under senaste försöket: {e}. Vänligen kontrollera ditt tillstånd och försök igen om möjligt.")]

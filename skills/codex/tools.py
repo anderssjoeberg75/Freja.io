@@ -190,6 +190,16 @@ async def audit_and_fix_impl(base_branch: str = "main", pr_title: str = "Auto-fi
         fix_result = await run_and_fix_impl(f"pytest {file_path}", file_path, max_retries=2)
         fix_results.append(f"{file_path}: {fix_result}")
 
+    return await _finalize_audit_pr(base_branch, pr_title, pr_body, files_to_fix, executor)
+
+async def _finalize_audit_pr(base_branch: str, pr_title: str, pr_body: str, files_to_fix: set, executor) -> str:
+    import os
+    import uuid
+    import httpx
+    import asyncio
+    from app.core.config import get_credential, settings
+    loop = asyncio.get_event_loop()
+    
     # 4. Kör tester (pytest)
     await loop.run_in_executor(None, executor.run_command, "pip install -q pytest flake8 pytest-asyncio")
     test_result = await loop.run_in_executor(None, executor.run_command, "pytest --maxfail=1 --disable-warnings")

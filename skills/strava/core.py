@@ -47,8 +47,9 @@ class StravaTool:
                 self.refresh_token = data["refresh_token"]
                 # Best-effort: save updated refresh token to Vault (non-blocking)
                 try:
+                    import asyncio
                     from app.core.vault import save_vault_secret
-                    if not save_vault_secret("STRAVA_REFRESH_TOKEN", self.refresh_token):
+                    if not await asyncio.to_thread(save_vault_secret, "STRAVA_REFRESH_TOKEN", self.refresh_token):
                         print(">> [STRAVA] Varning: Kunde inte spara refresh token i Vault (fortsätter ändå).")
                 except Exception as vault_exc:
                     print(f">> [STRAVA] Varning: Vault-sparning misslyckades: {vault_exc}")
