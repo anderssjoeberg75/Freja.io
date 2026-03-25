@@ -25,6 +25,7 @@ Freja decides when to call the underlying tool automatically.
 ## Skill index
 
 - `codex` – code execution, Git operations, and codebase auditing.
+- `ethical_hacking` – authorized pentest reconnaissance and vulnerability signal detection.
 - `garmin` – health snapshot from Garmin Connect.
 - `fitbit` – daily Fitbit activity, sleep, and heart-rate summaries.
 - `google_calendar` – list/create/update/delete calendar events.
