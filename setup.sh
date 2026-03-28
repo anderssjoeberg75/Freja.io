@@ -76,7 +76,7 @@ cat <<EOF > .env
 GOOGLE_API_KEY=
 OPENAI_API_KEY=
 ADMIN_API_TOKEN=freja_admin_pass
-ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://$SERVER_IP:5173,http://$USER_IP:5173
+ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://$SERVER_IP:5173,http://$USER_IP:5173,http://freja.andrix.se
 VAULT_URL=http://127.0.0.1:8200
 VAULT_TOKEN=
 EOF
