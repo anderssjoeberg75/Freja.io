@@ -140,6 +140,8 @@ WantedBy=vault.service
 EOF
 
 sudo systemctl daemon-reload
+export VAULT_ADDR='http://127.0.0.1:8200'
+vault operator init
 
 echo ""
 echo "-------------------------------------------------------"
