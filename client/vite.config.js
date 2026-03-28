@@ -19,7 +19,7 @@ export default defineConfig({
     }
   },
   server: {
-    allowedHosts: ["all"],
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
