@@ -86,6 +86,12 @@ echo "⚛️ Installing Frontend dependencies..."
 cd client
 npm install
 
+# FIX: Export both API_BASE_URL and API_URL to prevent "Uncaught SyntaxError"
+cat <<EOF > src/config.js
+export const API_BASE_URL = "http://$SERVER_IP:8000";
+export const API_URL = "http://$SERVER_IP:8000";
+EOF
+
 # Point frontend configuration to the server's public IP
 cat <<EOF > src/config.js
 export const API_BASE_URL = "http://$SERVER_IP:8000";
