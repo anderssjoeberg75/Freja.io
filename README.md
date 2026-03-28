@@ -139,8 +139,8 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/Freja.io
-ExecStart=/bin/bash /opt/Freja.io/start.sh
+WorkingDirectory=/home/netadmin/freja.io
+ExecStart=/bin/bash /home/netadmin/freja.io/start.sh
 Restart=always
 RestartSec=10
 KillSignal=SIGTERM
@@ -159,7 +159,7 @@ BindsTo=vault.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash /opt/Freja.io/scripts/auto_unseal.sh
+ExecStart=/bin/bash /home/netadmin/freja.io/scripts/auto_unseal.sh
 RemainAfterExit=true
 User=netadmin
 Environment="VAULT_ADDR=http://127.0.0.1:8200"
@@ -229,32 +229,6 @@ cd ..
 ```
 
 Then run backend normally; FastAPI serves static files from `client/dist` if the build exists.
-
-## Remote Deployment (freja.andrix.se)
-
-For production deployment to `freja.andrix.se`, use the automated deployment script:
-
-### 1) Prerequisites
-- SSH access to `freja.andrix.se` (root or sudo user).
-- SSH keys configured for passwordless login.
-
-### 2) Deploy from Local Machine
-Run the deployment script to push changes and update the remote server:
-```bash
-./scripts/deploy_remote.sh
-```
-
-This script will:
-- Commit and push local changes to GitHub.
-- SSH into the remote server.
-- Run `git pull` in `/opt/Freja.io`.
-- Restart the `freja` and `freja-vault-unseal` services.
-
-### 3) Remote Configuration (.env)
-Ensure your `.env` on the remote server includes the correct domain:
-```env
-ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://freja.andrix.se
-```
 
 
 ## Docker (isolated runtime)
