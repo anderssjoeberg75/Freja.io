@@ -131,6 +131,8 @@ const Settings = () => {
         } catch (err) {
             setMessage({ type: 'error', text: 'Backup failed.' });
         }
+    };
+
     const handleTokenSave = () => {
         const cleaned = adminToken.trim();
         setAdminToken(cleaned);
