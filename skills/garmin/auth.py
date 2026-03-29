@@ -49,11 +49,31 @@ class GarminAuth:
             self.token_dir = Path(BASE_DIR) / "db" / "tokens" / "garmin_tokens"
             
         self._is_authenticated = False
+        self._last_429_time = 0
+        self._cooldown_seconds = 600 # 10 minutes default cooldown for 429
 
     @property
     def is_authenticated(self) -> bool:
         """Check if currently authenticated."""
         return self._is_authenticated
+
+    def _check_cooldown(self):
+        """Check if we are in a cooldown period after a 429."""
+        import time
+        if self._last_429_time > 0:
+            elapsed = time.time() - self._last_429_time
+            if elapsed < self._cooldown_seconds:
+                remaining = int(self._cooldown_seconds - elapsed)
+                logger.warning(f"[GARMIN] Cooldown active. Skipping request for {remaining}s")
+                return False
+        return True
+
+    def _mark_429(self):
+        """Mark that we received a 429 error."""
+        import time
+        self._last_429_time = time.time()
+        self._is_authenticated = False
+        logger.error("[GARMIN] Rate limited (429) detected. Starting cooldown.")
 
     def login(self, email: str | None = None, password: str | None = None, save_tokens: bool = True) -> bool:
         """
@@ -108,6 +128,8 @@ class GarminAuth:
             return True
 
         except Exception as e:
+            if "429" in str(e):
+                self._mark_429()
             logger.error(f"[GARMIN] Login failed: {e}")
             raise AuthenticationError(f"Failed to authenticate: {e}") from e
 
@@ -143,6 +165,8 @@ class GarminAuth:
                 return True
             return False
         except GarthException as e:
+            if "429" in str(e):
+                self._mark_429()
             logger.warning(f"[GARMIN] Failed to load tokens: {e}")
             return False
         except Exception as e:

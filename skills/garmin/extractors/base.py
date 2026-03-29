@@ -54,22 +54,30 @@ class BaseExtractor(ABC, Generic[T]):
         **kwargs: Any,
     ) -> Any:
         """
-        Make an authenticated API request.
-
-        Args:
-            endpoint: API endpoint path
-            method: HTTP method
-            **kwargs: Additional request parameters
-
-        Returns:
-            The response data
+        Make an authenticated API request with 429 handling.
         """
+        if not self.auth._check_cooldown():
+            raise Exception("Garmin API is in cooldown due to previous 429 error.")
+
         self._ensure_authenticated()
-        try:
-            return garth.connectapi(endpoint, method=method, **kwargs)
-        except Exception as e:
-            logger.error(f"API request failed for {endpoint}: {e}")
-            raise
+        
+        import time
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                return garth.connectapi(endpoint, method=method, **kwargs)
+            except Exception as e:
+                error_msg = str(e)
+                if "429" in error_msg:
+                    self.auth._mark_429()
+                    if attempt < max_retries - 1:
+                        wait_time = (attempt + 1) * 2
+                        logger.warning(f"429 received, retrying in {wait_time}s...")
+                        time.sleep(wait_time)
+                        continue
+                
+                logger.error(f"API request failed for {endpoint}: {e}")
+                raise
 
     @staticmethod
     def _format_date(d: date | datetime | str) -> str:

@@ -189,8 +189,13 @@ class GarminCoach:
             return data
 
         except Exception as e:
+            err_str = str(e)
+            if "429" in err_str:
+                return {"error": "Garmin har tillfälligt blockerat anrop (Rate Limit). Prova igen om 15 minuter."}
+            if "cooldown" in err_str:
+                return {"error": "Garmin-anslutningen vilar pga tidigare blockeringsförsök. Prova igen om en stund."}
             logger.error(f"[GARMIN] Fetch Error: {e}")
-            return {"error": f"System error: {e}"}
+            return {"error": f"Garmin-fel: {e}"}
 
     def get_advanced_report(self, target_date=None) -> dict:
         """
