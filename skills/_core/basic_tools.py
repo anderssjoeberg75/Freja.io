@@ -11,6 +11,9 @@ class WebSearchSchema(BaseModel):
 class SystemStatusSchema(BaseModel):
     pass
 
+class TriggerBriefingSchema(BaseModel):
+    pass
+
 @registry.register(
     name="get_weather",
     description="Get current weather for a specific location.",
@@ -57,6 +60,22 @@ async def get_system_status():
         "memory": "4.2GB/16GB",
         "active_services": ["voice", "llm", "proactive"]
     }
+
+@registry.register(
+    name="trigger_morning_briefing",
+    description="Triggers the generation and push notification of the Morning Briefing to Telegram. Use when the user asks for their morning briefing.",
+    args_schema=TriggerBriefingSchema
+)
+async def trigger_morning_briefing():
+    """Generates and sends the daily morning briefing to the configured channels."""
+    try:
+        from app.services.proactive_service import proactive_service
+        # Trigger requires awaited background task or direct await
+        await proactive_service.trigger_briefing()
+        return "Morgonbriefing skapad och skickad!"
+    except Exception as e:
+        logger.error(f"Failed to trigger briefing: {e}")
+        return f"Ett fel uppstod: {e}"
 
 # @registry.register
 # async def tool_code_executor(code: str = None, command: str = None, language: str = "python"):
