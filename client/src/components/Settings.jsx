@@ -296,16 +296,6 @@ const Settings = () => {
                             <div className="grid gap-8">
                                 {identityItems.map(renderField)}
                             </div>
-                            <div className="mt-8 pt-6 border-t border-mainframe-border/30 flex justify-end">
-                                <button
-                                    onClick={() => handleSaveSection(identityItems, 'Identity')}
-                                    disabled={saving}
-                                    className="flex items-center gap-2 px-6 py-2.5 bg-mainframe-accent text-black font-bold uppercase tracking-widest rounded hover:bg-mainframe-accent/80 transition-all disabled:opacity-50 text-sm"
-                                >
-                                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                                    Save Identity
-                                </button>
-                            </div>
                         </div>
                     )}
 
@@ -318,16 +308,6 @@ const Settings = () => {
                             </div>
                             <div className="grid gap-8">
                                 {intelligenceItems.map(renderField)}
-                            </div>
-                            <div className="mt-8 pt-6 border-t border-mainframe-border/30 flex justify-end">
-                                <button
-                                    onClick={() => handleSaveSection(intelligenceItems, 'Intelligence')}
-                                    disabled={saving}
-                                    className="flex items-center gap-2 px-6 py-2.5 bg-mainframe-accent text-black font-bold uppercase tracking-widest rounded hover:bg-mainframe-accent/80 transition-all disabled:opacity-50 text-sm"
-                                >
-                                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                                    Save Intelligence
-                                </button>
                             </div>
                         </div>
                     )}
