@@ -1,7 +1,9 @@
 
 import logging
 import datetime
+import time
 from skills.garmin.client import GarminClient
+from app.core.config import get_credential
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -34,7 +36,40 @@ class GarminCoach:
         except Exception as e:
              logger.warning(f"[GARMIN] Failed to initialize client: {e}")
 
+    def _check_fetch_limit(self):
+        """Check if we have fetched data in the last 30 minutes."""
+        # Use a setting for cross-instance persistence (if possible)
+        # fallback to in-memory if DB is busy or not available
+        last_fetch = get_credential("LAST_GARMIN_FETCH_TIMESTAMP", 0)
+        try:
+            last_fetch = float(last_fetch)
+        except (ValueError, TypeError):
+            last_fetch = 0
+
+        now = time.time()
+        elapsed = now - last_fetch
+        if elapsed < 1800: # 30 minutes
+            remaining = int((1800 - elapsed) / 60)
+            return False, f"Garmin-data hämtades nyligen ({int(elapsed/60)} min sen). Vänta {remaining} minuter till för att undvika blockering."
+        return True, None
+
+    def _update_fetch_limit(self):
+        """Update the last fetch timestamp in the database."""
+        from app.core.database import save_db_setting_sync
+        now = time.time()
+        try:
+            # We use sync version if called from executor, but since we are in a skill
+            # and may be called from various places, we try to be safe.
+            save_db_setting_sync("LAST_GARMIN_FETCH_TIMESTAMP", str(now))
+        except Exception as e:
+            logger.warning(f"[GARMIN] Could not save fetch timestamp: {e}")
+
     def get_health_report(self, target_date=None):
+        # Enforce 30 minute limit
+        is_ok, limit_msg = self._check_fetch_limit()
+        if not is_ok:
+            return {"error": limit_msg}
+
         if not self.client or not self.client.is_authenticated:
             try:
                 if self.client:
@@ -181,11 +216,15 @@ class GarminCoach:
 
             # Final Fallback check: If steps=0 and sleep=0, we might want yesterday's data anyway
             # only if we are currently looking at today
+            # Final Fallback check: If steps=0 and sleep=0, we might want yesterday's data anyway
+            # only if we are currently looking at today
             if not target_date and data["steps"] == 0 and data["sleep_hours"] == "0h 0m":
                  yesterday = today - datetime.timedelta(days=1)
                  logger.info(f"[GARMIN] Today's data is empty, falling back to yesterday: {yesterday}")
                  return self.get_health_report(target_date=yesterday)
             
+            # Success! Update the limit
+            self._update_fetch_limit()
             return data
 
         except Exception as e:
@@ -202,6 +241,11 @@ class GarminCoach:
         Fetch all advanced metrics for a given date.
         Formats the raw API data into simpler, LLM-friendly dicts.
         """
+        # Enforce 30 minute limit (shared with health report)
+        is_ok, limit_msg = self._check_fetch_limit()
+        if not is_ok:
+            return {"error": limit_msg}
+
         if not self.client or not self.client.is_authenticated:
             try:
                 if self.client:
@@ -383,4 +427,5 @@ class GarminCoach:
             logger.warning(f"[GARMIN] personal_records failed: {e}")
 
         logger.info(f"[GARMIN] Advanced report complete for {today}")
+        self._update_fetch_limit()
         return report
