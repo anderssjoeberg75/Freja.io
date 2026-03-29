@@ -131,8 +131,6 @@ const Settings = () => {
         } catch (err) {
             setMessage({ type: 'error', text: 'Backup failed.' });
         }
-    };
-
     const handleTokenSave = () => {
         const cleaned = adminToken.trim();
         setAdminToken(cleaned);
@@ -154,29 +152,6 @@ const Settings = () => {
     const renderField = (item) => {
         const secretConfigured = settings.__secrets && settings.__secrets[item.key];
 
-        if (item.type === 'select') {
-            return (
-                <div key={item.key} className="grid gap-2">
-                    <label className="text-sm font-medium text-mainframe-text/70 uppercase tracking-tight">
-                        {item.label}
-                    </label>
-                    <select
-                        value={settings[item.key] || ''}
-                        onChange={(e) => handleChange(item.key, e.target.value)}
-                        className="w-full bg-black/40 border border-mainframe-border rounded px-4 py-2.5 text-mainframe-text focus:border-mainframe-accent focus:outline-none transition-all font-mono text-sm appearance-none cursor-pointer"
-                    >
-                        <option value="" disabled>Choose model...</option>
-                        {(item.options || models).map((opt) => (
-                            <option key={opt} value={opt}>
-                                {item.key.includes('MODEL') ? formatModelOption(opt) : opt}
-                            </option>
-                        ))}
-                    </select>
-                    {item.description && <p className="text-xs text-zinc-500 italic mt-1">{item.description}</p>}
-                </div>
-            );
-        }
-
         return (
             <SettingsField
                 key={item.key}
@@ -185,11 +160,56 @@ const Settings = () => {
                 onChange={(val) => handleChange(item.key, val)}
                 onSave={() => handleSave(item.key)}
                 type={item.type}
+                options={item.options || models}
+                formatOption={(opt) => item.key.includes('MODEL') ? formatModelOption(opt) : opt}
                 secretConfigured={secretConfigured}
                 saving={saving}
                 description={item.description}
             />
         );
+    };
+
+    const handleSaveSection = async (items, sectionName) => {
+        setSaving(true);
+        setMessage(null);
+        let successCount = 0;
+        let failCount = 0;
+
+        try {
+            for (const item of items) {
+                // If value is undefined or empty and it's not a secret, skip or send default?
+                // For now, we send whatever is in settings state.
+                const res = await adminFetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: item.key, value: settings[item.key] })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    successCount++;
+                    if (item.type === 'password') {
+                        setSettings(prev => ({
+                            ...prev,
+                            [item.key]: '',
+                            __secrets: { ...(prev.__secrets || {}), [item.key]: true }
+                        }));
+                    }
+                } else {
+                    failCount++;
+                }
+            }
+
+            if (failCount === 0) {
+                setMessage({ type: 'success', text: `All ${sectionName} settings updated successfully!` });
+            } else {
+                setMessage({ type: 'error', text: `${successCount} saved, ${failCount} failed.` });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Error saving section.' });
+        } finally {
+            setSaving(false);
+            setTimeout(() => setMessage(null), 3000);
+        }
     };
 
     return (
@@ -274,6 +294,16 @@ const Settings = () => {
                             <div className="grid gap-8">
                                 {identityItems.map(renderField)}
                             </div>
+                            <div className="mt-8 pt-6 border-t border-mainframe-border/30 flex justify-end">
+                                <button
+                                    onClick={() => handleSaveSection(identityItems, 'Identity')}
+                                    disabled={saving}
+                                    className="flex items-center gap-2 px-6 py-2.5 bg-mainframe-accent text-black font-bold uppercase tracking-widest rounded hover:bg-mainframe-accent/80 transition-all disabled:opacity-50 text-sm"
+                                >
+                                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                    Save Identity
+                                </button>
+                            </div>
                         </div>
                     )}
 
@@ -287,8 +317,19 @@ const Settings = () => {
                             <div className="grid gap-8">
                                 {intelligenceItems.map(renderField)}
                             </div>
+                            <div className="mt-8 pt-6 border-t border-mainframe-border/30 flex justify-end">
+                                <button
+                                    onClick={() => handleSaveSection(intelligenceItems, 'Intelligence')}
+                                    disabled={saving}
+                                    className="flex items-center gap-2 px-6 py-2.5 bg-mainframe-accent text-black font-bold uppercase tracking-widest rounded hover:bg-mainframe-accent/80 transition-all disabled:opacity-50 text-sm"
+                                >
+                                    {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                                    Save Intelligence
+                                </button>
+                            </div>
                         </div>
                     )}
+
 
                     <div className="p-5 bg-yellow-900/10 border border-yellow-700/30 rounded-lg text-yellow-500/80 text-sm flex items-start gap-4">
                         <AlertTriangle className="w-6 h-6 shrink-0" />

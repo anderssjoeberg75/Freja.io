@@ -13,7 +13,12 @@ echo "🌟 Starting total installation in $PROJECT_DIR"
 echo "🖥️ Server IP: $SERVER_IP"
 echo "🏠 Detected User IP: $USER_IP"
 
-# --- 2. PREPARE DIRECTORIES & GIT CLONE ---
+# --- 2. SYSTEM USER & DIRECTORIES ---
+echo "👤 Creating freja_app user..."
+if ! id -u freja_app > /dev/null 2>&1; then
+    sudo useradd -r -s /bin/false freja_app
+fi
+
 echo "📂 Preparing directories and cloning project..."
 sudo mkdir -p /opt
 cd /opt
@@ -75,7 +80,7 @@ pip install -r requirements.txt
 cat <<EOF > .env
 GOOGLE_API_KEY=
 OPENAI_API_KEY=
-ADMIN_API_TOKEN=freja_admin_pass
+ADMIN_API_TOKEN=$(openssl rand -hex 16)
 ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://$SERVER_IP:5173,http://$USER_IP:5173,http://freja.andrix.se
 VAULT_URL=http://127.0.0.1:8200
 VAULT_TOKEN=
@@ -92,11 +97,14 @@ export const API_BASE_URL = "http://\$SERVER_IP:8000";
 export const API_URL = "http://\$SERVER_IP:8000";
 EOF
 
-# Configure Vite to allow external connections (--host)
-sed -i 's/"dev": "vite"/"dev": "vite --host 0.0.0.0"/g' package.json
+# Note: Vite host configuration should be handled inside vite.config.js for cleaner setup.
 cd ..
 
-# --- 7. FIREWALL & SYSTEMD SERVICE CREATION ---
+# --- 7. SET FILE PERMISSIONS ---
+echo "🔒 Assigning ownership to freja_app..."
+sudo chown -R freja_app:freja_app "$PROJECT_DIR"
+
+# --- 8. FIREWALL & SYSTEMD SERVICE CREATION ---
 echo "🛡️ Configuring firewall and creating systemd services..."
 sudo ufw allow ssh
 sudo ufw allow 5173/tcp
@@ -111,7 +119,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=freja_app
+Group=freja_app
 WorkingDirectory=$PROJECT_DIR
 ExecStart=/bin/bash $PROJECT_DIR/start.sh
 Restart=always
