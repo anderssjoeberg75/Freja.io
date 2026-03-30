@@ -107,3 +107,21 @@ class PublishWordPressArticle(BaseModel):
         None,
         description="Optional GMT publish date in ISO format (used for scheduled/future posts).",
     )
+
+
+class RunPentestRecon(BaseModel):
+    """Run a lightweight authorized pentest reconnaissance pass."""
+
+    target: str = Field(..., description="Target hostname, IP, or URL to assess.")
+    ports: str = Field(
+        "1-1024",
+        description="Ports to scan as comma-separated values and/or ranges, e.g. '22,80,443,1000-1100'.",
+    )
+    timeout_seconds: float = Field(
+        0.5,
+        description="TCP connect timeout per port in seconds. Smaller values are faster but less reliable.",
+    )
+    include_web_checks: bool = Field(
+        True,
+        description="When true, evaluate common web security headers and basic TLS certificate indicators.",
+    )
