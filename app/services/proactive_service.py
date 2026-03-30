@@ -196,7 +196,10 @@ class ProactiveService:
 
                     # --- ADVANCED METRICS ---
                     try:
-                        adv = await loop.run_in_executor(None, garmin.get_advanced_report)
+                        adv = await loop.run_in_executor(
+                            None,
+                            lambda: garmin.get_advanced_report(enforce_fetch_limit=False),
+                        )
                         if isinstance(adv, dict) and not adv.get("error"):
                             adv_parts = []
 

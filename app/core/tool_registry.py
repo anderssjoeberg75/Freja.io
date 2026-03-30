@@ -135,7 +135,9 @@ class ToolRegistry:
 
             if tool:
                 try:
-                    adv = await asyncio.to_thread(tool.get_advanced_report)
+                    adv = await asyncio.to_thread(
+                        lambda: tool.get_advanced_report(enforce_fetch_limit=False)
+                    )
                     if adv and not adv.get("error"):
                         tr = adv.get("training_readiness", {})
                         ts = adv.get("training_status", {})
