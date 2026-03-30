@@ -64,11 +64,12 @@ class GarminCoach:
         except Exception as e:
             logger.warning(f"[GARMIN] Could not save fetch timestamp: {e}")
 
-    def get_health_report(self, target_date=None):
+    def get_health_report(self, target_date=None, enforce_fetch_limit: bool = True):
         # Enforce 30 minute limit
-        is_ok, limit_msg = self._check_fetch_limit()
-        if not is_ok:
-            return {"error": limit_msg}
+        if enforce_fetch_limit:
+            is_ok, limit_msg = self._check_fetch_limit()
+            if not is_ok:
+                return {"error": limit_msg}
 
         if not self.client or not self.client.is_authenticated:
             try:
@@ -224,7 +225,8 @@ class GarminCoach:
                  return self.get_health_report(target_date=yesterday)
             
             # Success! Update the limit
-            self._update_fetch_limit()
+            if enforce_fetch_limit:
+                self._update_fetch_limit()
             return data
 
         except Exception as e:
@@ -236,15 +238,16 @@ class GarminCoach:
             logger.error(f"[GARMIN] Fetch Error: {e}")
             return {"error": f"Garmin-fel: {e}"}
 
-    def get_advanced_report(self, target_date=None) -> dict:
+    def get_advanced_report(self, target_date=None, enforce_fetch_limit: bool = True) -> dict:
         """
         Fetch all advanced metrics for a given date.
         Formats the raw API data into simpler, LLM-friendly dicts.
         """
         # Enforce 30 minute limit (shared with health report)
-        is_ok, limit_msg = self._check_fetch_limit()
-        if not is_ok:
-            return {"error": limit_msg}
+        if enforce_fetch_limit:
+            is_ok, limit_msg = self._check_fetch_limit()
+            if not is_ok:
+                return {"error": limit_msg}
 
         if not self.client or not self.client.is_authenticated:
             try:
@@ -427,5 +430,6 @@ class GarminCoach:
             logger.warning(f"[GARMIN] personal_records failed: {e}")
 
         logger.info(f"[GARMIN] Advanced report complete for {today}")
-        self._update_fetch_limit()
+        if enforce_fetch_limit:
+            self._update_fetch_limit()
         return report

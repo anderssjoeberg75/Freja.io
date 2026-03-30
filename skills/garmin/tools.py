@@ -46,7 +46,10 @@ def register_tools(registry: ToolRegistry) -> None:
             
             # Fetch advanced metrics and merge them into the data dict
             try:
-                adv_data = await loop.run_in_executor(None, garmin.get_advanced_report)
+                adv_data = await loop.run_in_executor(
+                    None,
+                    lambda: garmin.get_advanced_report(enforce_fetch_limit=False),
+                )
                 if isinstance(adv_data, dict) and not adv_data.get("error"):
                     data["advanced_metrics"] = adv_data
             except Exception as adv_e:
