@@ -10,7 +10,7 @@ from google.genai import types
 
 from app.core.config import get_credential, settings
 from app.core.database import get_db_settings, get_history, get_user_state, save_message, save_user_state
-from app.core.dependencies import get_code_executor, get_garmin, get_strava, get_withings
+from app.core.dependencies import get_code_executor, get_fitbit, get_garmin, get_strava, get_withings
 from app.core.prompts import get_system_prompt
 from app.self_improving.hooks import handle_user_prompt_submit
 from app.services.web_fallback_service import WebFallbackService, needs_web_fallback
@@ -23,6 +23,14 @@ logger = logging.getLogger(__name__)
 
 
 class UnifiedChatService:
+
+    _HEALTH_INTENT_KEYWORDS = {
+        "health", "healthy", "wellness", "sleep", "stress", "recovery", "body battery",
+        "heart rate", "pulse", "steps", "workout", "training", "nutrition", "weight",
+        "hälsa", "hälsotips", "välmående", "sömn", "puls", "steg", "återhämtning",
+        "stress", "träning", "vikt", "analysera min hälsa", "coach"
+    }
+
     """
     Service responsible for handling chat logic across different interfaces (Web, Telegram, Voice).
     Consolidates:
@@ -130,6 +138,17 @@ class UnifiedChatService:
         )
 
         full_system_block = f"{system_prompt}\n\n{state_instructions}"
+
+        if self._is_health_coaching_request(user_msg):
+            health_context = await self._build_health_context_snapshot()
+            if health_context:
+                full_system_block += (
+                    "\n\n--- HEALTH CONTEXT SNAPSHOT (SYSTEM GENERATED) ---\n"
+                    f"{health_context}\n"
+                    "Use this data proactively for personalized health coaching and concrete next actions.\n"
+                    "If values are stale or conflicting, acknowledge uncertainty briefly and ask one follow-up question.\n"
+                    "-----------------------------------------------"
+                )
 
         # --- MEM0 INTEGRATION (Long Term Memory) ---
         mem0_client = None
@@ -331,6 +350,69 @@ class UnifiedChatService:
         except Exception as exc:
             logger.error(f"Chat error: {exc}", exc_info=True)
             return f"Error: {str(exc)}"
+
+    def _is_health_coaching_request(self, user_msg: str) -> bool:
+        normalized = user_msg.lower()
+        return any(keyword in normalized for keyword in self._HEALTH_INTENT_KEYWORDS)
+
+    async def _build_health_context_snapshot(self) -> str:
+        """Fetch and compress wearable health data for coaching-oriented prompts."""
+
+        async def _safe_fetch(name: str, fetcher):
+            try:
+                payload = await asyncio.wait_for(fetcher(), timeout=8)
+            except Exception as exc:
+                logger.info("Health context source %s unavailable: %s", name, exc)
+                return name, None
+
+            if not isinstance(payload, dict) or payload.get("error"):
+                return name, None
+            return name, payload
+
+        async def _garmin_fetch():
+            garmin = await asyncio.to_thread(get_garmin)
+            if not garmin:
+                return None
+            return await asyncio.to_thread(garmin.get_health_report, None, False)
+
+        async def _withings_fetch():
+            withings = await asyncio.to_thread(get_withings)
+            if not withings:
+                return None
+            return await asyncio.to_thread(withings.get_health_report)
+
+        async def _fitbit_fetch():
+            fitbit = await asyncio.to_thread(get_fitbit)
+            if not fitbit:
+                return None
+            return await fitbit.get_health_report(activities_limit=3)
+
+        results = await asyncio.gather(
+            _safe_fetch("garmin", _garmin_fetch),
+            _safe_fetch("withings", _withings_fetch),
+            _safe_fetch("fitbit", _fitbit_fetch),
+        )
+
+        lines: list[str] = []
+        for source_name, payload in results:
+            if not payload:
+                continue
+
+            source_lines: list[str] = []
+            for key in (
+                "date", "steps", "sleep_hours", "sleep_total_minutes", "sleep_score", "sleep_efficiency",
+                "body_battery_now", "stress_avg", "resting_heart_rate", "avg_hr",
+                "weight_kg", "fat_percent", "active_minutes", "active_zone_minutes"
+            ):
+                value = payload.get(key)
+                if value in (None, "", "N/A", {}):
+                    continue
+                source_lines.append(f"{key}={value}")
+
+            if source_lines:
+                lines.append(f"{source_name}: " + "; ".join(source_lines))
+
+        return "\n".join(lines)
 
     async def run_proactive_task(self, session_id: str, prompt: str) -> str:
         """
