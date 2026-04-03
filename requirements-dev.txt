@@ -1,5 +1,0 @@
-# Python code style tools for Freja.Io
-
-black
-flake8
-isort
