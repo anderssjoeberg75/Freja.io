@@ -131,3 +131,35 @@ def get_all_vault_secrets(path: str = None) -> dict:
     except Exception as e:
         logger.error(f"[Vault] Failed to read all secrets: {e}")
         return {}
+def delete_vault_secret(key: str, path: str = None) -> bool:
+    """Remove a specific key from a Vault secret path."""
+    client = get_vault_client()
+    if not client:
+        return False
+
+    mount_point = getattr(settings, "VAULT_MOUNT_POINT", "secret")
+    secret_path = path or getattr(settings, "VAULT_SECRET_PATH", "freja")
+
+    try:
+        # Read existing
+        read_response = client.secrets.kv.v2.read_secret_version(
+            mount_point=mount_point,
+            path=secret_path,
+        )
+        existing_data = read_response.get("data", {}).get("data", {})
+        
+        if key in existing_data:
+            del existing_data[key]
+            
+            client.secrets.kv.v2.create_or_update_secret(
+                mount_point=mount_point,
+                path=secret_path,
+                secret=existing_data,
+            )
+            return True
+        return True # Already gone
+    except hvac.exceptions.InvalidPath:
+        return True # Path doesn't exist, so key is "deleted"
+    except Exception as e:
+        logger.error(f"[Vault] Failed to delete secret {key}: {e}")
+        return False

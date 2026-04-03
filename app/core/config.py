@@ -126,50 +126,38 @@ def is_secret_key(key: str) -> bool:
     return any(hint in upper_key for hint in _SECRET_KEY_HINTS)
 
 def get_credential(key: str, fallback=None) -> str:
-    """Get credential from Vault (if secret), DB, then environment values, then fallback."""
-    env_value = os.getenv(key)
+    """Get credential from Vault, DB, Environment, or Defaults (in that priority)."""
+    # 1. Special case for token needed to access Vault itself
+    if key == "VAULT_TOKEN":
+        return os.getenv(key) or getattr(settings, key, "")
 
-    if key == "VAULT_TOKEN" and env_value:
-        return env_value
+    # 2. Try Vault (Preferred for all secrets if available)
+    try:
+        from app.core.vault import get_vault_secret
+        val = get_vault_secret(key)
+        if val:
+            return val
+    except Exception:
+        pass
 
-    secret_key = is_secret_key(key)
-
-    # Secrets should never be pulled from DB (only Vault or env).
-    if secret_key:
-        if env_value:
-            return env_value
-        # pydantic-settings loads .env into settings but NOT into os.environ,
-        # so check getattr(settings, key) as a second env fallback.
-        settings_value = getattr(settings, key, None)
-        if settings_value:
-            return settings_value
-        try:
-            from app.core.vault import get_vault_secret
-            vault_val = get_vault_secret(key)
-            if vault_val:
-                return vault_val
-        except Exception as exc:
-            import logging
-            logging.getLogger(__name__).warning("Failed to read Vault credential for key=%s: %s", key, exc)
-        return fallback or ""
-
-    # Non-secret settings: prefer DB, then env, then defaults.
+    # 3. Try DB settings (MySQL)
     try:
         from app.core.database import get_db_settings_sync
         db_settings = get_db_settings_sync()
-        db_value = db_settings.get(key)
-        if db_value:
-            return db_value
-    except Exception as exc:
-        import logging
-        logging.getLogger(__name__).warning("Failed to read DB credential for key=%s: %s", key, exc)
+        if key in db_settings:
+            return db_settings[key]
+    except Exception:
+        pass
 
-    if env_value:
-        return env_value
+    # 4. Try Environment variables
+    env_val = os.getenv(key)
+    if env_val:
+        return env_val
 
-    setting_value = getattr(settings, key, None)
-    if setting_value:
-        return setting_value
+    # 5. Try Pydantic Settings (Defaults from .env or class defaults)
+    setting_val = getattr(settings, key, None)
+    if setting_val is not None and setting_val != "":
+        return str(setting_val)
 
     return fallback or ""
 

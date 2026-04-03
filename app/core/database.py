@@ -1,7 +1,11 @@
-import aiosqlite
+import aiomysql
+import pymysql
 import os
 import logging
-from app.core.config import DB_PATH
+import json
+import asyncio
+import contextlib
+from app.core.config import settings
 
 # Konfigurera logger för denna modul
 logger = logging.getLogger(__name__)
@@ -49,7 +53,7 @@ Läs den texten för att svara på frågor om träning.
 Kom alltid med förbättringar på träningsrutiner baserat på den datan.
 
 HÄLSOANALYS OCH MÅENDE:
-När användaren frågar "Hur mår jag?", "Analysera min status" eller liknande:
+| När användaren frågar "Hur mår jag?", "Analysera min status" eller liknande:
 1. Titta PÅ REALTIDSDATAN NEDAN (Garmin-data).
 2. DU SKA INTE FRÅGA OM LOV. KÖR ANALYSEN DIREKT.
 3. Ge en sammanfattande analys av energinivå och återhämtning (Body Battery, Sömn, Stress).
@@ -57,7 +61,7 @@ När användaren frågar "Hur mår jag?", "Analysera min status" eller liknande:
 5. Svara aldrig "Ska jag analysera?". S-V-A-R-A med analysen.
 
 --- DATORSTYRNING (WINDOWS) ---
-Om Anders ber dig göra något med datorn, inkludera dessa taggar i ditt svar:
+| Om Anders ber dig göra något med datorn, inkludera dessa taggar i ditt svar:
 - [DO:SYS|lock] (Lås)
 - [DO:SYS|calc] (Kalkylator)
 - [DO:SYS|screenshot] (Skärmdump)
@@ -119,92 +123,118 @@ DATA:
 {context}"""
 }
 
+def _get_mysql_creds():
+    """Fetch MySQL credentials from Vault."""
+    from app.core.vault import get_all_vault_secrets
+    secrets = get_all_vault_secrets()
+    return {
+        "host": secrets.get("DB_HOST", "127.0.0.1"),
+        "user": secrets.get("DB_USER", "freja"),
+        "password": secrets.get("DB_PASS", ""),
+        "db": secrets.get("DB_NAME", "freja"),
+    }
+
 def get_db_connection_sync():
-    import sqlite3
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(DB_PATH, timeout=10.0, check_same_thread=False)
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA synchronous=NORMAL")
-    conn.row_factory = sqlite3.Row
-    return conn
+    """Synchronous MySQL connection using pymysql."""
+    creds = _get_mysql_creds()
+    return pymysql.connect(
+        host=creds["host"],
+        user=creds["user"],
+        password=creds["password"],
+        database=creds["db"],
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
 def get_db_settings_sync():
     """Synchronous version for when we absolutely must read synchronously (settings init)."""
     try:
-        import contextlib
-        with contextlib.closing(get_db_connection_sync()) as conn:
-            c = conn.cursor()
-            c.execute("SELECT key, value FROM settings")
-            return {row["key"]: row["value"] for row in c.fetchall()}
+        with get_db_connection_sync() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT `key`, `value` FROM settings")
+                return {row["key"]: row["value"] for row in cursor.fetchall()}
     except Exception as e:
         logger.error(f"[DB] Failed to get sync settings: {e}")
         return {}
 
-
-def get_db_connection():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    # Using async with inside aiosqlite? No, aiosqlite.connect returns a connection object.
-    # We shouldn't execute PRAGMA here directly since connect is synchronous before await.
-    # aiosqlite handles WAL pragmas best in the execute block or after `await conn`, 
-    # but since it's an async context manager, we'll configure PRAGMA on connect where needed
-    # Actually, WAL mode is persistent on the database file once set by any connection.
-    # Setting it in init_db and get_db_connection_sync is usually sufficient for SQLite,
-    # but doing it on every aiosqlite connection ensures it stays active.
-    # Let's write a small wrapper or just let it be persistent.
-    return aiosqlite.connect(DB_PATH, timeout=10.0)
+async def get_db_connection():
+    """Asynchronous MySQL connection using aiomysql."""
+    creds = _get_mysql_creds()
+    return await aiomysql.connect(
+        host=creds["host"],
+        user=creds["user"],
+        password=creds["password"],
+        db=creds["db"],
+        charset='utf8mb4',
+        cursorclass=aiomysql.DictCursor,
+        autocommit=True
+    )
 
 def init_db():
+    """Initialize database schema in MySQL (Synchronous at startup)."""
     try:
-        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        # init_db is called during app startup (lifespan), we can keep it synchronous
-        # or we could make the lifespan async and await an async init_db().
-        # Since this happens only once at startup, sync is fine to ensure fast setup
-        # before accepting connections, but we'll do the standard migrations here.
-        import sqlite3
-        import contextlib
-        with contextlib.closing(sqlite3.connect(DB_PATH, timeout=10.0)) as conn:
-            with conn:
-                c = conn.cursor()
-            c.execute('''CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT, role TEXT, content TEXT, image TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
-            c.execute('''CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)''')
-            c.execute('''CREATE TABLE IF NOT EXISTS prompts (key TEXT PRIMARY KEY, value TEXT)''')
-            c.execute('''CREATE TABLE IF NOT EXISTS user_state (session_id TEXT, key TEXT, value TEXT, PRIMARY KEY (session_id, key))''')
-            c.execute('''CREATE TABLE IF NOT EXISTS metrics (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                source TEXT,
-                metric_name TEXT,
-                value REAL,
-                unit TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                metadata TEXT
-            )''')
-            c.execute('''CREATE INDEX IF NOT EXISTS idx_metrics_name_ts ON metrics(metric_name, timestamp)''')
-            
-            for key, val in DEFAULT_PROMPTS.items():
-                c.execute("INSERT OR IGNORE INTO prompts (key, value) VALUES (?, ?)", (key, val))
+        conn = get_db_connection_sync()
+        with conn:
+            with conn.cursor() as c:
+                c.execute('''CREATE TABLE IF NOT EXISTS history (
+                    id INTEGER PRIMARY KEY AUTO_INCREMENT, 
+                    session_id VARCHAR(255), 
+                    role VARCHAR(50), 
+                    content LONGTEXT, 
+                    image LONGTEXT, 
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                )''')
+                c.execute('''CREATE TABLE IF NOT EXISTS settings (
+                    `key` VARCHAR(255) PRIMARY KEY, 
+                    `value` LONGTEXT
+                )''')
+                c.execute('''CREATE TABLE IF NOT EXISTS prompts (
+                    `key` VARCHAR(255) PRIMARY KEY, 
+                    `value` LONGTEXT
+                )''')
+                c.execute('''CREATE TABLE IF NOT EXISTS user_state (
+                    session_id VARCHAR(255), 
+                    `key` VARCHAR(255), 
+                    `value` LONGTEXT, 
+                    PRIMARY KEY (session_id, `key`)
+                )''')
+                c.execute('''CREATE TABLE IF NOT EXISTS metrics (
+                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                    source VARCHAR(100),
+                    metric_name VARCHAR(100),
+                    value DOUBLE,
+                    unit VARCHAR(50),
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    metadata LONGTEXT
+                )''')
+                c.execute('''CREATE INDEX IF NOT EXISTS idx_metrics_name_ts ON metrics(metric_name, timestamp)''')
                 
-            conn.commit()
-            logger.info("Database initialized/updated successfully.")
+                for key, val in DEFAULT_PROMPTS.items():
+                    c.execute("INSERT IGNORE INTO prompts (`key`, `value`) VALUES (%s, %s)", (key, val))
+                
+                conn.commit()
+            logger.info("MySQL database initialized successfully.")
     except Exception as e:
         logger.error(f"[DB] Database initialization error: {e}")
 
 async def get_db_settings():
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
-            async with conn.execute("SELECT key, value FROM settings") as cursor:
-                rows = await cursor.fetchall()
-                return {row["key"]: row["value"] for row in rows}
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
+            await cursor.execute("SELECT `key`, `value` FROM settings")
+            rows = await cursor.fetchall()
+            conn.close()
+            return {row["key"]: row["value"] for row in rows}
     except Exception as e:
         logger.error(f"[DB] Failed to get settings: {e}")
         return {}
 
 async def save_db_setting(key, value):
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
-            await conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, str(value)))
-            await conn.commit()
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
+            await cursor.execute("REPLACE INTO settings (`key`, `value`) VALUES (%s, %s)", (key, str(value)))
+            conn.close()
         return True
     except Exception as e:
         logger.error(f"[DB] Failed to save setting {key}: {e}")
@@ -212,21 +242,22 @@ async def save_db_setting(key, value):
 
 async def get_db_prompts():
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
-            async with conn.execute("SELECT key, value FROM prompts") as cursor:
-                rows = await cursor.fetchall()
-                return {row["key"]: row["value"] for row in rows}
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
+            await cursor.execute("SELECT `key`, `value` FROM prompts")
+            rows = await cursor.fetchall()
+            conn.close()
+            return {row["key"]: row["value"] for row in rows}
     except Exception as e:
         logger.error(f"[DB] Failed to get prompts: {e}")
         return {}
 
 async def save_db_prompt(key, value):
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
-            await conn.execute("INSERT OR REPLACE INTO prompts (key, value) VALUES (?, ?)", (key, str(value)))
-            await conn.commit()
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
+            await cursor.execute("REPLACE INTO prompts (`key`, `value`) VALUES (%s, %s)", (key, str(value)))
+            conn.close()
         return True
     except Exception as e:
         logger.error(f"[DB] Failed to save prompt {key}: {e}")
@@ -234,27 +265,29 @@ async def save_db_prompt(key, value):
 
 async def save_message(session_id, role, content, image=None):
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
-            await conn.execute("INSERT INTO history (session_id, role, content, image) VALUES (?, ?, ?, ?)", (session_id, role, content, image))
-            await conn.commit()
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
+            await cursor.execute(
+                "INSERT INTO history (session_id, role, content, image) VALUES (%s, %s, %s, %s)", 
+                (session_id, role, content, image)
+            )
+            conn.close()
     except Exception as e:
         logger.error(f"[DB] Failed to save message: {e}")
 
 async def get_history(session_id=None, limit=600):
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
             if session_id:
-                async with conn.execute(
-                    "SELECT * FROM history WHERE session_id = ? ORDER BY id DESC LIMIT ?",
+                await cursor.execute(
+                    "SELECT role, content, image FROM history WHERE session_id = %s ORDER BY id DESC LIMIT %s",
                     (session_id, limit),
-                ) as cursor:
-                    rows = await cursor.fetchall()
+                )
             else:
-                async with conn.execute("SELECT * FROM history ORDER BY id DESC LIMIT ?", (limit,)) as cursor:
-                    rows = await cursor.fetchall()
-            
+                await cursor.execute("SELECT role, content, image FROM history ORDER BY id DESC LIMIT %s", (limit,))
+            rows = await cursor.fetchall()
+            conn.close()
             # Return reversed list so it's chronological for the LLM
             return [{"role": r["role"], "content": r["content"], "image": r["image"]} for r in reversed(rows)]
     except Exception as e:
@@ -264,74 +297,65 @@ async def get_history(session_id=None, limit=600):
 async def get_user_state(session_id: str):
     """Return persisted user state for a session as a plain dictionary."""
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
-            async with conn.execute("SELECT key, value FROM user_state WHERE session_id = ?", (session_id,)) as cursor:
-                rows = await cursor.fetchall()
-                
-            state = {}
-            for row in rows:
-                state[row["key"]] = row["value"]
-            return state
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
+            await cursor.execute("SELECT `key`, `value` FROM user_state WHERE session_id = %s", (session_id,))
+            rows = await cursor.fetchall()
+            conn.close()
+            return {row["key"]: row["value"] for row in rows}
     except Exception as e:
         logger.error(f"[DB] Failed to get user state for session {session_id}: {e}")
         return {}
-
 
 async def save_user_state(session_id: str, state: dict):
     """Persist user state values for a session."""
     if not state:
         return True
-
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
             for key, value in state.items():
-                await conn.execute(
-                    "INSERT OR REPLACE INTO user_state (session_id, key, value) VALUES (?, ?, ?)",
+                await cursor.execute(
+                    "REPLACE INTO user_state (session_id, `key`, `value`) VALUES (%s, %s, %s)",
                     (session_id, key, str(value)),
                 )
-            await conn.commit()
+            conn.close()
         return True
     except Exception as e:
         logger.error(f"[DB] Failed to save user state for session {session_id}: {e}")
         return False
 
-
 async def save_metric(source: str, metric_name: str, value: float, unit: str = None, metadata: dict = None):
     """Persist a single metric data point."""
     try:
-        import json
-        async with get_db_connection() as conn:
-            await conn.execute(
-                "INSERT INTO metrics (source, metric_name, value, unit, metadata) VALUES (?, ?, ?, ?, ?)",
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
+            await cursor.execute(
+                "INSERT INTO metrics (source, metric_name, value, unit, metadata) VALUES (%s, %s, %s, %s, %s)",
                 (source, metric_name, value, unit, json.dumps(metadata) if metadata else None),
             )
-            await conn.commit()
+            conn.close()
         return True
     except Exception as e:
         logger.error(f"[DB] Failed to save metric {metric_name}: {e}")
         return False
 
-
 async def get_metrics(metric_name: str, limit: int = 30, days: int = None):
     """Retrieve historical metrics."""
     try:
-        async with get_db_connection() as conn:
-            conn.row_factory = aiosqlite.Row
-            query = "SELECT * FROM metrics WHERE metric_name = ?"
+        conn = await get_db_connection()
+        async with conn.cursor() as cursor:
+            query = "SELECT * FROM metrics WHERE metric_name = %s"
             params = [metric_name]
-            
             if days:
-                query += " AND timestamp >= datetime('now', ?)"
-                params.append(f"-{days} days")
-                
-            query += " ORDER BY timestamp DESC LIMIT ?"
+                query += " AND timestamp >= DATE_SUB(NOW(), INTERVAL %s DAY)"
+                params.append(days)
+            query += " ORDER BY timestamp DESC LIMIT %s"
             params.append(limit)
-            
-            async with conn.execute(query, params) as cursor:
-                rows = await cursor.fetchall()
-                return [dict(r) for r in rows]
+            await cursor.execute(query, params)
+            rows = await cursor.fetchall()
+            conn.close()
+            return [dict(r) for r in rows]
     except Exception as e:
         logger.error(f"[DB] Failed to get metrics {metric_name}: {e}")
         return []

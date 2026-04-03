@@ -14,13 +14,18 @@ ProcessHandler = Callable[[Dict[str, Any]], Awaitable[None]]
 
 
 class SchedulerService:
-    def __init__(self, db_url: str = "sqlite:///jobs.sqlite"):
+    def __init__(self):
+        from app.core.database import _get_mysql_creds
+        creds = _get_mysql_creds()
+        # Use mysqlclient via pymysql for the SQLAlchemy connection string
+        db_url = f"mysql+pymysql://{creds['user']}:{creds['password']}@{creds['host']}/{creds['db']}?charset=utf8mb4"
+        
         self.jobstores = {"default": SQLAlchemyJobStore(url=db_url)}
         self.scheduler = AsyncIOScheduler(jobstores=self.jobstores, timezone="UTC")
         self._process_handlers: Dict[str, ProcessHandler] = {}
         self.register_process("log_instruction", self._default_log_process)
         self.scheduler.start()
-        logger.info("Scheduler service started")
+        logger.info("Scheduler service started with MySQL jobstore")
 
     def register_process(self, process_name: str, handler: ProcessHandler) -> None:
         """Register a new process handler that can be scheduled by name."""

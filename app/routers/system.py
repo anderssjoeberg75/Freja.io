@@ -139,21 +139,37 @@ async def trigger_morning_briefing():
 
 @router.get("/api/system/backup_db")
 async def backup_database():
-    """Returns the current database file as a download."""
+    """Returns a MySQL dump of the remote database as a download."""
     from fastapi.responses import FileResponse
-    from app.core.config import DB_PATH
+    from app.core.database import _get_mysql_creds
+    import subprocess
+    import tempfile
 
     try:
-        if not os.path.exists(DB_PATH):
-            return {"error": "Database file not found"}
-
+        creds = _get_mysql_creds()
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"mainframe_backup_{timestamp}.db"
+        filename = f"freja_backup_{timestamp}.sql"
+        tmp_file = os.path.join(tempfile.gettempdir(), filename)
+
+        # We use SSH to run mysqldump on the remote host and pipe it back.
+        # Since we have SSH root access, let's run it there and redirect to a local file.
+        cmd = [
+            "ssh", "root@db.andrix.local",
+            f"mysqldump -u {creds['user']} -p'{creds['password']}' {creds['db']}"
+        ]
+        
+        with open(tmp_file, "w") as f:
+            result = subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, text=True)
+        
+        if result.returncode != 0:
+            error_msg = result.stderr or "Unknown mysqldump error"
+            logger.error(f"Backup failed: {error_msg}")
+            return {"error": f"Backup failed: {error_msg}"}
 
         return FileResponse(
-            path=DB_PATH,
+            path=tmp_file,
             filename=filename,
-            media_type='application/x-sqlite3'
+            media_type='application/sql'
         )
     except Exception as e:
         logger.error(f"Backup error: {e}")

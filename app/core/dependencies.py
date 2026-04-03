@@ -13,7 +13,6 @@ class DependencyManager:
         self._strava_tool = None
         self._withings_tool = None
         self._fitbit_tool = None
-        self._tibber_tool = None
         self._code_executor = None
         self._has_docker = False
 
@@ -95,22 +94,6 @@ class DependencyManager:
 
         return self._fitbit_tool
 
-    def get_tibber_tool(self):
-        if self._tibber_tool:
-            return self._tibber_tool
-
-        tibber_token = get_credential("TIBBER_API_TOKEN")
-
-        if tibber_token:
-            try:
-                from skills.tibber.core import TibberTool
-
-                self._tibber_tool = TibberTool()
-                logger.info("Tibber tool initialized (Dependency)")
-            except Exception as exc:
-                logger.error(f"Tibber init failed: {exc}")
-
-        return self._tibber_tool
 
     def get_code_executor(self):
         if self._code_executor:
@@ -159,5 +142,3 @@ def get_fitbit():
     return _manager.get_fitbit_tool()
 
 
-def get_tibber():
-    return _manager.get_tibber_tool()
