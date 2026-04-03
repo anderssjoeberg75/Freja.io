@@ -16,12 +16,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000"
 
-    GOOGLE_API_KEY: Optional[str] = None
-    OPENAI_API_KEY: Optional[str] = None
 
-    GEMINI_LIVE_MODEL: str = "gemini-2.5-flash-native-audio-preview-09-2025"
-    LIVE_FRAME_FPS: float = 1.0
-    LIVE_AUDIO_CHUNK_MS: int = 30
 
     TOOL_GATEWAY_SCHEME: str = "http"
     TOOL_GATEWAY_HOST: Optional[str] = None
@@ -66,7 +61,7 @@ class Settings(BaseSettings):
     WEB_FALLBACK_CACHE_TTL_MINUTES: int = 20
 
     OLLAMA_URL: str = "http://127.0.0.1:11434"
-    WEB_AGENT_MODEL: str = "gemini-2.5-computer-use-preview-10-2025"
+    WEB_AGENT_MODEL: str = "llama3.1:8b"
 
     ELEVENLABS_API_KEY: Optional[str] = None
     ELEVENLABS_VOICE_ID: Optional[str] = "21m00Tcm4TlvDq8ikWAM"

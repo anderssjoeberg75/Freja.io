@@ -5,8 +5,7 @@ import logging
 import re
 from typing import Dict, List, Optional, Any
 
-from google import genai
-from google.genai import types
+
 
 from app.core.config import get_credential, settings
 from app.core.database import get_db_settings, get_history, get_user_state, save_message, save_user_state
@@ -49,7 +48,7 @@ class UnifiedChatService:
         """
         # 1. Setup & Defaults
         if not model_id:
-            model_id = get_credential("SELECTED_MODEL") or "gemini-2.0-flash"
+            model_id = get_credential("SELECTED_MODEL") or "llama3.1:8b"
 
         logger.info(f"Processing message for session {session_id} with model {model_id}")
 
@@ -184,120 +183,16 @@ class UnifiedChatService:
 
         gemini_history.append({"role": "user", "parts": current_parts})
 
-        # 7. Route to appropriate backend
-        if not model_id.startswith("gemini"):
-            # Assume Ollama for non-gemini models
-            try:
-                # We pass the constructed history (mapped for Gemini) to the helper, 
-                # which will re-map it for Ollama.
-                # Ideally we should have a generic history format, but for now we convert.
-                final_text_response = await generate_ollama_response(
-                    model_id=model_id,
-                    system_prompt=full_system_block,
-                    history=gemini_history[:-1], # Exclude current message which is handled separately
-                    user_msg=user_msg,
-                    image_data=image_data
-                )
-                
-                await save_message(session_id, "user", user_msg)
-                await save_message(session_id, "assistant", final_text_response)
-                return final_text_response
-                
-            except Exception as e:
-                logger.error(f"Ollama routing error: {e}")
-                return f"Error: {str(e)}"
-
-        # 8. Call Gemini with Tool Loop
+        # 7. Route to backend
         try:
-            google_api_key = get_credential("GOOGLE_API_KEY")
-            if not google_api_key:
-                return "Error: GOOGLE_API_KEY is missing."
-
-            client = genai.Client(api_key=google_api_key)
-            tools_def = registry.get_gemini_function_declarations()
-            config = types.GenerateContentConfig(
-                system_instruction=full_system_block,
-                tools=[{"function_declarations": tools_def}],
+            final_text_response = await generate_ollama_response(
+                model_id=model_id,
+                system_prompt=full_system_block,
+                history=gemini_history[:-1], # Exclude current message which is handled separately
+                user_msg=user_msg,
+                image_data=image_data
             )
-            history = [
-                types.Content(
-                    role=("user" if msg["role"] == "user" else "model"),
-                    parts=[types.Part(text=msg["content"])],
-                )
-                for msg in db_history
-            ]
-            chat = client.aio.chats.create(model=model_id, config=config, history=history)
-            current_message_parts: list[types.Part] = [types.Part(text=user_msg)]
-            if image_data:
-                try:
-                    b64_data = image_data.split(",", 1)[1] if "," in image_data else image_data
-                    current_message_parts.append(types.Part.from_bytes(data=base64.b64decode(b64_data), mime_type="image/jpeg"))
-                except Exception as exc:
-                    logger.error(f"Image decode error: {exc}")
             
-            # --- TOOL EXECUTION LOOP ---
-            max_turns = 5
-            final_text_response = ""
-            
-            for _ in range(max_turns):
-                response = await chat.send_message(current_message_parts)
-                
-                if not response.candidates:
-                    return "Error: AI returned no candidates."
-                
-                candidate = response.candidates[0]
-                
-                # Check for Function Calls
-                function_calls = []
-                for part in (candidate.content.parts or []):
-                    if getattr(part, "function_call", None):
-                        function_calls.append(part.function_call)
-                
-                if function_calls:
-                    # Execute all function calls
-                    next_parts: list[types.Part] = []
-                    for fc in function_calls:
-                        fname = fc.name
-                        fargs = dict(fc.args)
-                        
-                        logger.info(f"AI requesting tool: {fname}({fargs})")
-                        
-                        # Execute Tool
-                        result_text = await registry.execute(fname, fargs)
-                        
-                        # --- POINT 3: ENHANCED TOOL REFLECTION ---
-                        # If the result looks like an error, give the AI a hint to reflect/retry
-                        if isinstance(result_text, str) and ("Error" in result_text or "Fel" in result_text or "not found" in result_text.lower()):
-                            result_text = (
-                                f"{result_text}\n\n"
-                                "[SYSTEM HINT]: The tool returned an error. Please analyze if you used the correct "
-                                "arguments or if an alternative tool should be used. You can try a different approach "
-                                "or explain the specific obstacle to the user."
-                            )
-                            # Ensure we don't count an error turn as a final turn if we want it to reflect
-                            if _ == max_turns - 1:
-                                max_turns += 1
-
-                        next_parts.append(
-                            types.Part(
-                                function_response=types.FunctionResponse(
-                                    name=fname,
-                                    response={"result": result_text},
-                                    id=getattr(fc, "id", None),
-                                )
-                            )
-                        )
-                    
-                    current_message_parts = next_parts
-                    continue
-                
-                # No function calls -> Final Response
-                final_text_response = response.text or ""
-                break
-            
-            if not final_text_response:
-                final_text_response = "Error: Maximum tool turns exceeded or no response."
-
             # 8. Web Fallback (Legacy / Safety net)
             web_fallback_enabled = str(get_credential("WEB_FALLBACK_ENABLED", "true")).lower() in {"1", "true", "yes", "on"}
             if web_fallback_enabled and needs_web_fallback(final_text_response):
@@ -341,7 +236,7 @@ class UnifiedChatService:
         
         # 1. Setup
         settings_cache = await get_db_settings()
-        codex_model = settings_cache.get("CODEX_MODEL", "gemini-2.0-flash")
+        codex_model = settings_cache.get("CODEX_MODEL", "llama3.1:8b")
         model_id = get_credential("DEFAULT_MODEL", codex_model)
         
         logger.info(f"Using model {model_id} for proactive task")
@@ -389,62 +284,20 @@ class UnifiedChatService:
              except Exception as exc:
                  logger.warning(f"Mem0 proactive search failed (continuing without memory): {exc}")
 
-        # 4. Route to appropriate backend
-        if not model_id.startswith("gemini"):
-            try:
-                # We pass the constructed history (mapped for Gemini) to the helper, 
-                # which will re-map it for Ollama.
-                # In proactive tasks, history is simplified.
-                final_text_response = await generate_ollama_response(
-                    model_id=model_id,
-                    system_prompt=full_system_block,
-                    history=[], 
-                    user_msg=prompt,
-                    image_data=None
-                )
-                await save_message(session_id, "assistant", final_text_response)
-                return final_text_response
-            except Exception as e:
-                logger.error(f"Ollama proactive routing error: {e}")
-                return f"Error: {str(e)}"
-
-        # 5. Construct History for Gemini
-        gemini_history = [
-            types.Content(role="user", parts=[types.Part(text=full_system_block)]),
-            types.Content(role="model", parts=[types.Part(text="System ready.")]),
-            types.Content(role="user", parts=[types.Part(text=prompt)]),
-        ]
-
-        # 6. Call Gemini
+        # 4. Route to backend
         try:
-            google_api_key = get_credential("GOOGLE_API_KEY")
-            if not google_api_key:
-                return "Error generating briefing: GOOGLE_API_KEY is missing"
-
-            client = genai.Client(api_key=google_api_key)
-            response = await client.aio.models.generate_content(
-                model=model_id,
-                contents=gemini_history,
+            final_text_response = await generate_ollama_response(
+                model_id=model_id,
+                system_prompt=full_system_block,
+                history=[], 
+                user_msg=prompt,
+                image_data=None
             )
-            
-            # Secure text extraction (Google GenAI throws exceptions on BLOCKED content if accessing .text directly)
-            try:
-                output_text = response.text
-            except ValueError:
-                if response.candidates and response.candidates[0].finish_reason:
-                    output_text = f"Content blocked due to: {response.candidates[0].finish_reason.name}"
-                else:
-                    output_text = "Error: Blocked or unparseable text format."
-            
-            if output_text:
-                await save_message(session_id, "assistant", output_text)
-                return output_text
-                
-            return "Error: No response generated."
-            
+            await save_message(session_id, "assistant", final_text_response)
+            return final_text_response
         except Exception as e:
-            logger.error(f"Proactive gen error: {e}")
-            return f"Error generating briefing: {e}"
+            logger.error(f"Ollama proactive routing error: {e}")
+            return f"Error: {str(e)}"
 
     def _build_user_state_context(self, state: Dict[str, Any]) -> str:
         """Format the user state dictionary into a descriptive string."""

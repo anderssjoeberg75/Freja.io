@@ -2,7 +2,6 @@ import os
 from fastapi import APIRouter, Depends
 from app.core.database import get_db_settings, save_db_setting, get_db_prompts, save_db_prompt
 import logging
-from google import genai
 import time
 import httpx
 from app.core.config import get_credential, settings, get_secret_keys, is_secret_key
@@ -99,7 +98,7 @@ async def update_setting(payload: dict):
             
         logger.info(f"Setting updated: {key} = ***") # Don't log values for security
         
-        if key in ("GOOGLE_API_KEY", "OPENAI_API_KEY", "OLLAMA_URL"):
+        if key in ("OLLAMA_URL",):
             global _model_cache
             _model_cache["timestamp"] = 0
             logger.info("Invalidated model cache due to credentials update.")
@@ -149,21 +148,7 @@ async def get_models():
 
     models = []
     
-    # 1. Fetch Gemini Models
-    try:
-        google_api_key = get_credential("GOOGLE_API_KEY")
-        if google_api_key:
-            client = genai.Client(api_key=google_api_key)
-            for model in client.models.list():
-                name = getattr(model, "name", "") or ""
-                if name.startswith("models/"):
-                    name = name.replace("models/", "", 1)
-                if name:
-                    models.append(name)
-    except Exception as e:
-        logger.error(f"Error listing Gemini models: {e}")
-
-    # 2. Fetch Ollama Models
+    # 1. Fetch Ollama Models
     try:
         ollama_url = get_credential("OLLAMA_URL") or settings.OLLAMA_URL
         # Ensure URL logic (some users might set full API path or just base)
@@ -180,26 +165,9 @@ async def get_models():
         # Don't log full stack trace for connection errors (common if Ollama is down)
         logger.warning(f"Could not fetch Ollama models: {e}")
 
-    # 3. Fetch OpenAI Models
-    try:
-        openai_api_key = get_credential("OPENAI_API_KEY")
-        if openai_api_key:
-            import openai
-            client = openai.AsyncOpenAI(api_key=openai_api_key)
-            resp = await client.models.list()
-            for model in resp.data:
-                name = getattr(model, "id", "") or ""
-                if name.startswith(("gpt-", "o1", "o3")):
-                    # Keep only standard conversational models
-                    if not any(suffix in name for suffix in ["-audio", "-realtime", "babbage", "davinci"]):
-                        models.append(name)
-    except Exception as e:
-        logger.warning(f"Could not fetch OpenAI models: {e}")
-
-    # Always include standard models so they are selectable even if keys are not yet configured
+    # Always include some fallback local names
     standard_models = [
-        "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-pro", 
-        "gpt-4o", "gpt-4o-mini", "o1", "o3-mini"
+        "llama3.1:8b", "qwen2.5-coder:14b", "deepseek-coder-v2:latest"
     ]
     models.extend(standard_models)
 

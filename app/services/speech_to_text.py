@@ -66,17 +66,20 @@ class OpenAISpeechToTextProvider:
 
 def build_speech_to_text_provider() -> SpeechToTextProvider:
     """Build an STT provider from settings with safe defaults."""
+    from app.core.config import get_credential
+    
     configured_provider = (settings.STT_PROVIDER or "").strip().lower()
     resolved_provider = configured_provider
+    openai_key = get_credential("OPENAI_API_KEY")
 
     # If provider is not explicitly configured, auto-enable OpenAI when an API key exists.
     if not resolved_provider:
-        resolved_provider = "openai" if settings.OPENAI_API_KEY else "disabled"
+        resolved_provider = "openai" if openai_key else "disabled"
 
     if resolved_provider == "openai":
-        if not settings.OPENAI_API_KEY:
+        if not openai_key:
             return DisabledSpeechToTextProvider("OPENAI_API_KEY is missing for STT provider 'openai'.")
-        return OpenAISpeechToTextProvider(api_key=settings.OPENAI_API_KEY)
+        return OpenAISpeechToTextProvider(api_key=openai_key)
 
     if resolved_provider == "disabled":
         return DisabledSpeechToTextProvider("Speech-to-text is disabled by configuration.")

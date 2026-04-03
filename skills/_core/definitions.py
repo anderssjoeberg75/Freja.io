@@ -92,6 +92,11 @@ class GetTibberEnergyAnalysis(BaseModel):
     days: int = Field(7, description="Number of days to analyze (1-30).")
 
 
+class ManageWordPress(BaseModel):
+    """Executes a wp-cli command over SSH."""
+    command: str = Field(..., description="The wp-cli command to run, e.g. 'plugin list' or 'theme install'.")
+
+
 class PublishWordPressArticle(BaseModel):
     """Publish or draft an article to WordPress via REST API."""
 
